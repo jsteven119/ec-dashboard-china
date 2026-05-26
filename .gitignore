@@ -1,0 +1,16 @@
+# Local raw data (synced from Google Sheets at runtime)
+*.xlsx
+*.xls
+*.csv
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Temp
+*.tmp
+*.bak
+~$*
