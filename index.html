@@ -302,6 +302,52 @@ Chart.defaults.font.family="'Malgun Gothic','맑은 고딕',sans-serif"; Chart.d
 function destroy(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 const ML=m=>m.map(x=>x.월+'월');
 
+// ============ WAKEMAKE 노트유형 → 콘텐츠앵글 자동 매핑 ============
+// 시트의 콘텐츠앵글 컬럼이 빌 때 노트유형(샤오홍슈 콘텐츠 분류)에서 큰 카테고리로 추론.
+// 매핑 갱신 시: 빈 셀만 채우고 기존 값은 보존. CG는 노트유형 거의 비어있어 적용 안 함.
+const WM_NOTETYPE_TO_ANGLE={
+  '韩系水光肌':'韩系水光肌','韩系水光':'韩系水光肌','水光肌':'韩系水光肌',
+  '韩女同款水光肌':'韩系水光肌','秋冬水光肌':'韩系水光肌','韩系水光底妆':'韩系水光肌',
+  '韩女水光感':'韩系水光肌','冬日氧气水光底妆':'韩系水光肌','小韩水光肌粉霜':'韩系水光肌',
+  '韩女同款水光气垫':'韩系水光肌',
+  '妆教':'妆教 튜토리얼','韩妆进阶tips':'妆教 튜토리얼','韩系伪素颜妆':'妆教 튜토리얼',
+  '单品种草':'单品测评/种草','单品测评':'单品测评/种草',
+  '品牌合集':'品牌合集',
+  '妆容植入':'妆容植入',
+  '韩女同款':'韩女同款',
+  '气垫推荐':'气垫推荐','粉膏气垫':'气垫推荐',
+  '横测气垫':'横测对比','眼影横测':'横测对比','气垫横测':'横测对比',
+  '干敏皮底妆秘诀':'底妆秘诀','干皮底妆':'底妆秘诀','无暇底妆':'底妆秘诀',
+  '珍珠妆':'콘셉트 메이크업','光泽感':'콘셉트 메이크업','奶油妆':'콘셉트 메이크업',
+  '亚裔甜心妆':'콘셉트 메이크업','光泽淡妆':'콘셉트 메이크업','古早千金妆':'콘셉트 메이크업',
+  '淡颜低饱和':'콘셉트 메이크업',
+  '大学生早八妆容':'特定场景','田中杏奈仿妆':'特定场景'
+};
+function deriveWmAngleFromNoteType(rows){
+  let n=0;
+  (rows||[]).forEach(r=>{
+    if(r.브랜드!=='WAKEMAKE')return;
+    const cur=String(r.콘텐츠앵글||'').trim();
+    if(cur&&cur!=='미입력')return;
+    const nt=String(r.노트유형||'').trim();
+    const ang=WM_NOTETYPE_TO_ANGLE[nt];
+    if(ang){r.콘텐츠앵글=ang;r._앵글자동매핑=true;n++;}
+  });
+  return n;
+}
+function rebuildKolAggregates(){
+  if(typeof recomputeAgg!=='function')return;
+  const all=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
+  KOL.sp.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','주력상품');
+  KOL.sp.COLORGRAM=recomputeAgg(all,'COLORGRAM','주력상품');
+  KOL.bundle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','상품_조합');
+  KOL.bundle.COLORGRAM=recomputeAgg(all,'COLORGRAM','상품_조합');
+  KOL.tier.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','팔로워구간');
+  KOL.tier.COLORGRAM=recomputeAgg(all,'COLORGRAM','팔로워구간');
+  KOL.angle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','콘텐츠앵글');
+  KOL.angle.COLORGRAM=recomputeAgg(all,'COLORGRAM','콘텐츠앵글');
+}
+
 // ===== OVERVIEW =====
 function kpis(){
   if(brand==='BOTH'){renderCompareKpis();return;}
@@ -922,13 +968,24 @@ function renderAngleInsight(){
   const b=brand==='BOTH'?'WAKEMAKE':brand;
   const notice=document.getElementById('angleNotice');
   const ok=hasAngleData(b);
+  const autoN=window._wmAutoAngleN||0;
+  let noticeHtml='';
   if(!ok){
-    notice.innerHTML=`<div class="alert-card neu" style="border-left-color:#E08A00;background:#FFFBEF">
+    noticeHtml=`<div class="alert-card neu" style="border-left-color:#E08A00;background:#FFFBEF">
       <div class="lbl">⚠ 앵글 데이터 부족</div>
       <div class="ttl" style="color:#9a4a00">KOL_${b==='WAKEMAKE'?'WM':'CG'} 시트의 <b>콘텐츠앵글</b> 컬럼이 비어있거나 누락되어 있습니다.</div>
-      <div style="font-size:12px;color:#5b4636;margin-top:6px">로컬 엑셀 원본에는 있지만 구글 시트로 옮길 때 빠진 듯합니다. 시트의 <code>상품_전체</code>와 <code>SPU</code> 사이에 <code>콘텐츠앵글</code> 컬럼을 추가하시면 아래 분석이 활성화됩니다. (주력상품 기준 대체 분석은 아래 매트릭스에서 확인 가능)</div>
+      <div style="font-size:12px;color:#5b4636;margin-top:6px">로컬 엑셀 원본에는 있지만 구글 시트로 옮길 때 빠진 듯합니다. 시트의 <code>상품_전체</code>와 <code>SPU</code> 사이에 <code>콘텐츠앵글</code> 컬럼을 추가하시면 정밀도가 향상됩니다.</div>
     </div>`;
-  } else { notice.innerHTML=''; }
+  }
+  // WM 자동 매핑 안내 (콘텐츠앵글 시트 컬럼이 비어있어도 노트유형 기반 자동 보강)
+  if(b==='WAKEMAKE'&&autoN>0){
+    noticeHtml+=`<div class="alert-card neu" style="border-left-color:#2E8B57;background:#F0FBF6;margin-top:8px">
+      <div class="lbl">ℹ 자동 앵글 매핑 적용</div>
+      <div class="ttl" style="color:#1E7F66">WAKEMAKE <b>${autoN}건</b>의 콘텐츠앵글을 <b>노트유형</b> 컬럼에서 자동 분류했습니다.</div>
+      <div style="font-size:12px;color:#475569;margin-top:6px">35개 노트유형 → 11개 카테고리(韩系水光肌·妆教·单品测评 등). 시트의 콘텐츠앵글 컬럼에 직접 값을 입력하면 자동 매핑보다 우선 적용됩니다.</div>
+    </div>`;
+  }
+  notice.innerHTML=noticeHtml;
   chQuadrant(b,ok);
   renderAngleActions(b,ok);
   renderAngleProductHeatmap(b);
@@ -1176,6 +1233,10 @@ renderTable=function(){_origRenderTable();
   });
 };
 
+// 임베드 데이터에도 WM 노트유형 → 앵글 자동 매핑 적용 + 집계 재계산
+window._wmAutoAngleN=deriveWmAngleFromNoteType(KOL.kol.WAKEMAKE);
+rebuildKolAggregates();
+
 render();
 
 const SHEET_ID = '1Ijm-z7fkbcWxTb5bc1UDZ4bCrsio1awazUv1D1lEmqI';
@@ -1188,6 +1249,7 @@ function recomputeMonthly(byday,brand){const rows=byday.filter(r=>r.브랜드===
 function recomputeMonthlyChannel(byday,brand){const rows=byday.filter(r=>r.브랜드===brand);const months=[...new Set(rows.map(r=>r.월))].filter(m=>typeof m==='number').sort();const out=[];months.forEach(m=>{const mrows=rows.filter(r=>r.월===m);const zg_cost=mrows.reduce((s,r)=>s+(r.쥐광_광고비||0),0),zg_imp=mrows.reduce((s,r)=>s+(r.쥐광_노출||0),0),zg_int=mrows.reduce((s,r)=>s+(r.쥐광_상호작용||0),0),zg_uv=mrows.reduce((s,r)=>s+(r['샤오홍싱_진입UV']||0),0),zg_gmv=mrows.reduce((s,r)=>s+(r['샤오홍싱_전점GMV']||0),0);out.push({브랜드:brand,매체:'쥐광(샤오홍싱)',월:m,노출:Math.round(zg_imp),인터랙션:Math.round(zg_int),'CTR(%)':zg_imp?+(zg_int/zg_imp*100).toFixed(2):0,광고비:Math.round(zg_cost),CPM:zg_imp?+(zg_cost/zg_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(zg_uv),GMV:Math.round(zg_gmv),'ROAS(%)':zg_cost?+(zg_gmv/zg_cost*100).toFixed(1):0});const ci_cost=mrows.reduce((s,r)=>s+(r.CID_비용||0),0),ci_imp=mrows.reduce((s,r)=>s+(r.CID_노출||0),0),ci_clk=mrows.reduce((s,r)=>s+(r.CID_클릭||0),0),ci_ord=mrows.reduce((s,r)=>s+(r.CID_성사주문||0),0),ci_gmv=mrows.reduce((s,r)=>s+(r.CID_성사GMV||0),0);if(ci_cost>0||ci_imp>0)out.push({브랜드:brand,매체:'CID(전환)',월:m,노출:Math.round(ci_imp),인터랙션:Math.round(ci_clk),'CTR(%)':ci_imp?+(ci_clk/ci_imp*100).toFixed(2):0,광고비:Math.round(ci_cost),CPM:ci_imp?+(ci_cost/ci_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(ci_ord),GMV:Math.round(ci_gmv),'ROAS(%)':ci_cost?+(ci_gmv/ci_cost*100).toFixed(1):0});const k_cost=mrows.reduce((s,r)=>s+(r.KOL_비용||0),0),k_pub=mrows.reduce((s,r)=>s+(r.KOL_발행수||0),0);if(k_cost>0)out.push({브랜드:brand,매체:'KOL(达人)',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(k_cost),CPM:0,'외부UV/구매':Math.round(k_pub),GMV:0,'ROAS(%)':0});const sns=mrows.reduce((s,r)=>s+(r.SNS_비용||0),0);if(sns>0)out.push({브랜드:brand,매체:'SNS',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(sns),CPM:0,'외부UV/구매':0,GMV:0,'ROAS(%)':0});});return out;}
 async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{const [byday,wmRaw,cgRaw]=await Promise.all(FETCH_SHEETS.map(fetchSheet));if(!byday.length||!wmRaw.length||!cgRaw.length)throw new Error('빈 응답');
   const wm=dedupeByLatest(wmRaw); const cg=dedupeByLatest(cgRaw);
+  const _autoN=deriveWmAngleFromNoteType(wm); window._wmAutoAngleN=_autoN;
   DATA.byday=byday;
   const wmL=[...byday].filter(r=>r.브랜드==='WAKEMAKE').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   const cgL=[...byday].filter(r=>r.브랜드==='COLORGRAM').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
