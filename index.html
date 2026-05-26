@@ -49,14 +49,81 @@
   .pill.gen{background:#e2e8f0;color:#475569}
   footer{margin-top:28px;color:var(--grey);font-size:11.5px;text-align:center;line-height:1.7}
   .hide{display:none}
+  /* v12: subtabs / modal / alerts / heatmap / quadrant */
+  .subtabs{display:flex;gap:4px;margin:6px 0 14px;background:#eef2f8;padding:4px;border-radius:10px;width:fit-content}
+  .subtabs button{border:0;background:transparent;padding:7px 16px;border-radius:7px;font-weight:600;font-size:12.5px;cursor:pointer;color:var(--grey);font-family:inherit;transition:.15s}
+  .subtabs button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .freshness{display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:6px;background:#E0F2EF;color:#1E7F66;font-weight:600;margin-right:6px}
+  .freshness.warn{background:#FFF4E5;color:#9a4a00}
+  .freshness.err{background:#FCE5E5;color:#9a3030}
+  .alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:14px 0}
+  .alert-card{background:#fff;border:1px solid var(--line);border-left:4px solid;border-radius:10px;padding:10px 14px;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .alert-card.up{border-left-color:#2E8B57}
+  .alert-card.down{border-left-color:#C00000}
+  .alert-card.neu{border-left-color:#5B9BD5}
+  .alert-card .lbl{font-size:11px;color:var(--grey);font-weight:600;letter-spacing:.2px}
+  .alert-card .ttl{font-weight:700;color:var(--navy);font-size:13px;margin-top:2px}
+  .alert-card .delta{font-weight:700;font-size:13.5px}
+  .alert-card .delta.up{color:#1E7F66}
+  .alert-card .delta.down{color:#C00000}
+  .kpi .mom{font-size:11px;font-weight:700;margin-top:4px}
+  .kpi .mom.up{color:#1E7F66}
+  .kpi .mom.down{color:#C00000}
+  .kpi .mom.flat{color:var(--grey)}
+  /* action cards in KOL insight */
+  .action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .action-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;border-top:3px solid}
+  .action-card.boost{border-top-color:#2E8B57;background:linear-gradient(180deg,#F0FBF6 0%,#fff 50%)}
+  .action-card.test{border-top-color:#5B9BD5;background:linear-gradient(180deg,#F0F7FC 0%,#fff 50%)}
+  .action-card.cut{border-top-color:#C00000;background:linear-gradient(180deg,#FDF1F1 0%,#fff 50%)}
+  .action-card h4{font-size:13.5px;color:var(--navy);margin-bottom:6px;font-weight:700}
+  .action-card ul{list-style:none;padding:0;font-size:12.5px;color:#334155}
+  .action-card li{padding:6px 0;border-bottom:1px dashed #e2e8f0}
+  .action-card li:last-child{border-bottom:0}
+  .action-card li b{color:var(--navy)}
+  .action-card .empty{color:var(--grey);font-size:12px;padding:8px 0;font-style:italic}
+  /* heatmap */
+  .heatmap{width:100%;border-collapse:separate;border-spacing:2px;font-size:11.5px}
+  .heatmap th{background:var(--navy);color:#fff;padding:6px 8px;font-weight:600;text-align:center;writing-mode:initial;white-space:nowrap}
+  .heatmap th:first-child{text-align:left;background:#fff;color:var(--navy)}
+  .heatmap td{padding:8px 6px;text-align:center;border-radius:4px;font-weight:600;color:#1e293b}
+  .heatmap td:first-child{text-align:left;font-weight:700;color:var(--navy);background:#F4F6FA}
+  .heatmap td.empty{background:#F4F6FA;color:#cbd5e1}
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+  .modal-bg.on{display:flex}
+  .modal{background:#fff;border-radius:14px;max-width:720px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:1}
+  .modal-head h3{font-size:16px;color:var(--navy);font-weight:800}
+  .modal-close{border:0;background:transparent;font-size:20px;cursor:pointer;color:var(--grey);padding:4px 10px;border-radius:6px}
+  .modal-close:hover{background:#F4F6FA}
+  .modal-body{padding:18px 20px}
+  .modal-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px}
+  .modal-kpi .k{background:#F4F6FA;border-radius:8px;padding:8px 10px}
+  .modal-kpi .k .lab{font-size:11px;color:var(--grey);font-weight:600}
+  .modal-kpi .k .val{font-size:15px;font-weight:800;color:var(--navy);margin-top:2px}
+  .modal-tl{font-size:12px}
+  .modal-tl th{background:#F4F6FA;color:var(--navy)}
+  /* benchmark card */
+  .bench-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #e2e8f0;font-size:12.5px}
+  .bench-row:last-child{border-bottom:0}
+  .bench-row .val{font-weight:700}
+  .bench-row .delta{font-weight:700;margin-left:8px}
+  .bench-row .delta.up{color:#1E7F66}
+  .bench-row .delta.down{color:#C00000}
+  /* compare mode 2-col layout */
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:880px){.cmp{grid-template-columns:1fr}}
+  .cmp .col h4{font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px;letter-spacing:.3px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>중국 광고성과 대시보드 <span class="badge">v11 · 콘텐츠 앵글 분석 추가</span></h1>
-      <div class="sub" id="periodNote">WAKEMAKE × COLORGRAM · byday + KOL 소재 통합</div>
+      <h1>중국 광고성과 대시보드 <span class="badge">v12 · 인사이트 강화</span></h1>
+      <div class="sub" id="periodNote">WAKEMAKE × COLORGRAM · 샤오홍슈 광고 + KOL 통합</div>
+      <div id="dataFreshness" style="margin-top:6px"></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <div id="syncStatus" style="font-size:11.5px;padding:5px 10px;border-radius:14px;background:#FFF4E5;color:#9a4a00;font-weight:600">📦 내장 데이터</div>
@@ -64,6 +131,7 @@
       <div class="toggle" id="brandToggle">
         <button data-b="WAKEMAKE" class="on">WAKEMAKE</button>
         <button data-b="COLORGRAM">COLORGRAM</button>
+        <button data-b="BOTH">동시 비교</button>
       </div>
     </div>
   </header>
@@ -76,46 +144,85 @@
 
   <!-- ===== OVERVIEW TAB ===== -->
   <div id="tab_overview">
+    <div id="alerts" class="alerts"></div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
       <div class="panel"><h3>월별 광고비 vs 전점 GMV</h3><div class="note">막대=쥐광 광고비(￥), 선=샤오홍싱 전점 GMV(￥)</div><div class="cwrap"><canvas id="cSpend"></canvas></div></div>
       <div class="panel"><h3>월별 ROI 추세</h3><div class="note">샤오홍싱 ROI(전점GMV/쥐광비), CID ROI(CG)</div><div class="cwrap"><canvas id="cRoi"></canvas></div></div>
-      <div class="panel full"><h3>일별 추세 (byday raw)</h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 빨간 점선 = 618 캠페인 시작(5/18)</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div></div>
+      <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 빨간 점선 = 618 캠페인 시작(5/18) · 회색 점선 = 7일 이동평균 기준 월말 forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div></div>
+      <div class="panel full"><h3>전환 깔때기 (CTR → 진입 → 站外행동 → GMV)</h3><div class="note">노출 → 인터랙션 → 진입UV → 외부행동(타오바오 진입) → 전점GMV · 누적 1~5월 전환율로 새는 단계 식별</div><div class="cwrap"><canvas id="cFunnel"></canvas></div></div>
       <div class="panel"><h3>채널별 투자 구성 (월별)</h3><div class="note">KOL · 쥐광 · CID · SNS 비용(￥)</div><div class="cwrap"><canvas id="cChannel"></canvas></div></div>
       <div class="panel"><h3>브랜드 검색지수 추세</h3><div class="note">샤오홍슈 검색 관심도 월평균</div><div class="cwrap"><canvas id="cSearch"></canvas></div></div>
-      <div class="panel full"><div class="insight" id="insightOv"></div></div>
+      <div class="panel full"><h3>벤치마크 vs 경쟁사 (검색 모멘텀)</h3><div class="note">최신월 vs 1월 대비 검색지수 변화율 · 양수=상승, 음수=하락</div><div id="benchmark"></div></div>
+      <div class="panel full"><h3>📊 자동 인사이트</h3><div class="insight" id="insightOv"></div></div>
     </div>
   </div>
 
   <!-- ===== KOL TAB ===== -->
   <div id="tab_kol" class="hide">
-    <div class="kpis" id="kolKpis"></div>
-    <div class="grid">
-      <div class="panel full">
-        <h3>소재 산점도: 총비용 → 인터랙션 (점 크기=노출량)</h3>
-        <div class="note">점 색 = 주력상품별 / 점 크기 = 노출량 / 빨간 테두리 = 인기콘텐츠(爆文)</div>
-        <div class="cwrap tall"><canvas id="cScatter"></canvas></div>
-      </div>
-      <div class="panel"><h3>주력상품별 평균 CPUV</h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수</div><div class="cwrap"><canvas id="cCType"></canvas></div></div>
-      <div class="panel"><h3>팔로워 구간별 평균 CPUV</h3><div class="note">미들 KOL의 효율이 메가 대비 높은지 검증</div><div class="cwrap"><canvas id="cTier"></canvas></div></div>
-      <div class="panel full"><h3>콘텐츠 앵글별 성과 (CPUV ↔ 인기콘텐츠 비율)</h3><div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율 · 우측 하단(저CPUV+고인기)이 최적 앵글</div><div class="cwrap"><canvas id="cAngle"></canvas></div></div>
-      <div class="panel full">
-        <div class="insight" id="insightKol"></div>
-      </div>
-      <div class="panel full">
-        <h3>소재 raw 테이블 <span class="badge" id="rowcountK"></span></h3>
-        <div class="ctrl">
-          <label>브랜드</label>
-          <select id="fBrandK"><option value="ALL">전체</option><option value="WAKEMAKE">WAKEMAKE</option><option value="COLORGRAM">COLORGRAM</option></select>
-          <label>상품</label><select id="fType"><option value="ALL">전체</option></select>
-        <label>앵글</label><select id="fAngle"><option value="ALL">전체</option></select>
-          <label>데이터상태</label><select id="fState"><option value="최신">최신만</option><option value="ALL">전체(이전포함)</option><option value="이전작업">이전작업만</option></select>
-        <label>인기콘텐츠</label><select id="fHot"><option value="ALL">전체</option><option value="1">인기콘텐츠</option><option value="0">일반</option></select>
-          <label>정렬</label>
-          <select id="fSort"><option value="cpuv_asc">CPUV 낮은순</option><option value="int_desc">인터랙션 높은순</option><option value="ext_desc">외부UV 높은순</option><option value="cost_desc">총비용 높은순</option><option value="imp_desc">노출 높은순</option></select>
-          <input id="fSearch" placeholder="인플루언서 검색 (한글/원문/Pinyin)…" />
+    <div class="subtabs" id="kolSubtabs">
+      <button data-s="perf" class="on">성과</button>
+      <button data-s="insight">🎯 앵글 인사이트</button>
+    </div>
+
+    <!-- ===== KOL · 성과 서브탭 ===== -->
+    <div id="kol_perf">
+      <div class="kpis" id="kolKpis"></div>
+      <div class="grid">
+        <div class="panel full">
+          <h3>소재 산점도: 총비용 → 인터랙션 (점 크기=노출량)</h3>
+          <div class="note">점 색 = 주력상품별 / 점 크기 = 노출량 / 빨간 테두리 = 인기콘텐츠(爆文) · <b>점 클릭 → 인플루언서 상세</b></div>
+          <div class="cwrap tall"><canvas id="cScatter"></canvas></div>
         </div>
-        <div class="tbox"><table id="kolTable"><thead></thead><tbody></tbody></table></div>
+        <div class="panel"><h3>주력상품별 평균 CPUV</h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수</div><div class="cwrap"><canvas id="cCType"></canvas></div></div>
+        <div class="panel"><h3>팔로워 구간별 평균 CPUV</h3><div class="note">미들 KOL의 효율이 메가 대비 높은지 검증</div><div class="cwrap"><canvas id="cTier"></canvas></div></div>
+        <div class="panel full"><h3>콘텐츠 앵글별 성과 (CPUV ↔ 인기콘텐츠 비율)</h3><div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율 · 우측 하단(저CPUV+고인기)이 최적 앵글</div><div class="cwrap"><canvas id="cAngle"></canvas></div></div>
+        <div class="panel full"><h3>📊 KOL 요약 인사이트</h3><div class="insight" id="insightKol"></div></div>
+        <div class="panel full">
+          <h3>소재 raw 테이블 <span class="badge" id="rowcountK"></span></h3>
+          <div class="ctrl">
+            <label>브랜드</label>
+            <select id="fBrandK"><option value="ALL">전체</option><option value="WAKEMAKE">WAKEMAKE</option><option value="COLORGRAM">COLORGRAM</option></select>
+            <label>상품</label><select id="fType"><option value="ALL">전체</option></select>
+            <label>앵글</label><select id="fAngle"><option value="ALL">전체</option></select>
+            <label>데이터상태</label><select id="fState"><option value="최신">최신만</option><option value="ALL">전체(이전포함)</option><option value="이전작업">이전작업만</option></select>
+            <label>인기콘텐츠</label><select id="fHot"><option value="ALL">전체</option><option value="1">인기콘텐츠</option><option value="0">일반</option></select>
+            <label>정렬</label>
+            <select id="fSort"><option value="cpuv_asc">CPUV 낮은순</option><option value="int_desc">인터랙션 높은순</option><option value="ext_desc">외부UV 높은순</option><option value="cost_desc">총비용 높은순</option><option value="imp_desc">노출 높은순</option></select>
+            <input id="fSearch" placeholder="인플루언서 검색 (한글/원문/Pinyin)…" />
+          </div>
+          <div class="tbox"><table id="kolTable"><thead></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KOL · 앵글 인사이트 서브탭 ===== -->
+    <div id="kol_insight" class="hide">
+      <div id="angleNotice" style="margin-bottom:14px"></div>
+      <div class="grid">
+        <div class="panel full">
+          <h3>🎯 효율 × 화제성 4사분면 (앵글별)</h3>
+          <div class="note">X축=평균 CPUV(↓좋음) · Y축=인기콘텐츠 비율(↑좋음) · 점 크기=콘텐츠 수 ·
+          <span style="color:#1E7F66;font-weight:600">좌상=최우선 증량</span> ·
+          <span style="color:#5B9BD5;font-weight:600">좌하=스텔스 효율</span> ·
+          <span style="color:#E08A00;font-weight:600">우상=브랜딩 자산</span> ·
+          <span style="color:#C00000;font-weight:600">우하=제외 검토</span></div>
+          <div class="cwrap tall"><canvas id="cQuadrant"></canvas></div>
+        </div>
+        <div class="panel full">
+          <h3>💡 다음 분기 액션 아이템</h3>
+          <div class="note">데이터 기반 자동 추천 · 우선순위 콘텐츠수 ≥ 2건 기준</div>
+          <div class="action-grid" id="angleActions"></div>
+        </div>
+        <div class="panel full">
+          <h3>🗺️ 앵글 × 주력상품 매트릭스</h3>
+          <div class="note">셀=해당 조합의 평균 CPUV(￥) · 색 진할수록 효율 좋음 · 빈 셀=해당 조합 콘텐츠 없음 → 시드 테스트 후보</div>
+          <div style="overflow:auto"><div id="angleProductHeatmap"></div></div>
+        </div>
+        <div class="panel full">
+          <h3>📋 종합 앵글 방향성 제안</h3>
+          <div class="insight" id="angleStrategy"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -163,9 +270,20 @@
     <div class="panel full"><div class="insight" id="insightMonthly"></div></div>
   </div>
 
+  <!-- ===== Influencer Deep-Dive Modal ===== -->
+  <div class="modal-bg" id="infModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="infModalTitle">인플루언서 상세</h3>
+        <button class="modal-close" id="infModalClose">✕</button>
+      </div>
+      <div class="modal-body" id="infModalBody"></div>
+    </div>
+  </div>
+
   <footer>
-    출처: 일별 데이터(byday) + 사용자 제공 Google Sheets KOL 시트 · WM 97건 + CG 95건 ·
-    인기콘텐츠(爆文)는 진행상태 컬럼 기반 식별. 검증: WM 4월 ROI 2.71 일치.
+    출처: 일별 데이터(byday) + Google Sheets KOL_WM/CG · 인기콘텐츠(爆文) = `인기콘텐츠` 컬럼 기반 ·
+    v12 인사이트 엔진: rule-based 자동 생성.
   </footer>
 </div>
 
@@ -186,37 +304,126 @@ const ML=m=>m.map(x=>x.월+'월');
 
 // ===== OVERVIEW =====
 function kpis(){
+  if(brand==='BOTH'){renderCompareKpis();return;}
   const m=DATA.monthly[brand];
   const sum=k=>m.reduce((a,x)=>a+(x[k]||0),0);
   const spend=sum('쥐광비'),gmv=sum('전점GMV'),imp=sum('노출'),kol=sum('KOL비');
   const roi=spend?(gmv/spend):0;
-  let cards=[['누적 쥐광 광고비',WON(spend),'1~5월'],['누적 전점 GMV',WON(gmv),'샤오홍싱'],['평균 샤오홍싱 ROI',F2(roi),'GMV/쥐광비'],['누적 노출',FMT(imp),'쥐광'],['누적 KOL 비용',WON(kol),'达人']];
-  if(brand==='COLORGRAM'){const cs=sum('CID비'),cg=sum('CID성사GMV');cards.push(['CID 누적비',WON(cs),'전환광고']);cards.push(['CID ROI',F2(cs?cg/cs:0),'성사GMV/비용']);}
-  document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div></div>`).join('');
+  // MoM: 가장 최근 완료된 월(5월은 MTD라 4월 vs 3월), MTD가 아닌 가장 큰 완료월 기준
+  // 단순화: 최신월 = m[m.length-1], 전월 = m[m.length-2]
+  const cur=m[m.length-1]||{},prev=m[m.length-2]||{};
+  const curRoi=cur.쥐광비?(cur.전점GMV/cur.쥐광비):0, prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
+  let cards=[
+    ['누적 쥐광 광고비',WON(spend),'1~5월',momPct(cur.쥐광비,prev.쥐광비)],
+    ['누적 전점 GMV',WON(gmv),'샤오홍싱',momPct(cur.전점GMV,prev.전점GMV)],
+    ['평균 샤오홍싱 ROI',F2(roi),'GMV/쥐광비',momPct(curRoi,prevRoi)],
+    ['누적 노출',FMT(imp),'쥐광',momPct(cur.노출,prev.노출)],
+    ['누적 KOL 비용',WON(kol),'达人',momPct(cur.KOL비,prev.KOL비)]
+  ];
+  if(brand==='COLORGRAM'){
+    const cs=sum('CID비'),cg=sum('CID성사GMV');
+    const curCidRoi=cur.CID비?(cur.CID성사GMV/cur.CID비):0, prevCidRoi=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
+    cards.push(['CID 누적비',WON(cs),'전환광고',momPct(cur.CID비,prev.CID비)]);
+    cards.push(['CID ROI',F2(cs?cg/cs:0),'성사GMV/비용',momPct(curCidRoi,prevCidRoi)]);
+  }
+  document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div>${c[3]||''}</div>`).join('');
 }
-function chSpend(){destroy('cSpend');const m=DATA.monthly[brand];
+function chSpend(){destroy('cSpend');
+  if(brand==='BOTH'){
+    const wm=DATA.monthly.WAKEMAKE, cg=DATA.monthly.COLORGRAM;
+    const labels=ML(wm);
+    charts.cSpend=new Chart(document.getElementById('cSpend'),{data:{labels,datasets:[
+      {type:'bar',label:'WM 쥐광비',data:wm.map(x=>x.쥐광비),backgroundColor:COL.sky,borderRadius:5,yAxisID:'y'},
+      {type:'bar',label:'CG 쥐광비',data:cg.map(x=>x.쥐광비),backgroundColor:COL.purple,borderRadius:5,yAxisID:'y'},
+      {type:'line',label:'WM 전점GMV',data:wm.map(x=>x.전점GMV),borderColor:COL.accent,backgroundColor:COL.accent,tension:.3,pointRadius:3,yAxisID:'y'},
+      {type:'line',label:'CG 전점GMV',data:cg.map(x=>x.전점GMV),borderColor:COL.green,backgroundColor:COL.green,tension:.3,pointRadius:3,yAxisID:'y'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});
+    return;
+  }
+  const m=DATA.monthly[brand];
   charts.cSpend=new Chart(document.getElementById('cSpend'),{data:{labels:ML(m),datasets:[{type:'bar',label:'쥐광 광고비',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky,borderRadius:5},{type:'line',label:'전점 GMV',data:m.map(x=>x.전점GMV),borderColor:COL.accent,backgroundColor:COL.accent,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});}
-function chRoi(){destroy('cRoi');const m=DATA.monthly[brand];
+function chRoi(){destroy('cRoi');
+  if(brand==='BOTH'){
+    const wm=DATA.monthly.WAKEMAKE, cg=DATA.monthly.COLORGRAM;
+    const ds=[
+      {label:'WM 샤오홍싱 ROI',data:wm.map(x=>x.샤오홍싱ROI),borderColor:COL.blue,backgroundColor:COL.blue,tension:.3,pointRadius:3},
+      {label:'CG 샤오홍싱 ROI',data:cg.map(x=>x.샤오홍싱ROI),borderColor:COL.purple,backgroundColor:COL.purple,tension:.3,pointRadius:3},
+      {label:'CG CID ROI',data:cg.map(x=>x.CID_ROI),borderColor:COL.green,backgroundColor:COL.green,tension:.3,pointRadius:3,borderDash:[3,3]},
+      {label:'손익분기(1.0)',data:wm.map(()=>1),borderColor:COL.grey,borderDash:[5,5],pointRadius:0}
+    ];
+    charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(wm),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});
+    return;
+  }
+  const m=DATA.monthly[brand];
   const ds=[{label:'샤오홍싱 ROI',data:m.map(x=>x.샤오홍싱ROI),borderColor:COL.blue,backgroundColor:COL.blue,tension:.3,pointRadius:3}];
   if(brand==='COLORGRAM')ds.push({label:'CID ROI',data:m.map(x=>x.CID_ROI),borderColor:COL.green,backgroundColor:COL.green,tension:.3,pointRadius:3});
   ds.push({label:'손익분기(1.0)',data:m.map(()=>1),borderColor:COL.grey,borderDash:[5,5],pointRadius:0});
   charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});}
 function chDaily(){destroy('cDaily');
-  const rows=DATA.byday.filter(r=>r.브랜드===brand&&(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
-  const labels=rows.map(r=>r.날짜.slice(5));
-  const startIdx=rows.findIndex(r=>r.날짜>='2026-05-18');
+  const brands=brand==='BOTH'?['WAKEMAKE','COLORGRAM']:[brand];
+  const colors={WAKEMAKE:{spend:COL.sky,gmv:COL.accent},COLORGRAM:{spend:COL.purple,gmv:COL.green}};
+  let allDates=[];
+  brands.forEach(b=>{
+    const rs=DATA.byday.filter(r=>r.브랜드===b&&(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
+    rs.forEach(r=>{if(!allDates.includes(r.날짜))allDates.push(r.날짜);});
+  });
+  allDates.sort();
+  const labels=allDates.map(d=>d.slice(5));
+  const datasets=[];
+  let forecastInfo=null;
+  brands.forEach(b=>{
+    const map=Object.fromEntries(DATA.byday.filter(r=>r.브랜드===b).map(r=>[r.날짜,r]));
+    const spend=allDates.map(d=>map[d]?map[d]['쥐광_광고비']||null:null);
+    const gmv=allDates.map(d=>map[d]?map[d]['샤오홍싱_전점GMV']||null:null);
+    datasets.push({label:`${b==='WAKEMAKE'?'WM':'CG'} 쥐광 광고비`,data:spend,borderColor:colors[b].spend,backgroundColor:colors[b].spend+'1F',fill:brands.length===1,tension:.25,pointRadius:0});
+    datasets.push({label:`${b==='WAKEMAKE'?'WM':'CG'} 전점 GMV`,data:gmv,borderColor:colors[b].gmv,tension:.25,pointRadius:0});
+    if(brands.length===1){forecastInfo=calcForecast(b,allDates,map);}
+  });
+  // forecast 라인 (단일 브랜드 모드에서만)
+  if(forecastInfo){
+    const fc=forecastInfo;
+    datasets.push({label:`5월 forecast (${WON(fc.projGmv)})`,data:fc.gmvLine,borderColor:'#9a4a00',backgroundColor:'#9a4a00',borderDash:[6,4],pointRadius:0,tension:0});
+    document.getElementById('forecastBadge').textContent=`5월 예상 GMV ${WON(fc.projGmv)} (${fc.projDelta>=0?'+':''}${fc.projDelta.toFixed(0)}% vs 4월)`;
+    document.getElementById('forecastBadge').style.background=fc.projDelta>=0?'#E0F2EF':'#FCE5E5';
+    document.getElementById('forecastBadge').style.color=fc.projDelta>=0?'#1E7F66':'#9a3030';
+  } else {document.getElementById('forecastBadge').textContent='';document.getElementById('forecastBadge').style.background='';}
+  const startIdx=allDates.findIndex(d=>d>='2026-05-18');
   const mk={id:'mk',afterDraw:c=>{if(startIdx<0)return;const x=c.scales.x.getPixelForValue(startIdx);const a=c.chartArea;const ctx=c.ctx;ctx.save();ctx.strokeStyle=COL.accent;ctx.setLineDash([5,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,a.top);ctx.lineTo(x,a.bottom);ctx.stroke();ctx.fillStyle=COL.accent;ctx.font='bold 11px sans-serif';ctx.fillText('618 시작',x+4,a.top+12);ctx.restore();}};
-  charts.cDaily=new Chart(document.getElementById('cDaily'),{type:'line',data:{labels,datasets:[{label:'쥐광 광고비',data:rows.map(r=>r['쥐광_광고비']),borderColor:COL.sky,backgroundColor:'rgba(91,155,213,.12)',fill:true,tension:.25,pointRadius:0},{label:'전점 GMV',data:rows.map(r=>r['샤오홍싱_전점GMV']),borderColor:COL.accent,tension:.25,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{ticks:{callback:v=>FMT(v)}}}},plugins:[mk]});}
-function chChannel(){destroy('cChannel');const m=DATA.monthly[brand];
+  charts.cDaily=new Chart(document.getElementById('cDaily'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{ticks:{callback:v=>FMT(v)}}}},plugins:[mk]});}
+function chChannel(){destroy('cChannel');
+  if(brand==='BOTH'){
+    // 비교 모드: 채널별 누적 비용을 양 브랜드 비교
+    const labels=['KOL','쥐광','CID','SNS'];
+    const sum=(b,k)=>DATA.monthly[b].reduce((a,x)=>a+(x[k]||0),0);
+    const wm=[sum('WAKEMAKE','KOL비'),sum('WAKEMAKE','쥐광비'),sum('WAKEMAKE','CID비'),sum('WAKEMAKE','SNS비')];
+    const cg=[sum('COLORGRAM','KOL비'),sum('COLORGRAM','쥐광비'),sum('COLORGRAM','CID비'),sum('COLORGRAM','SNS비')];
+    charts.cChannel=new Chart(document.getElementById('cChannel'),{type:'bar',data:{labels,datasets:[
+      {label:'WAKEMAKE',data:wm,backgroundColor:COL.sky,borderRadius:5},
+      {label:'COLORGRAM',data:cg,backgroundColor:COL.purple,borderRadius:5}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});
+    return;
+  }
+  const m=DATA.monthly[brand];
   const ds=[{label:'KOL',data:m.map(x=>x.KOL비),backgroundColor:COL.navy},{label:'쥐광',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky}];
   if(brand==='COLORGRAM')ds.push({label:'CID',data:m.map(x=>x.CID비),backgroundColor:COL.green});
   ds.push({label:'SNS',data:m.map(x=>x.SNS비),backgroundColor:COL.orange});
   charts.cChannel=new Chart(document.getElementById('cChannel'),{type:'bar',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>FMT(v)}}}}});}
-function chSearch(){destroy('cSearch');const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const palette=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
+function chSearch(){destroy('cSearch');
+  if(brand==='BOTH'){
+    // 비교 모드: 각 브랜드의 메인 브랜드 키워드만 비교
+    const wm=DATA.search.WAKEMAKE, cg=DATA.search.COLORGRAM;
+    const months=Object.keys(wm).sort((a,b)=>a-b);
+    const wmKey=Object.keys(wm[months[0]])[0], cgKey=Object.keys(cg[months[0]])[0];
+    charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:[
+      {label:'WAKEMAKE 브랜드',data:months.map(m=>wm[m][wmKey]),borderColor:COL.sky,backgroundColor:COL.sky,tension:.3,pointRadius:3},
+      {label:'COLORGRAM 브랜드',data:months.map(m=>cg[m][cgKey]),borderColor:COL.purple,backgroundColor:COL.purple,tension:.3,pointRadius:3}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+    return;
+  }
+  const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const palette=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
   const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m][k]),borderColor:palette[i%palette.length],backgroundColor:palette[i%palette.length],tension:.3,pointRadius:2}));
   charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});}
-const INSIGHTS={WAKEMAKE:'<b>WAKEMAKE</b> — 4월 ROI 2.71 정점은 티몰 백억보조금 견인 효과로, 5월 정상화. 5월 들어 일 광고비를 약 +39% 끌어올려 618 예열에 진입(데이터 ~5/19, MTD ROI 1.08은 전환 후행으로 평가 보류). 브랜드 검색은 유지되나 쿠션·아이섀도우 카테고리 검색은 하락하고 경쟁사(애경) 검색은 상승 → 카테고리 콘텐츠 증량 필요.',COLORGRAM:'<b>COLORGRAM</b> — 채널이 분리되어 있어 샤오홍싱은 상단 퍼널(ROI 1.0대), <b>CID가 전환 엔진(ROI 1.86~2.16 안정)</b>으로 매출을 견인. 브랜드·틴트 검색이 5월 최고치로 동반 상승해 수요 모멘텀이 우호적. 단 5월 KOL 발행 0건 → 예열기 콘텐츠 적시 투입이 관건.'};
-function renderOverview(){kpis();chSpend();chRoi();chDaily();chChannel();chSearch();document.getElementById('insightOv').innerHTML=INSIGHTS[brand];document.getElementById('periodNote').textContent=`${brand} · 데이터 기준일 ~${DATA.last[brand]} · 5월은 부분(MTD) 실적`;}
+function renderOverview(){renderAlerts();kpis();chSpend();chRoi();chDaily();chFunnel();chChannel();chSearch();renderBenchmark();document.getElementById('insightOv').innerHTML=autoInsightOv(brand);document.getElementById('periodNote').textContent=`${brand==='BOTH'?'WM + CG 동시 비교':brand} · 데이터 기준일 ~${brand==='BOTH'?(DATA.last.WAKEMAKE+' / '+DATA.last.COLORGRAM):DATA.last[brand]} · 5월은 부분(MTD) 실적`;}
 
 // ===== KOL =====
 function kolKpis(){
@@ -342,7 +549,10 @@ function renderTable(){
 function renderKol(){kolKpis();chScatter();chCType();chTier();chAngle();insightKol();renderTable();}
 
 // ===== events =====
-document.getElementById('brandToggle').addEventListener('click',e=>{if(e.target.dataset.b){brand=e.target.dataset.b;[...document.querySelectorAll('#brandToggle button')].forEach(b=>b.classList.toggle('on',b.dataset.b===brand));render();}});
+document.getElementById('brandToggle').addEventListener('click',e=>{if(e.target.dataset.b){brand=e.target.dataset.b;[...document.querySelectorAll('#brandToggle button')].forEach(b=>b.classList.toggle('on',b.dataset.b===brand));
+  // BOTH는 개요 탭만 지원. KOL/Monthly 탭에 있을 때 BOTH 선택 시 WM으로 폴백.
+  if(brand==='BOTH'&&tab!=='overview'){brand='WAKEMAKE';[...document.querySelectorAll('#brandToggle button')].forEach(b=>b.classList.toggle('on',b.dataset.b==='WAKEMAKE'));}
+  render();}});
 document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.t){tab=e.target.dataset.t;[...document.querySelectorAll('#tabs button')].forEach(b=>b.classList.toggle('on',b.dataset.t===tab));document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol');document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');render();}});
 ['fBrandK','fType','fAngle','fHot','fSort','fState'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{window[id]=e.target.value;if(id==='fBrandK')fBrandK=e.target.value;if(id==='fType')fType=e.target.value;if(id==='fHot')fHot=e.target.value;if(id==='fSort')fSort=e.target.value;if(id==='fState')fState=e.target.value;if(id==='fAngle')fAngle=e.target.value;renderTable();}));
 document.getElementById('fSearch').addEventListener('input',e=>{fSearch=e.target.value;renderTable();});
@@ -490,6 +700,481 @@ function renderMonthly(){renderMonthlyTable(); chMonthlyTrend(); insightMonthly(
     renderMonthly();
   });
 });
+
+// ==================== v12: NEW HELPERS ====================
+
+// --- 데이터 신선도 배지 ---
+function renderFreshness(){
+  const el=document.getElementById('dataFreshness'); if(!el) return;
+  const lastDate=DATA.last[brand==='BOTH'?'WAKEMAKE':brand];
+  if(!lastDate){el.innerHTML='';return;}
+  const last=new Date(lastDate+'T23:59:59'); const today=new Date(); const days=Math.floor((today-last)/86400000);
+  let cls='freshness', icon='✓';
+  if(days>=7){cls+=' err'; icon='⚠';}
+  else if(days>=3){cls+=' warn'; icon='⏳';}
+  el.innerHTML=`<span class="${cls}">${icon} 데이터 기준일 ${lastDate} (${days===0?'오늘':days+'일 전'})</span>`;
+}
+
+// --- MoM 표시 ---
+function momPct(cur,prev){
+  if(!prev||prev===0||cur==null||prev==null||isNaN(cur)||isNaN(prev)) return '<div class="mom flat">전월비 -</div>';
+  const p=((cur-prev)/Math.abs(prev))*100;
+  const cls=p>0.5?'up':(p<-0.5?'down':'flat');
+  const sign=p>0?'▲':(p<0?'▼':'·');
+  return `<div class="mom ${cls}">${sign} ${Math.abs(p).toFixed(1)}% vs 전월</div>`;
+}
+
+// --- 비교 모드 KPI (BOTH) ---
+function renderCompareKpis(){
+  const make=(b)=>{
+    const m=DATA.monthly[b]; const sum=k=>m.reduce((a,x)=>a+(x[k]||0),0);
+    const spend=sum('쥐광비'),gmv=sum('전점GMV'),roi=spend?(gmv/spend):0,kol=sum('KOL비');
+    const cur=m[m.length-1]||{},prev=m[m.length-2]||{};
+    const curRoi=cur.쥐광비?(cur.전점GMV/cur.쥐광비):0, prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
+    const cards=[
+      ['쥐광비',WON(spend),momPct(cur.쥐광비,prev.쥐광비)],
+      ['전점GMV',WON(gmv),momPct(cur.전점GMV,prev.전점GMV)],
+      ['ROI',F2(roi),momPct(curRoi,prevRoi)],
+      ['KOL비',WON(kol),momPct(cur.KOL비,prev.KOL비)]
+    ];
+    return cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div>${c[2]}</div>`).join('');
+  };
+  document.getElementById('kpis').innerHTML=
+    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(90deg,#E0F2FE,#fff)"><div class="lab" style="color:#0369a1">WAKEMAKE 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('WAKEMAKE')}</div></div>`+
+    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(90deg,#F3E8FF,#fff)"><div class="lab" style="color:#7c3aed">COLORGRAM 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('COLORGRAM')}</div></div>`;
+}
+
+// --- Anomaly 자동 감지 ---
+function renderAlerts(){
+  const box=document.getElementById('alerts'); if(!box) return; box.innerHTML='';
+  const brands=brand==='BOTH'?['WAKEMAKE','COLORGRAM']:[brand];
+  const alerts=[];
+  brands.forEach(b=>{
+    const rs=DATA.byday.filter(r=>r.브랜드===b&&(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0)).sort((x,y)=>x.날짜.localeCompare(y.날짜));
+    if(rs.length<8)return;
+    const last=rs[rs.length-1]; const prev7=rs.slice(Math.max(0,rs.length-8),rs.length-1);
+    const metrics=[
+      {key:'쥐광_광고비',label:'쥐광 광고비'},
+      {key:'샤오홍싱_전점GMV',label:'전점 GMV'},
+      {key:'샤오홍싱_진입UV',label:'진입 UV'},
+      {key:'쥐광_상호작용',label:'쥐광 상호작용'}
+    ];
+    metrics.forEach(({key,label})=>{
+      const v=last[key]||0; const avg=prev7.reduce((a,r)=>a+(r[key]||0),0)/prev7.length;
+      if(avg<5)return;
+      const delta=((v-avg)/avg)*100;
+      if(Math.abs(delta)<25)return;
+      alerts.push({brand:b,date:last.날짜,label,delta,v,avg});
+    });
+  });
+  // 가장 큰 변동 6개만
+  alerts.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const top=alerts.slice(0,brand==='BOTH'?6:4);
+  if(!top.length){box.innerHTML=`<div class="alert-card neu"><div class="lbl">알럭 감지</div><div class="ttl">최근 1일 vs 7일 평균 변동 ±25% 미만 — 안정 구간</div></div>`;return;}
+  box.innerHTML=top.map(a=>{
+    const cls=a.delta>0?'up':'down'; const sign=a.delta>0?'▲':'▼';
+    return `<div class="alert-card ${cls}"><div class="lbl">${a.brand} · ${a.date.slice(5)}</div><div class="ttl">${a.label}</div><div class="delta ${cls}">${sign} ${Math.abs(a.delta).toFixed(0)}%</div><div style="font-size:11px;color:#64748b;margin-top:2px">${FMT(a.v)} vs 7일 평균 ${FMT(a.avg)}</div></div>`;
+  }).join('');
+}
+
+// --- MTD Forecast (현재 월 = 5월) ---
+function calcForecast(b,allDates,map){
+  // 5월 데이터만 필터
+  const mayDates=allDates.filter(d=>d.startsWith('2026-05'));
+  if(mayDates.length<3) return null;
+  const mayLast=mayDates[mayDates.length-1];
+  const lastDay=parseInt(mayLast.slice(8),10);
+  const daysInMonth=31; // 5월
+  // 7일 이동 평균 (마지막 7일 GMV)
+  const recent7=mayDates.slice(-7).map(d=>map[d]?map[d]['샤오홍싱_전점GMV']||0:0);
+  const dailyAvg=recent7.reduce((a,v)=>a+v,0)/recent7.length;
+  // MTD 누적 + 남은 일수 × 평균
+  const mtdGmv=mayDates.reduce((a,d)=>a+(map[d]?map[d]['샤오홍싱_전점GMV']||0:0),0);
+  const projGmv=mtdGmv+(daysInMonth-lastDay)*dailyAvg;
+  // 4월 대비
+  const aprMonthly=DATA.monthly[b].find(m=>m.월===4); const aprGmv=aprMonthly?aprMonthly.전점GMV:0;
+  const projDelta=aprGmv?((projGmv-aprGmv)/aprGmv*100):0;
+  // forecast 라인: 전체 길이 = allDates.length, 마지막 5월 일자부터 projGmv까지 일 평균으로 직선
+  const gmvLine=new Array(allDates.length).fill(null);
+  const lastIdx=allDates.indexOf(mayLast);
+  if(lastIdx>=0){
+    gmvLine[lastIdx]=map[mayLast]?map[mayLast]['샤오홍싱_전점GMV']||0:0;
+    // 남은 일수에 대해 평균값으로 채움
+    for(let i=lastIdx+1;i<allDates.length;i++){gmvLine[i]=dailyAvg;}
+    // allDates에 이후 일자가 없으면 라인 안 그려짐 - 강제로 추가 안 함
+  }
+  return {projGmv,projDelta,gmvLine,mtdGmv,dailyAvg};
+}
+
+// --- 깔때기 차트 (CTR → 진입UV → 외부행동 → GMV) ---
+function chFunnel(){destroy('cFunnel');
+  const brands=brand==='BOTH'?['WAKEMAKE','COLORGRAM']:[brand];
+  const colors={WAKEMAKE:COL.sky,COLORGRAM:COL.purple};
+  const datasets=brands.map(b=>{
+    const rs=DATA.byday.filter(r=>r.브랜드===b);
+    const sum=k=>rs.reduce((a,r)=>a+(r[k]||0),0);
+    const imp=sum('쥐광_노출'),int_=sum('쥐광_상호작용'),uv=sum('샤오홍싱_진입UV'),ext=sum('쥐광_站外행동'),gmvUv=sum('샤오홍싱_성사UV');
+    // 5단계 깔때기: 노출→상호작용→진입UV→站外행동→성사UV
+    const stages=[imp,int_,uv,ext,gmvUv];
+    return {label:b==='WAKEMAKE'?'WAKEMAKE':'COLORGRAM',data:stages,backgroundColor:colors[b]+'AA',borderColor:colors[b],borderWidth:1,borderRadius:5};
+  });
+  const labels=['노출','상호작용','진입UV','站外행동(타오바오)','성사UV'];
+  charts.cFunnel=new Chart(document.getElementById('cFunnel'),{type:'bar',data:{labels,datasets},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},
+      tooltip:{callbacks:{label:c=>{
+        const ds=c.dataset.data; const idx=c.dataIndex;
+        const v=c.parsed.x; const prev=idx>0?ds[idx-1]:null;
+        const conv=prev?(v/prev*100).toFixed(2)+'%':'';
+        return `${c.dataset.label}: ${FMT(v)} ${conv?'(전단계 → '+conv+')':''}`;
+      }}}},
+      scales:{x:{type:'logarithmic',min:1,ticks:{callback:v=>FMT(v)}}}}});
+}
+
+// --- 벤치마크 (검색지수 최신월 vs 1월) ---
+function renderBenchmark(){
+  const box=document.getElementById('benchmark'); if(!box) return;
+  const brands=brand==='BOTH'?['WAKEMAKE','COLORGRAM']:[brand];
+  let html='';
+  brands.forEach(b=>{
+    const s=DATA.search[b]; if(!s){html+=`<div>${b}: 검색지수 데이터 없음</div>`;return;}
+    const months=Object.keys(s).sort((a,b)=>a-b);
+    const first=months[0], last=months[months.length-1];
+    const keys=Object.keys(s[first]);
+    html+=`<div style="margin-bottom:10px"><b style="color:var(--navy)">${b}</b> <span style="color:var(--grey);font-size:11.5px">· ${first}월 → ${last}월 변화</span></div>`;
+    keys.slice(0,6).forEach(k=>{
+      const v1=s[first][k]||0, v2=s[last][k]||0;
+      if(!v1)return;
+      const delta=((v2-v1)/v1*100);
+      const cls=delta>0?'up':(delta<0?'down':'');
+      const sign=delta>0?'▲':(delta<0?'▼':'·');
+      html+=`<div class="bench-row"><span>${SMAP[k]||k}</span><span><span class="val">${FMT(v2)}</span><span class="delta ${cls}">${sign} ${Math.abs(delta).toFixed(1)}%</span></span></div>`;
+    });
+  });
+  box.innerHTML=html;
+}
+
+// --- 자동 인사이트 (rule-based) ---
+function autoInsightOv(b){
+  if(b==='BOTH'){return autoInsightOv('WAKEMAKE')+'<br><br>'+autoInsightOv('COLORGRAM');}
+  const m=DATA.monthly[b]; if(!m||!m.length) return '데이터 없음';
+  const cur=m[m.length-1]||{},prev=m[m.length-2]||{};
+  const sum=k=>m.reduce((a,x)=>a+(x[k]||0),0);
+  const lines=[];
+  // 1. 가장 큰 MoM 변화 (절대값)
+  const compareMetrics=[
+    {key:'쥐광비',label:'쥐광 광고비',unit:'￥'},
+    {key:'전점GMV',label:'전점 GMV',unit:'￥'},
+    {key:'샤오홍싱ROI',label:'샤오홍싱 ROI',unit:''},
+    {key:'노출',label:'노출량',unit:''},
+    {key:'KOL비',label:'KOL 비용',unit:'￥'}
+  ];
+  const moms=compareMetrics.map(mt=>{
+    const c=cur[mt.key]||0, p=prev[mt.key]||0;
+    return {...mt,c,p,delta:p?((c-p)/Math.abs(p)*100):0};
+  }).filter(x=>x.p>0).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  if(moms[0]&&Math.abs(moms[0].delta)>=10){
+    const x=moms[0]; const dir=x.delta>0?'<b style="color:#1E7F66">+'+x.delta.toFixed(0)+'%</b>':'<b style="color:#C00000">'+x.delta.toFixed(0)+'%</b>';
+    lines.push(`📈 <b>${x.label}</b> ${dir} (${m[m.length-2].월}월 → ${m[m.length-1].월}월: ${x.unit}${FMT(x.p)} → ${x.unit}${FMT(x.c)})`);
+  }
+  // 2. ROI 평가
+  const totalSpend=sum('쥐광비'), totalGmv=sum('전점GMV'); const totalRoi=totalSpend?totalGmv/totalSpend:0;
+  if(totalRoi>=1.5) lines.push(`✅ 누적 ROI <b>${F2(totalRoi)}</b> — 손익분기 이상, 광고비 효율 양호`);
+  else if(totalRoi>=1.0) lines.push(`🟡 누적 ROI <b>${F2(totalRoi)}</b> — 손익분기 부근, 전환 단계 점검 필요`);
+  else lines.push(`🔴 누적 ROI <b>${F2(totalRoi)}</b> — 손익분기 미달, 광고비/매체 믹스 재검토 권장`);
+  // 3. 가장 효율 좋은 매체 (CG의 경우 CID 강조)
+  if(b==='COLORGRAM'){
+    const cidSpend=sum('CID비'),cidGmv=sum('CID성사GMV'); const cidRoi=cidSpend?cidGmv/cidSpend:0;
+    if(cidRoi>totalRoi&&cidSpend>0) lines.push(`💎 CID 채널 ROI <b>${F2(cidRoi)}</b> — 샤오홍싱 ${F2(totalRoi)} 대비 전환 효율 우위 → CID 비중 확대 고려`);
+  }
+  // 4. 검색 모멘텀
+  const s=DATA.search[b]; if(s){
+    const months=Object.keys(s).sort((a,b)=>a-b);
+    const first=months[0], last=months[months.length-1];
+    const brandKey=Object.keys(s[first])[0];
+    if(brandKey){
+      const v1=s[first][brandKey]||0, v2=s[last][brandKey]||0;
+      const delta=v1?((v2-v1)/v1*100):0;
+      if(delta>=10) lines.push(`🔥 브랜드 검색지수 <b>+${delta.toFixed(0)}%</b> (${first}→${last}월) — 수요 모멘텀 우호, 컨버전 캠페인 증량 타이밍`);
+      else if(delta<=-10) lines.push(`⚠ 브랜드 검색지수 <b>${delta.toFixed(0)}%</b> — 인지/관심 단계 약화, 콘텐츠 시드 증량 필요`);
+    }
+  }
+  // 5. 618 캠페인 효과
+  const may=m.find(x=>x.월===5);
+  if(may&&may.쥐광비>0){
+    const apr=m.find(x=>x.월===4);
+    if(apr&&apr.쥐광비>0){
+      const spendUp=((may.쥐광비-apr.쥐광비)/apr.쥐광비*100);
+      if(spendUp>=20) lines.push(`🚀 5월 쥐광 비용 <b>+${spendUp.toFixed(0)}%</b> vs 4월 — 618 예열 본격화 (MTD 데이터 후행 효과는 ~5/28까지 평가 보류)`);
+    }
+  }
+  return lines.map(l=>'• '+l).join('<br>');
+}
+
+// ==================== KOL · 앵글 인사이트 ====================
+let kolSub='perf'; // 'perf' | 'insight'
+
+function hasAngleData(b){
+  const rows=KOL.kol[b]||[]; const filled=rows.filter(r=>r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력').length;
+  return filled>=3;
+}
+
+function renderAngleInsight(){
+  const b=brand==='BOTH'?'WAKEMAKE':brand;
+  const notice=document.getElementById('angleNotice');
+  const ok=hasAngleData(b);
+  if(!ok){
+    notice.innerHTML=`<div class="alert-card neu" style="border-left-color:#E08A00;background:#FFFBEF">
+      <div class="lbl">⚠ 앵글 데이터 부족</div>
+      <div class="ttl" style="color:#9a4a00">KOL_${b==='WAKEMAKE'?'WM':'CG'} 시트의 <b>콘텐츠앵글</b> 컬럼이 비어있거나 누락되어 있습니다.</div>
+      <div style="font-size:12px;color:#5b4636;margin-top:6px">로컬 엑셀 원본에는 있지만 구글 시트로 옮길 때 빠진 듯합니다. 시트의 <code>상품_전체</code>와 <code>SPU</code> 사이에 <code>콘텐츠앵글</code> 컬럼을 추가하시면 아래 분석이 활성화됩니다. (주력상품 기준 대체 분석은 아래 매트릭스에서 확인 가능)</div>
+    </div>`;
+  } else { notice.innerHTML=''; }
+  chQuadrant(b,ok);
+  renderAngleActions(b,ok);
+  renderAngleProductHeatmap(b);
+  renderAngleStrategy(b,ok);
+}
+
+function chQuadrant(b,hasAngle){
+  destroy('cQuadrant');
+  const ag=hasAngle?(KOL.angle[b]||[]).filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력'):[];
+  if(!ag.length){
+    const cv=document.getElementById('cQuadrant'); if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='#94A3B8';ctx.font='13px sans-serif';ctx.fillText('앵글 데이터 부족 — 콘텐츠앵글 컬럼 추가 후 사용 가능',20,40);}
+    return;
+  }
+  const cpuvVals=ag.map(a=>a.평균CPUV), hotVals=ag.map(a=>a.인기콘텐츠비율);
+  const cpuvMed=median(cpuvVals), hotMed=median(hotVals);
+  // 4사분면 색
+  const colorOf=(a)=>{
+    if(a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율>=hotMed) return '#2E8B57'; // 최우선
+    if(a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율<hotMed) return '#5B9BD5'; // 스텔스
+    if(a.평균CPUV>cpuvMed&&a.인기콘텐츠비율>=hotMed) return '#E08A00'; // 브랜딩
+    return '#C00000'; // 제외
+  };
+  const data=ag.map(a=>({x:a.평균CPUV,y:a.인기콘텐츠비율,r:Math.max(5,Math.sqrt(a.콘텐츠수)*4),_n:a.콘텐츠앵글,_c:a.콘텐츠수,_cost:a.평균_총비용,_imp:a.평균_노출량}));
+  const colors=ag.map(colorOf);
+  // 중앙 십자선 plugin
+  const cross={id:'cross',afterDraw:c=>{const a=c.chartArea;const ctx=c.ctx;
+    const xPx=c.scales.x.getPixelForValue(cpuvMed); const yPx=c.scales.y.getPixelForValue(hotMed);
+    ctx.save();ctx.strokeStyle='#cbd5e1';ctx.setLineDash([3,3]);ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(xPx,a.top);ctx.lineTo(xPx,a.bottom);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(a.left,yPx);ctx.lineTo(a.right,yPx);ctx.stroke();
+    ctx.fillStyle='#94A3B8';ctx.font='10.5px sans-serif';
+    ctx.fillText('좌상: 최우선 증량',a.left+8,a.top+14);
+    ctx.fillText('우상: 브랜딩 자산',a.right-110,a.top+14);
+    ctx.fillText('좌하: 스텔스 효율',a.left+8,a.bottom-6);
+    ctx.fillText('우하: 제외 검토',a.right-95,a.bottom-6);
+    ctx.restore();
+  }};
+  charts.cQuadrant=new Chart(document.getElementById('cQuadrant'),{type:'bubble',data:{datasets:[{label:'앵글',data,backgroundColor:colors.map(c=>c+'AA'),borderColor:colors,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>{const d=c.raw;return [`${d._n}`,`콘텐츠 ${d._c}건 · 평균비용 ￥${FMT(d._cost)}`,`CPUV ${F2(d.x)} · 인기비율 ${d.y.toFixed(1)}%`];}}},
+      datalabels:false},
+      scales:{x:{title:{display:true,text:'평균 CPUV (← 효율 좋음)'},reverse:false},y:{title:{display:true,text:'인기콘텐츠 비율(%) (↑ 화제성)'},beginAtZero:true}}},
+    plugins:[cross,{id:'lbl',afterDatasetDraw:c=>{
+      const ctx=c.ctx; const ds=c.data.datasets[0]; const meta=c.getDatasetMeta(0);
+      ctx.fillStyle='#1F3864';ctx.font='bold 10.5px sans-serif';ctx.textAlign='center';
+      ds.data.forEach((p,i)=>{const el=meta.data[i];if(!el)return;ctx.fillText(p._n,el.x,el.y-el.options.radius-3);});
+    }}]});
+}
+
+function median(arr){const s=[...arr].filter(v=>!isNaN(v)).sort((a,b)=>a-b);if(!s.length)return 0;const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+
+function renderAngleActions(b,hasAngle){
+  const box=document.getElementById('angleActions'); if(!box) return;
+  if(!hasAngle){
+    // fallback: 주력상품 기준 분석
+    const sp=(KOL.sp[b]||[]).filter(c=>c.콘텐츠수>=2);
+    const best=sp.slice(0,3), worst=[...sp].sort((a,b)=>b.평균CPUV-a.평균CPUV).slice(0,2);
+    box.innerHTML=`
+      <div class="action-card boost"><h4>🟢 증량 권장 (주력상품 기준)</h4><ul>${best.map(c=>`<li><b>${c.주력상품}</b> · ${c.콘텐츠수}건 · CPUV ${F2(c.평균CPUV)}</li>`).join('')||'<li class="empty">데이터 부족</li>'}</ul></div>
+      <div class="action-card test"><h4>🆕 시드 테스트 권장</h4><ul><li class="empty">앵글 컬럼 필요 — 시트에 추가 후 활성화</li></ul></div>
+      <div class="action-card cut"><h4>🔴 제외 검토</h4><ul>${worst.map(c=>`<li><b>${c.주력상품}</b> · CPUV ${F2(c.평균CPUV)} (효율 하위)</li>`).join('')||'<li class="empty">데이터 부족</li>'}</ul></div>
+    `;
+    return;
+  }
+  const ag=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력');
+  // 중앙값
+  const cpuvMed=median(ag.filter(a=>a.콘텐츠수>=2).map(a=>a.평균CPUV));
+  const hotMed=median(ag.filter(a=>a.콘텐츠수>=2).map(a=>a.인기콘텐츠비율));
+  // 증량: 효율↑(저CPUV) & 화제성↑(고hot) — 좌상단
+  const boost=ag.filter(a=>a.콘텐츠수>=2&&a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율>=hotMed).sort((a,b)=>a.평균CPUV-b.평균CPUV).slice(0,5);
+  // 시드 테스트: 콘텐츠수 1건 (또는 콘텐츠 부족), 다음 분기 검증 필요
+  const test=ag.filter(a=>a.콘텐츠수>=1&&a.콘텐츠수<=2).slice(0,5);
+  // 제외 검토: 우하단 — 효율↓ & 화제성↓
+  const cut=ag.filter(a=>a.콘텐츠수>=2&&a.평균CPUV>cpuvMed&&a.인기콘텐츠비율<hotMed).sort((a,b)=>b.평균CPUV-a.평균CPUV).slice(0,5);
+  box.innerHTML=`
+    <div class="action-card boost"><h4>🟢 다음 캠페인 증량 권장</h4><div style="font-size:11.5px;color:#475569;margin-bottom:6px">효율 + 화제성 모두 상위</div><ul>${boost.length?boost.map(a=>`<li><b>${a.콘텐츠앵글}</b> · ${a.콘텐츠수}건 · CPUV ${F2(a.평균CPUV)} · 인기 ${a.인기콘텐츠비율.toFixed(0)}%</li>`).join(''):'<li class="empty">현재 좌상단 앵글 없음 — 모두 화제성 미흡</li>'}</ul></div>
+    <div class="action-card test"><h4>🆕 시드 테스트 권장</h4><div style="font-size:11.5px;color:#475569;margin-bottom:6px">콘텐츠 1~2건 — 데이터 부족, 검증 필요</div><ul>${test.length?test.map(a=>`<li><b>${a.콘텐츠앵글}</b> · ${a.콘텐츠수}건 · CPUV ${F2(a.평균CPUV)}</li>`).join(''):'<li class="empty">시드 단계 앵글 없음</li>'}</ul></div>
+    <div class="action-card cut"><h4>🔴 제외 검토 권장</h4><div style="font-size:11.5px;color:#475569;margin-bottom:6px">효율↓ + 화제성↓ 동시 하위</div><ul>${cut.length?cut.map(a=>`<li><b>${a.콘텐츠앵글}</b> · CPUV ${F2(a.평균CPUV)} · 인기 ${a.인기콘텐츠비율.toFixed(0)}%</li>`).join(''):'<li class="empty">제외 검토 대상 없음</li>'}</ul></div>
+  `;
+}
+
+function renderAngleProductHeatmap(b){
+  const box=document.getElementById('angleProductHeatmap'); if(!box) return;
+  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태==='최신'&&r.총비용>0);
+  // 그룹: 앵글 × 주력상품 → 평균 CPUV
+  const grid={};
+  rows.forEach(r=>{
+    const ag=(r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력')?r.콘텐츠앵글:'(앵글 미입력)';
+    const sp=r.주력상품||'기타';
+    if(!grid[ag])grid[ag]={};
+    if(!grid[ag][sp])grid[ag][sp]={cpuv:0,n:0};
+    if(r.종합CPUV>0){grid[ag][sp].cpuv+=r.종합CPUV; grid[ag][sp].n++;}
+  });
+  // 상품/앵글 목록 (콘텐츠 1건이라도 있는 것만)
+  const angles=Object.keys(grid);
+  const products=Array.from(new Set(rows.map(r=>r.주력상품||'기타'))).sort();
+  if(!angles.length||!products.length){box.innerHTML='<div style="color:var(--grey);padding:20px;text-align:center">데이터 부족</div>';return;}
+  // 모든 CPUV 값 모아서 min/max
+  let vals=[];
+  angles.forEach(a=>products.forEach(p=>{const c=grid[a][p];if(c&&c.n>0)vals.push(c.cpuv/c.n);}));
+  const min=Math.min(...vals), max=Math.max(...vals);
+  const colorScale=(v)=>{
+    if(!v)return ['#F4F6FA','#cbd5e1'];
+    const t=(v-min)/Math.max(max-min,0.01);
+    // 낮을수록 진한 녹색, 높을수록 빨강
+    const r=Math.round(46+t*(192-46)); const g=Math.round(139-t*(139-0)); const bl=Math.round(87-t*(87-0));
+    return [`rgba(${r},${g},${bl},${0.18+0.6*(1-t)})`,'#1e293b'];
+  };
+  let html='<table class="heatmap"><thead><tr><th>앵글 \\ 주력상품</th>';
+  products.forEach(p=>html+=`<th>${p}</th>`);
+  html+='</tr></thead><tbody>';
+  angles.forEach(a=>{
+    html+=`<tr><td>${a}</td>`;
+    products.forEach(p=>{
+      const c=grid[a][p];
+      if(!c||!c.n){html+='<td class="empty">·</td>';}
+      else{
+        const avg=c.cpuv/c.n; const [bg,fg]=colorScale(avg);
+        html+=`<td style="background:${bg};color:${fg}" title="콘텐츠 ${c.n}건"><div>${F2(avg)}</div><div style="font-size:10px;color:#64748b;font-weight:500">${c.n}건</div></td>`;
+      }
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  box.innerHTML=html;
+}
+
+function renderAngleStrategy(b,hasAngle){
+  const box=document.getElementById('angleStrategy'); if(!box) return;
+  const ag=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력'&&a.콘텐츠수>=2);
+  const lines=[];
+  lines.push(`<b>${b}</b> · ${(KOL.kol[b]||[]).length}건 KOL 소재 기준 종합 제안.`);
+  if(!hasAngle){
+    lines.push(`<br>⚠ 콘텐츠앵글 컬럼이 시트에 없어 정밀 분석 불가. <b>대체 분석</b>으로 주력상품 기준 추천만 제공합니다.`);
+    const sp=(KOL.sp[b]||[]).filter(c=>c.콘텐츠수>=2);
+    if(sp.length){
+      const best=sp[0], worst=sp[sp.length-1];
+      lines.push(`<br>📊 주력상품 효율 1위: <b>${best.주력상품}</b> (CPUV ${F2(best.평균CPUV)}) ↔ 효율 하위: <b>${worst.주력상품}</b> (CPUV ${F2(worst.평균CPUV)})`);
+    }
+    box.innerHTML=lines.join('');
+    return;
+  }
+  if(!ag.length){box.innerHTML='앵글 데이터 부족 — 다음 분기에 최소 2건 이상의 콘텐츠가 누적된 앵글이 필요합니다.';return;}
+  // 효율 1위
+  const byCpuv=[...ag].sort((a,b)=>a.평균CPUV-b.평균CPUV);
+  const eff=byCpuv[0]; lines.push(`<br>🥇 <b>효율 1위 앵글</b>: ${eff.콘텐츠앵글} (CPUV ${F2(eff.평균CPUV)}, ${eff.콘텐츠수}건)`);
+  // 화제성 1위
+  const byHot=[...ag].sort((a,b)=>b.인기콘텐츠비율-a.인기콘텐츠비율);
+  const hot=byHot[0]; if(hot.인기콘텐츠비율>0) lines.push(`<br>🔥 <b>화제성 1위 앵글</b>: ${hot.콘텐츠앵글} (인기콘텐츠 비율 ${hot.인기콘텐츠비율.toFixed(0)}%)`);
+  // 시드 권장 - 콘텐츠수 1~2
+  const seeds=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력'&&a.콘텐츠수<=2);
+  if(seeds.length){
+    const list=seeds.slice(0,3).map(a=>a.콘텐츠앵글).join(', ');
+    lines.push(`<br>🌱 <b>시드 테스트 후보</b>: ${list} — 콘텐츠 1~2건으로 데이터 부족, 다음 캠페인 시 각 3~5건 보강 권장`);
+  }
+  // 미입력 비율 경고
+  const all=KOL.kol[b]||[]; const missing=all.filter(r=>!r.콘텐츠앵글||r.콘텐츠앵글==='미입력').length;
+  if(missing/Math.max(all.length,1)>=0.2) lines.push(`<br>⚠ <b>앵글 미입력 ${missing}건 (${Math.round(missing/all.length*100)}%)</b> — 운영팀 입력 보강 시 정밀도 향상`);
+  // 4사분면 요약
+  const cpuvMed=median(ag.map(a=>a.평균CPUV)); const hotMed=median(ag.map(a=>a.인기콘텐츠비율));
+  const boost=ag.filter(a=>a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율>=hotMed).length;
+  const cut=ag.filter(a=>a.평균CPUV>cpuvMed&&a.인기콘텐츠비율<hotMed).length;
+  lines.push(`<br>🎯 <b>다음 분기 작전</b>: 최우선 증량 ${boost}개 앵글, 제외 검토 ${cut}개 앵글. 매트릭스 좌상단을 80%/우상단 20% 비율로 예산 배분 권장.`);
+  box.innerHTML=lines.join('');
+}
+
+// ==================== 인플루언서 deep-dive 모달 ====================
+function openInfluencerModal(name){
+  const all=[...KOL.kol.WAKEMAKE,...KOL.kol.COLORGRAM];
+  const rows=all.filter(r=>(r.인플루언서_한글||r.인플루언서)===name||r.인플루언서===name);
+  if(!rows.length)return;
+  const first=rows[0];
+  const disp=first.인플루언서_한글||first.인플루언서;
+  const totalCost=rows.reduce((a,r)=>a+(r.총비용||0),0);
+  const totalImp=rows.reduce((a,r)=>a+(r.노출량||0),0);
+  const totalInt=rows.reduce((a,r)=>a+(r.인터랙션||0),0);
+  const totalUv=rows.reduce((a,r)=>a+(r.외부행동UV||0),0);
+  const avgCpuv=totalUv?(totalCost/totalUv):0;
+  const hot=rows.filter(r=>r.인기콘텐츠).length;
+  // 베스트 앵글
+  const byAngle={};
+  rows.forEach(r=>{const k=r.콘텐츠앵글||'미입력';if(!byAngle[k])byAngle[k]={n:0,uv:0,cost:0};byAngle[k].n++;byAngle[k].uv+=r.외부행동UV||0;byAngle[k].cost+=r.총비용||0;});
+  const bestAngle=Object.entries(byAngle).filter(([k])=>k!=='미입력').sort((a,b)=>(b[1].uv/Math.max(b[1].cost,1))-(a[1].uv/Math.max(a[1].cost,1)))[0];
+  // 협업 timeline (게시일 정렬)
+  const timeline=[...rows].sort((a,b)=>String(a.게시일||'').localeCompare(String(b.게시일||'')));
+  document.getElementById('infModalTitle').innerHTML=`${disp} <span style="color:var(--grey);font-size:13px;font-weight:500">· ${first.인플루언서} · ${first.팔로워?FMT(first.팔로워)+' 팔로워':'-'} (${first.팔로워구간||'-'})</span>`;
+  let body=`<div class="modal-kpi">
+    <div class="k"><div class="lab">총 협업</div><div class="val">${rows.length}건</div></div>
+    <div class="k"><div class="lab">총 비용</div><div class="val">${WON(totalCost)}</div></div>
+    <div class="k"><div class="lab">평균 CPUV</div><div class="val">${F2(avgCpuv)}</div></div>
+    <div class="k"><div class="lab">총 노출</div><div class="val">${FMT(totalImp)}</div></div>
+    <div class="k"><div class="lab">총 외부UV</div><div class="val">${FMT(totalUv)}</div></div>
+    <div class="k"><div class="lab">인기콘텐츠</div><div class="val">${hot}/${rows.length}</div></div>
+  </div>`;
+  if(bestAngle){body+=`<div style="background:#F0FBF6;border-left:3px solid #2E8B57;padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px"><b>💡 베스트 앵글</b>: ${bestAngle[0]} (${bestAngle[1].n}건, UV/￥ ${F2(bestAngle[1].uv/Math.max(bestAngle[1].cost,1)*1000)}‰)</div>`;}
+  body+=`<h4 style="font-size:13px;color:var(--navy);margin-bottom:8px;font-weight:700">📅 협업 타임라인</h4><div class="tbox" style="max-height:300px"><table class="modal-tl"><thead><tr><th>게시일</th><th>브랜드</th><th>주력상품</th><th>앵글</th><th>총비용</th><th>노출</th><th>외부UV</th><th>CPUV</th><th>구분</th></tr></thead><tbody>`;
+  body+=timeline.map(r=>{
+    const link=String(r.노트링크||'').trim();
+    const dateCell=link.startsWith('http')?`<a href="${link}" target="_blank" style="color:#2E5496;text-decoration:none;border-bottom:1px dashed #2E5496">${r.게시일||'-'} ↗</a>`:(r.게시일||'-');
+    return `<tr><td>${dateCell}</td><td>${r.브랜드}</td><td>${r.주력상품||'-'}</td><td>${r.콘텐츠앵글||'-'}</td><td>${WON(r.총비용)}</td><td>${FMT(r.노출량)}</td><td>${FMT(r.외부행동UV)}</td><td>${F2(r.종합CPUV)}</td><td>${r.인기콘텐츠?'<span class="pill hot">인기</span>':'<span class="pill gen">일반</span>'}</td></tr>`;
+  }).join('');
+  body+='</tbody></table></div>';
+  document.getElementById('infModalBody').innerHTML=body;
+  document.getElementById('infModal').classList.add('on');
+}
+function closeInfModal(){document.getElementById('infModal').classList.remove('on');}
+document.getElementById('infModalClose').addEventListener('click',closeInfModal);
+document.getElementById('infModal').addEventListener('click',e=>{if(e.target.id==='infModal')closeInfModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInfModal();});
+
+// ==================== KOL 서브탭 이벤트 ====================
+document.getElementById('kolSubtabs').addEventListener('click',e=>{
+  if(!e.target.dataset.s)return;
+  kolSub=e.target.dataset.s;
+  [...document.querySelectorAll('#kolSubtabs button')].forEach(b=>b.classList.toggle('on',b.dataset.s===kolSub));
+  document.getElementById('kol_perf').classList.toggle('hide',kolSub!=='perf');
+  document.getElementById('kol_insight').classList.toggle('hide',kolSub!=='insight');
+  if(kolSub==='insight') renderAngleInsight();
+});
+
+// renderKol 보강 — insight 서브탭일 때 angle insight도 렌더
+const _origRenderKol=renderKol;
+renderKol=function(){_origRenderKol();if(kolSub==='insight')renderAngleInsight();};
+
+// renderOverview 보강 — freshness 갱신
+const _origRenderOverview=renderOverview;
+renderOverview=function(){_origRenderOverview();renderFreshness();};
+
+// chScatter 점 클릭 → 인플루언서 모달 (이벤트 위임)
+document.addEventListener('click',e=>{
+  const canvas=document.getElementById('cScatter');
+  if(e.target!==canvas) return;
+  if(!charts.cScatter) return;
+  const points=charts.cScatter.getElementsAtEventForMode(e,'nearest',{intersect:true},false);
+  if(points.length){const p=points[0];const ds=charts.cScatter.data.datasets[p.datasetIndex];const d=ds.data[p.index];if(d&&d._n)openInfluencerModal(d._n);}
+});
+
+// renderTable 인플루언서 클릭 → 모달
+const _origRenderTable=renderTable;
+renderTable=function(){_origRenderTable();
+  document.querySelectorAll('#kolTable tbody tr').forEach(tr=>{
+    const td=tr.children[1]; if(!td)return;
+    td.style.cursor='pointer';
+    td.addEventListener('click',()=>{const name=td.textContent.replace(' ↗','').trim();openInfluencerModal(name);});
+  });
+};
 
 render();
 
