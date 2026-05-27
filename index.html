@@ -441,7 +441,7 @@
     <div class="gfilter">
       <span class="gicon">🛍</span><label>RETAIL</label>
       <select id="globalRetail">
-        <option value="ALL">샤오홍슈</option>
+        <option value="Tmall">Tmall (天猫)</option>
       </select>
     </div>
     <div class="gfilter">
@@ -700,7 +700,7 @@ function getCampaignsInRange(dates){
 let brand='TOTAL', tab='overview';
 // 글로벌 필터 상태 — date range 기반
 let globalDateFrom='2026-01-01', globalDateTo='2026-05-27';
-let globalChannel='ALL', globalRetail='ALL', globalPromo='ALL', globalFx=190; // 1 CNY ≈ 190 KRW
+let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=190; // 1 CNY ≈ 190 KRW · RETAIL=Tmall(天猫) 판매 플랫폼
 // 활성 월 배열 (date range 내 포함된 월들)
 function getActiveMonths(){
   const from=+globalDateFrom.slice(5,7), to=+globalDateTo.slice(5,7);
