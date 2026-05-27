@@ -364,31 +364,46 @@
   ::-webkit-scrollbar-track{background:var(--rice-paper)}
   ::-webkit-scrollbar-thumb{background:var(--line-ink);border-radius:5px;border:2px solid var(--rice-paper)}
   ::-webkit-scrollbar-thumb:hover{background:var(--gong-red)}
-  /* ===== 글로벌 필터 (기간 · 브랜드 · 매체) ===== */
+  /* ===== 글로벌 필터 바 (가로 한 줄 · 아이콘+라벨+셀렉터 인라인) ===== */
   .gfilters{
-    display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-end;
-    margin:8px 0 16px;padding:14px 18px;
-    background:linear-gradient(135deg,#FFFDF5 0%,#F2EAD0 100%);
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;
+    margin:8px 0 18px;padding:13px 20px;
+    background:var(--card);
     border:1px solid var(--line);border-radius:10px;
-    box-shadow:0 1px 3px rgba(92,15,15,.05);
+    box-shadow:0 1px 3px rgba(92,15,15,.04);
     position:relative;
   }
   .gfilters::before{
     content:'';position:absolute;top:0;left:0;right:0;height:2px;
-    background:var(--gold-grad);border-radius:10px 10px 0 0;opacity:.7;
+    background:var(--gold-grad);border-radius:10px 10px 0 0;opacity:.6;
   }
-  .gfilter{display:flex;flex-direction:column;gap:5px}
+  .gfilter{display:flex;align-items:center;gap:8px}
+  .gfilter .gicon{
+    color:var(--ink-soft);font-size:14px;opacity:.7;
+    width:18px;text-align:center;
+  }
   .gfilter label{
-    font-size:11px;color:var(--ink-soft);font-weight:700;
-    font-family:'Noto Serif SC',serif;letter-spacing:.5px;text-transform:uppercase;
+    font-size:12px;color:var(--ink-soft);font-weight:700;
+    font-family:'Noto Serif SC',serif;letter-spacing:.4px;text-transform:uppercase;
+    white-space:nowrap;
   }
-  .gfilter select{
-    padding:7px 12px;border:1px solid var(--line);
+  .gfilter select,.gfilter input[type=date],.gfilter input[type=number]{
+    padding:6px 10px;border:1px solid var(--line);
     background:var(--card);color:var(--ink);
     border-radius:6px;font-family:inherit;font-size:13px;font-weight:600;
-    min-width:160px;cursor:pointer;
+    cursor:pointer;transition:.15s;
   }
-  .gfilter select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-shadow)}
+  .gfilter select{min-width:130px}
+  .gfilter input[type=date]{min-width:130px;font-weight:500}
+  .gfilter input[type=number]{width:80px;text-align:right}
+  .gfilter select:focus,.gfilter input:focus{
+    outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-shadow);
+  }
+  .g-sep{color:var(--ink-soft);font-weight:700;padding:0 2px}
+  @media(max-width:880px){
+    .gfilter{flex:1;min-width:0}
+    .gfilter select,.gfilter input[type=date]{min-width:0;width:100%}
+  }
   /* ===== 캠페인 캘린더 마커 ===== */
   .cal-event{
     display:inline-block;font-size:10.5px;font-weight:700;
@@ -403,10 +418,9 @@
 <body>
 <div class="wrap">
   <header>
-    <div style="flex:1;min-width:240px">
-      <h1>Global EC Dashboard <span class="cn-flag" aria-label="중국">🇨🇳</span> China</h1>
-      <div class="sub" id="periodNote">WAKEMAKE × COLORGRAM · 샤오홍슈(小红书) 광고 + KOL 통합</div>
-      <div id="dataFreshness" style="margin-top:6px"></div>
+    <div style="flex:1;min-width:240px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <h1><span class="cn-flag" aria-label="중국">🇨🇳</span> Global EC dashboard China <span class="badge">AD.DASH · PERFORMANCE</span></h1>
+      <div id="dataFreshness" style="font-size:11.5px"></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <div id="syncStatus">📦 내장 데이터</div>
@@ -414,30 +428,24 @@
     </div>
   </header>
 
-  <!-- ===== 글로벌 필터 (기간 · 브랜드 · 매체) ===== -->
+  <!-- ===== 글로벌 필터 바 (브랜드 · RETAIL · 매체 · 프로모션 · 기간 · 환율) ===== -->
   <div class="gfilters">
     <div class="gfilter">
-      <label>기간</label>
-      <select id="globalPeriod">
-        <option value="ALL">전체 (1~5월)</option>
-        <option value="1">1월</option>
-        <option value="2">2월</option>
-        <option value="3">3월</option>
-        <option value="4">4월</option>
-        <option value="5">5월</option>
-        <option value="618">618 예열기 (5/18~)</option>
+      <span class="gicon">🏷</span><label>브랜드</label>
+      <select id="globalBrand">
+        <option value="TOTAL">Total</option>
+        <option value="WAKEMAKE">Wakemake</option>
+        <option value="COLORGRAM">Colorgram</option>
       </select>
     </div>
     <div class="gfilter">
-      <label>브랜드</label>
-      <div class="toggle" id="brandToggle">
-        <button data-b="TOTAL" class="on">Total</button>
-        <button data-b="WAKEMAKE">Wakemake</button>
-        <button data-b="COLORGRAM">Colorgram</button>
-      </div>
+      <span class="gicon">🛍</span><label>RETAIL</label>
+      <select id="globalRetail">
+        <option value="ALL">샤오홍슈</option>
+      </select>
     </div>
     <div class="gfilter">
-      <label>매체</label>
+      <span class="gicon">📢</span><label>매체</label>
       <select id="globalChannel">
         <option value="ALL">전체</option>
         <option value="쥐광(샤오홍싱)">쥐광 (샤오홍싱)</option>
@@ -445,6 +453,32 @@
         <option value="KOL(达人)">KOL (达人)</option>
         <option value="SNS">SNS</option>
       </select>
+    </div>
+    <div class="gfilter">
+      <span class="gicon">🎁</span><label>프로모션</label>
+      <select id="globalPromo">
+        <option value="ALL">전체</option>
+        <option value="38妇女节">38妇女节 (여성의 날)</option>
+        <option value="520">520 (사랑데이)</option>
+        <option value="618 예열">618 예열</option>
+        <option value="618 본전">618 본전</option>
+        <option value="818 光辉节">818 광휘절</option>
+        <option value="99 大促">99 대촉</option>
+        <option value="国庆节">국경절</option>
+        <option value="双11 예열">쌍11 예열</option>
+        <option value="双11 본전">쌍11 본전</option>
+        <option value="双12">쌍12</option>
+      </select>
+    </div>
+    <div class="gfilter">
+      <span class="gicon">📅</span><label>기간</label>
+      <input type="date" id="globalDateFrom" value="2026-01-01">
+      <span class="g-sep">~</span>
+      <input type="date" id="globalDateTo" value="2026-05-27">
+    </div>
+    <div class="gfilter">
+      <span class="gicon">¥</span><label>CNY→KRW</label>
+      <input type="number" id="globalFx" value="190" step="1" min="0">
     </div>
   </div>
 
@@ -664,7 +698,15 @@ function getCampaignsInRange(dates){
   return out;
 }
 let brand='TOTAL', tab='overview';
-let globalPeriod='ALL', globalChannel='ALL'; // 글로벌 필터 상태
+// 글로벌 필터 상태 — date range 기반
+let globalDateFrom='2026-01-01', globalDateTo='2026-05-27';
+let globalChannel='ALL', globalRetail='ALL', globalPromo='ALL', globalFx=190; // 1 CNY ≈ 190 KRW
+// 활성 월 배열 (date range 내 포함된 월들)
+function getActiveMonths(){
+  const from=+globalDateFrom.slice(5,7), to=+globalDateTo.slice(5,7);
+  const out=[]; for(let m=Math.max(1,from);m<=Math.min(12,to);m++)out.push(m);
+  return out.length?out:[1,2,3,4,5];
+}
 let charts={};
 Chart.defaults.font.family="'Malgun Gothic','맑은 고딕',sans-serif"; Chart.defaults.font.size=11;
 
@@ -708,20 +750,19 @@ function deriveWmAngleFromNoteType(rows){
 function rebuildKolAggregates(){
   if(typeof recomputeAgg!=='function')return;
   const all=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
-  KOL.sp.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','주력상품');
-  KOL.sp.COLORGRAM=recomputeAgg(all,'COLORGRAM','주력상품');
-  KOL.bundle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','상품_조합');
-  KOL.bundle.COLORGRAM=recomputeAgg(all,'COLORGRAM','상품_조합');
-  KOL.tier.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','팔로워구간');
-  KOL.tier.COLORGRAM=recomputeAgg(all,'COLORGRAM','팔로워구간');
-  KOL.angle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','콘텐츠앵글');
-  KOL.angle.COLORGRAM=recomputeAgg(all,'COLORGRAM','콘텐츠앵글');
+  ['WAKEMAKE','COLORGRAM','TOTAL'].forEach(b=>{
+    KOL.sp[b]=recomputeAgg(all,b,'주력상품');
+    KOL.bundle[b]=recomputeAgg(all,b,'상품_조합');
+    KOL.tier[b]=recomputeAgg(all,b,'팔로워구간');
+    KOL.angle[b]=recomputeAgg(all,b,'콘텐츠앵글');
+  });
+  KOL.kol.TOTAL=all.filter(r=>r.데이터상태==='최신');
 }
 
 // ===== OVERVIEW =====
-// ===== brand 합산 + 기간/매체 필터 헬퍼 =====
-// brand='TOTAL'이면 WM+CG 월별 합산 (비율 지표는 재계산), 단일 브랜드면 해당 데이터
-// globalPeriod (ALL / 1~5 / 618), globalChannel (ALL / 매체별) 자동 반영
+// ===== brand 합산 + date range 필터 헬퍼 =====
+// brand='TOTAL'이면 WM+CG 월별 합산 (비율 지표 재계산), 단일 브랜드면 해당 데이터
+// globalDateFrom/To (date range), globalChannel (ALL / 매체별) 자동 반영
 function brandMonthly(){
   let data;
   if(brand!=='TOTAL'){
@@ -739,20 +780,15 @@ function brandMonthly(){
       return out;
     });
   }
-  // 기간 필터
-  if(globalPeriod==='618') data=data.filter(x=>x.월===5);
-  else if(globalPeriod!=='ALL') data=data.filter(x=>x.월===+globalPeriod);
-  return data;
+  // date range → 활성 월만 필터
+  const months=getActiveMonths();
+  return data.filter(x=>months.includes(x.월));
 }
-// byday 헬퍼: brand + 기간 필터
+// byday 헬퍼: brand + date range 필터
 function brandByday(){
   let rows=DATA.byday.slice();
   if(brand!=='TOTAL') rows=rows.filter(r=>r.브랜드===brand);
-  if(globalPeriod==='618') rows=rows.filter(r=>r.날짜>='2026-05-18');
-  else if(globalPeriod!=='ALL'){
-    const mm=String(globalPeriod).padStart(2,'0');
-    rows=rows.filter(r=>r.날짜&&r.날짜.slice(5,7)===mm);
-  }
+  rows=rows.filter(r=>r.날짜&&r.날짜>=globalDateFrom&&r.날짜<=globalDateTo);
   return rows;
 }
 function kpis(){
@@ -806,9 +842,10 @@ function chDaily(){destroy('cDaily');
     {label:'쥐광 광고비',data:spend,borderColor:COL.sky,backgroundColor:COL.sky+'1F',fill:true,tension:.25,pointRadius:0},
     {label:'전점 GMV',data:gmv,borderColor:COL.accent,tension:.25,pointRadius:0}
   ];
-  // forecast (전체 기간 모드에서만 의미 있음 — 특정 월 필터링 시 비활성)
+  // forecast: date range가 1월 시작 ~ 5월 끝일 때(전체 기간) 의미 있음. 그 외엔 비활성
   let forecastInfo=null;
-  if(globalPeriod==='ALL'){
+  const isFullRange=(globalDateFrom<='2026-01-31'&&globalDateTo>='2026-05-25');
+  if(isFullRange){
     if(brand!=='TOTAL'){
       const map=Object.fromEntries(DATA.byday.filter(r=>r.브랜드===brand).map(r=>[r.날짜,r]));
       forecastInfo=calcForecast(brand,allDates,map);
@@ -928,12 +965,7 @@ function chSearch(){destroy('cSearch');
   const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const pal=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
   const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m][k]),borderColor:pal[i%pal.length],backgroundColor:pal[i%pal.length],tension:.3,pointRadius:2}));
   charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});}
-function renderOverview(){renderAlerts();kpis();chSpend();chRoi();chDaily();chFunnel();chChannel();chSearch();renderBenchmark();document.getElementById('insightOv').innerHTML=autoInsightOv(brand);
-  const brandLabel=brand==='TOTAL'?'Total (WM + CG 합산)':brand;
-  const dateLabel=brand==='TOTAL'?[DATA.last.WAKEMAKE,DATA.last.COLORGRAM].sort().pop():DATA.last[brand];
-  const periodLabel=globalPeriod==='ALL'?'1~5월':(globalPeriod==='618'?'618 예열기':globalPeriod+'월');
-  const channelLabel=globalChannel==='ALL'?'전체 매체':globalChannel;
-  document.getElementById('periodNote').textContent=`${brandLabel} · ${periodLabel} · ${channelLabel} · 데이터 기준일 ~${dateLabel} · 5월은 부분(MTD) 실적`;}
+function renderOverview(){renderAlerts();kpis();chSpend();chRoi();chDaily();chFunnel();chChannel();chSearch();renderBenchmark();document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}
 
 // ===== KOL =====
 function kolKpis(){
@@ -1060,21 +1092,47 @@ function renderTable(){
 function renderKol(){kolKpis();chScatter();chCType();chTier();chAngle();insightKol();renderTable();}
 
 // ===== events =====
-// ===== 글로벌 필터 이벤트 (기간 · 브랜드 · 매체) =====
-document.getElementById('brandToggle').addEventListener('click',e=>{
-  if(!e.target.dataset.b)return;
-  brand=e.target.dataset.b;
-  [...document.querySelectorAll('#brandToggle button')].forEach(b=>b.classList.toggle('on',b.dataset.b===brand));
+// ===== 글로벌 필터 이벤트 (브랜드 · RETAIL · 매체 · 프로모션 · 기간 · 환율) =====
+document.getElementById('globalBrand').addEventListener('change',e=>{
+  brand=e.target.value;
   render();
 });
-document.getElementById('globalPeriod').addEventListener('change',e=>{
-  globalPeriod=e.target.value;
-  mMonths=globalPeriod; // 월별 탭 변수 동기화
+document.getElementById('globalRetail').addEventListener('change',e=>{
+  globalRetail=e.target.value;
   render();
 });
 document.getElementById('globalChannel').addEventListener('change',e=>{
   globalChannel=e.target.value;
-  mChannel=globalChannel; // 월별 탭 변수 동기화
+  mChannel=globalChannel;
+  render();
+});
+document.getElementById('globalPromo').addEventListener('change',e=>{
+  globalPromo=e.target.value;
+  if(globalPromo!=='ALL'){
+    // 캠페인 선택 시 date range 자동 설정 (CN_CAMPAIGNS 기준 · 2026년 가정)
+    const c=CN_CAMPAIGNS.find(x=>x.name===globalPromo);
+    if(c){
+      globalDateFrom=`2026-${c.start}`;
+      globalDateTo=`2026-${c.end}`;
+      document.getElementById('globalDateFrom').value=globalDateFrom;
+      document.getElementById('globalDateTo').value=globalDateTo;
+    }
+  }
+  render();
+});
+document.getElementById('globalDateFrom').addEventListener('change',e=>{
+  globalDateFrom=e.target.value;
+  // 수동 변경 시 프로모션 해제
+  globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
+  render();
+});
+document.getElementById('globalDateTo').addEventListener('change',e=>{
+  globalDateTo=e.target.value;
+  globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
+  render();
+});
+document.getElementById('globalFx').addEventListener('change',e=>{
+  globalFx=+e.target.value||190;
   render();
 });
 document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.t){tab=e.target.dataset.t;[...document.querySelectorAll('#tabs button')].forEach(b=>b.classList.toggle('on',b.dataset.t===tab));document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol');document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');render();}});
@@ -1084,21 +1142,42 @@ document.getElementById('fSearch').addEventListener('input',e=>{fSearch=e.target
 function render(){if(tab==='overview')renderOverview();else if(tab==='kol')renderKol();else if(tab==='monthly')renderMonthly();}
 
 // ===== Monthly tab =====
-let mChannel='ALL', mMonths='ALL', mMetric='광고비';
+let mChannel='ALL', mMetric='광고비';
 const METRICS=['노출','인터랙션','CTR(%)','광고비','CPM','외부UV/구매','GMV','ROAS(%)'];
 
+// brand별 monthly_channel rows. TOTAL은 사전 계산값이 있으면 우선, 없으면 합산 fallback
+function brandMonthlyChannel(){
+  if(KOL.monthly_channel?.[brand]) return KOL.monthly_channel[brand].map(r=>({...r}));
+  if(brand==='TOTAL'){
+    const wm=KOL.monthly_channel?.WAKEMAKE||[], cg=KOL.monthly_channel?.COLORGRAM||[];
+    const map={};
+    [...wm,...cg].forEach(r=>{
+      const k=r.월+'|'+r.매체;
+      if(!map[k]){map[k]={...r,브랜드:'TOTAL'};return;}
+      Object.keys(r).forEach(key=>{
+        if(typeof r[key]==='number'&&key!=='월') map[k][key]=(map[k][key]||0)+r[key];
+      });
+    });
+    return Object.values(map).map(r=>{
+      if(r.노출) r['CTR(%)']=r.인터랙션?+(r.인터랙션/r.노출*100).toFixed(2):0;
+      if(r.노출&&r.광고비) r.CPM=+(r.광고비/r.노출*1000).toFixed(2);
+      if(r.광고비&&r.GMV) r['ROAS(%)']=+(r.GMV/r.광고비*100).toFixed(1);
+      return r;
+    });
+  }
+  return [];
+}
 function getMonthlyRows(){
-  const rows=KOL.monthly_channel?.[brand]||[];
-  return rows.filter(r=>{
+  const months=getActiveMonths();
+  return brandMonthlyChannel().filter(r=>{
     if(mChannel!=='ALL' && r.매체!==mChannel) return false;
-    if(mMonths==='ALL' || mMonths==='618') return true;
-    return r.월===+mMonths;
+    return months.includes(r.월);
   });
 }
 
 function renderMonthlyTable(){
-  const all=KOL.monthly_channel?.[brand]||[];
-  const months=mMonths==='ALL'? [1,2,3,4,5] : (mMonths==='618'?[5]:[+mMonths]);
+  const all=brandMonthlyChannel();
+  const months=getActiveMonths();
   const channels=mChannel==='ALL'? ['쥐광(샤오홍싱)','CID(전환)','KOL(达人)','SNS'] : [mChannel];
   const tbl=document.getElementById('monthlyTable');
   const fmtV=(v,mt)=>{
@@ -1226,7 +1305,7 @@ document.getElementById('mMetric').addEventListener('change',e=>{
 // --- 데이터 신선도 배지 ---
 function renderFreshness(){
   const el=document.getElementById('dataFreshness'); if(!el) return;
-  const lastDate=DATA.last[brand==='TOTAL'?'WAKEMAKE':brand];
+  const lastDate=brand==='TOTAL'?[DATA.last.WAKEMAKE,DATA.last.COLORGRAM].filter(Boolean).sort().pop():DATA.last[brand];
   if(!lastDate){el.innerHTML='';return;}
   const last=new Date(lastDate+'T23:59:59'); const today=new Date(); const days=Math.floor((today-last)/86400000);
   let cls='freshness', icon='✓';
@@ -1481,7 +1560,8 @@ function hasAngleData(b){
 }
 
 function renderAngleInsight(){
-  const b=brand==='TOTAL'?'WAKEMAKE':brand;
+  // TOTAL은 합산 데이터 (rebuildKolAggregates에서 사전 계산됨)
+  const b=brand;
   const notice=document.getElementById('angleNotice');
   const ok=hasAngleData(b);
   const autoN=window._wmAutoAngleN||0;
@@ -1760,9 +1840,9 @@ const FETCH_SHEETS = ['일별raw통합', 'KOL_WM', 'KOL_CG'];
 function setSyncStatus(text, color){const el=document.getElementById('syncStatus');if(!el)return;el.textContent=text;if(color==='live'){el.style.background='rgba(30,86,49,0.14)';el.style.color='#1E5631';el.style.borderColor='rgba(30,86,49,0.3)';}else if(color==='err'){el.style.background='rgba(200,16,46,0.12)';el.style.color='#5C0F0F';el.style.borderColor='rgba(200,16,46,0.3)';}else{el.style.background='rgba(184,148,31,0.15)';el.style.color='#B8941F';el.style.borderColor='rgba(184,148,31,0.3)';}}
 async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;const resp=await fetch(url,{cache:'no-store'});if(!resp.ok)throw new Error(`${name}: HTTP ${resp.status}`);return Papa.parse(await resp.text(),{header:true,dynamicTyping:true,skipEmptyLines:true}).data;}
 function dedupeByLatest(rows){const map=new Map();rows.forEach((r,i)=>{const k=r.인플루언서||r['인플루언서_한글']||Symbol(i);const ex=map.get(k);const dr=String(r.게시일||''),de=String(ex?.게시일||'');if(!ex||dr>de)map.set(k,r);});const cnt={};rows.forEach(r=>{const k=r.인플루언서;if(k){cnt[k]=(cnt[k]||0)+1;}});return Array.from(map.values()).map(r=>({...r,총협업횟수:cnt[r.인플루언서]||1}));}
-function recomputeAgg(kolRows,brand,col){const rows=kolRows.filter(r=>r.브랜드===brand&&r.데이터상태==='최신');const g={};rows.forEach(r=>{const k=r[col]||'미입력';if(!g[k])g[k]={key:k,콘텐츠수:0,_imp:0,_int:0,_uv:0,_cpuv:0,_cost:0,_hot:0};const s=g[k];s.콘텐츠수++;s._imp+=r.노출량||0;s._int+=r.인터랙션||0;s._uv+=r.외부행동UV||0;s._cpuv+=r.종합CPUV||0;s._cost+=r.총비용||0;if(r.인기콘텐츠)s._hot++;});return Object.values(g).map(s=>({[col]:s.key,콘텐츠수:s.콘텐츠수,평균_노출량:Math.round(s._imp/s.콘텐츠수),평균_인터랙션:Math.round(s._int/s.콘텐츠수),평균_외부UV:Math.round(s._uv/s.콘텐츠수),평균CPUV:+(s._cpuv/s.콘텐츠수).toFixed(2),평균_총비용:Math.round(s._cost/s.콘텐츠수),인기콘텐츠비율:+(s._hot/s.콘텐츠수*100).toFixed(1)})).sort((a,b)=>b.콘텐츠수-a.콘텐츠수);}
+function recomputeAgg(kolRows,brand,col){const rows=kolRows.filter(r=>{if(brand!=='TOTAL'&&r.브랜드!==brand)return false;return r.데이터상태==='최신';});const g={};rows.forEach(r=>{const k=r[col]||'미입력';if(!g[k])g[k]={key:k,콘텐츠수:0,_imp:0,_int:0,_uv:0,_cpuv:0,_cost:0,_hot:0};const s=g[k];s.콘텐츠수++;s._imp+=r.노출량||0;s._int+=r.인터랙션||0;s._uv+=r.외부행동UV||0;s._cpuv+=r.종합CPUV||0;s._cost+=r.총비용||0;if(r.인기콘텐츠)s._hot++;});return Object.values(g).map(s=>({[col]:s.key,콘텐츠수:s.콘텐츠수,평균_노출량:Math.round(s._imp/s.콘텐츠수),평균_인터랙션:Math.round(s._int/s.콘텐츠수),평균_외부UV:Math.round(s._uv/s.콘텐츠수),평균CPUV:+(s._cpuv/s.콘텐츠수).toFixed(2),평균_총비용:Math.round(s._cost/s.콘텐츠수),인기콘텐츠비율:+(s._hot/s.콘텐츠수*100).toFixed(1)})).sort((a,b)=>b.콘텐츠수-a.콘텐츠수);}
 function recomputeMonthly(byday,brand){const rows=byday.filter(r=>r.브랜드===brand);const m={};rows.forEach(r=>{const k=r.월;if(!m[k])m[k]={월:k,쥐광비:0,노출:0,상호작용:0,진입UV:0,전점GMV:0,타겟GMV:0,KOL비:0,KOL발행:0,CID비:0,CID노출:0,CID클릭:0,CID성사GMV:0,SNS비:0};const x=m[k];x.쥐광비+=r.쥐광_광고비||0;x.노출+=r.쥐광_노출||0;x.상호작용+=r.쥐광_상호작용||0;x.진입UV+=r['샤오홍싱_진입UV']||0;x.전점GMV+=r['샤오홍싱_전점GMV']||0;x.타겟GMV+=r['샤오홍싱_타겟GMV']||0;x.KOL비+=r.KOL_비용||0;x.KOL발행+=r.KOL_발행수||0;x.CID비+=r.CID_비용||0;x.CID노출+=r.CID_노출||0;x.CID클릭+=r.CID_클릭||0;x.CID성사GMV+=r.CID_성사GMV||0;x.SNS비+=r.SNS_비용||0;});return Object.values(m).sort((a,b)=>a.월-b.월).map(x=>({...x,쥐광비:Math.round(x.쥐광비),노출:Math.round(x.노출),상호작용:Math.round(x.상호작용),진입UV:Math.round(x.진입UV),전점GMV:Math.round(x.전점GMV),타겟GMV:Math.round(x.타겟GMV),샤오홍싱ROI:x.쥐광비?+(x.전점GMV/x.쥐광비).toFixed(2):0,KOL비:Math.round(x.KOL비),KOL발행:Math.round(x.KOL발행),CID비:Math.round(x.CID비),CID노출:Math.round(x.CID노출),CID클릭:Math.round(x.CID클릭),CID성사GMV:Math.round(x.CID성사GMV),CID_ROI:x.CID비?+(x.CID성사GMV/x.CID비).toFixed(2):0,SNS비:Math.round(x.SNS비)}));}
-function recomputeMonthlyChannel(byday,brand){const rows=byday.filter(r=>r.브랜드===brand);const months=[...new Set(rows.map(r=>r.월))].filter(m=>typeof m==='number').sort();const out=[];months.forEach(m=>{const mrows=rows.filter(r=>r.월===m);const zg_cost=mrows.reduce((s,r)=>s+(r.쥐광_광고비||0),0),zg_imp=mrows.reduce((s,r)=>s+(r.쥐광_노출||0),0),zg_int=mrows.reduce((s,r)=>s+(r.쥐광_상호작용||0),0),zg_uv=mrows.reduce((s,r)=>s+(r['샤오홍싱_진입UV']||0),0),zg_gmv=mrows.reduce((s,r)=>s+(r['샤오홍싱_전점GMV']||0),0);out.push({브랜드:brand,매체:'쥐광(샤오홍싱)',월:m,노출:Math.round(zg_imp),인터랙션:Math.round(zg_int),'CTR(%)':zg_imp?+(zg_int/zg_imp*100).toFixed(2):0,광고비:Math.round(zg_cost),CPM:zg_imp?+(zg_cost/zg_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(zg_uv),GMV:Math.round(zg_gmv),'ROAS(%)':zg_cost?+(zg_gmv/zg_cost*100).toFixed(1):0});const ci_cost=mrows.reduce((s,r)=>s+(r.CID_비용||0),0),ci_imp=mrows.reduce((s,r)=>s+(r.CID_노출||0),0),ci_clk=mrows.reduce((s,r)=>s+(r.CID_클릭||0),0),ci_ord=mrows.reduce((s,r)=>s+(r.CID_성사주문||0),0),ci_gmv=mrows.reduce((s,r)=>s+(r.CID_성사GMV||0),0);if(ci_cost>0||ci_imp>0)out.push({브랜드:brand,매체:'CID(전환)',월:m,노출:Math.round(ci_imp),인터랙션:Math.round(ci_clk),'CTR(%)':ci_imp?+(ci_clk/ci_imp*100).toFixed(2):0,광고비:Math.round(ci_cost),CPM:ci_imp?+(ci_cost/ci_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(ci_ord),GMV:Math.round(ci_gmv),'ROAS(%)':ci_cost?+(ci_gmv/ci_cost*100).toFixed(1):0});const k_cost=mrows.reduce((s,r)=>s+(r.KOL_비용||0),0),k_pub=mrows.reduce((s,r)=>s+(r.KOL_발행수||0),0);if(k_cost>0)out.push({브랜드:brand,매체:'KOL(达人)',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(k_cost),CPM:0,'외부UV/구매':Math.round(k_pub),GMV:0,'ROAS(%)':0});const sns=mrows.reduce((s,r)=>s+(r.SNS_비용||0),0);if(sns>0)out.push({브랜드:brand,매체:'SNS',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(sns),CPM:0,'외부UV/구매':0,GMV:0,'ROAS(%)':0});});return out;}
+function recomputeMonthlyChannel(byday,brand){const rows=byday.filter(r=>brand==='TOTAL'?true:r.브랜드===brand);const months=[...new Set(rows.map(r=>r.월))].filter(m=>typeof m==='number').sort();const out=[];months.forEach(m=>{const mrows=rows.filter(r=>r.월===m);const zg_cost=mrows.reduce((s,r)=>s+(r.쥐광_광고비||0),0),zg_imp=mrows.reduce((s,r)=>s+(r.쥐광_노출||0),0),zg_int=mrows.reduce((s,r)=>s+(r.쥐광_상호작용||0),0),zg_uv=mrows.reduce((s,r)=>s+(r['샤오홍싱_진입UV']||0),0),zg_gmv=mrows.reduce((s,r)=>s+(r['샤오홍싱_전점GMV']||0),0);out.push({브랜드:brand,매체:'쥐광(샤오홍싱)',월:m,노출:Math.round(zg_imp),인터랙션:Math.round(zg_int),'CTR(%)':zg_imp?+(zg_int/zg_imp*100).toFixed(2):0,광고비:Math.round(zg_cost),CPM:zg_imp?+(zg_cost/zg_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(zg_uv),GMV:Math.round(zg_gmv),'ROAS(%)':zg_cost?+(zg_gmv/zg_cost*100).toFixed(1):0});const ci_cost=mrows.reduce((s,r)=>s+(r.CID_비용||0),0),ci_imp=mrows.reduce((s,r)=>s+(r.CID_노출||0),0),ci_clk=mrows.reduce((s,r)=>s+(r.CID_클릭||0),0),ci_ord=mrows.reduce((s,r)=>s+(r.CID_성사주문||0),0),ci_gmv=mrows.reduce((s,r)=>s+(r.CID_성사GMV||0),0);if(ci_cost>0||ci_imp>0)out.push({브랜드:brand,매체:'CID(전환)',월:m,노출:Math.round(ci_imp),인터랙션:Math.round(ci_clk),'CTR(%)':ci_imp?+(ci_clk/ci_imp*100).toFixed(2):0,광고비:Math.round(ci_cost),CPM:ci_imp?+(ci_cost/ci_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(ci_ord),GMV:Math.round(ci_gmv),'ROAS(%)':ci_cost?+(ci_gmv/ci_cost*100).toFixed(1):0});const k_cost=mrows.reduce((s,r)=>s+(r.KOL_비용||0),0),k_pub=mrows.reduce((s,r)=>s+(r.KOL_발행수||0),0);if(k_cost>0)out.push({브랜드:brand,매체:'KOL(达人)',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(k_cost),CPM:0,'외부UV/구매':Math.round(k_pub),GMV:0,'ROAS(%)':0});const sns=mrows.reduce((s,r)=>s+(r.SNS_비용||0),0);if(sns>0)out.push({브랜드:brand,매체:'SNS',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(sns),CPM:0,'외부UV/구매':0,GMV:0,'ROAS(%)':0});});return out;}
 async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{const [byday,wmRaw,cgRaw]=await Promise.all(FETCH_SHEETS.map(fetchSheet));if(!byday.length||!wmRaw.length||!cgRaw.length)throw new Error('빈 응답');
   const wm=dedupeByLatest(wmRaw); const cg=dedupeByLatest(cgRaw);
   const _autoN=deriveWmAngleFromNoteType(wm); window._wmAutoAngleN=_autoN;
@@ -1771,13 +1851,11 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
   const cgL=[...byday].filter(r=>r.브랜드==='COLORGRAM').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   DATA.last={WAKEMAKE:wmL?.날짜||DATA.last.WAKEMAKE,COLORGRAM:cgL?.날짜||DATA.last.COLORGRAM};
   DATA.monthly.WAKEMAKE=recomputeMonthly(byday,'WAKEMAKE'); DATA.monthly.COLORGRAM=recomputeMonthly(byday,'COLORGRAM');
-  KOL.kol.WAKEMAKE=wm; KOL.kol.COLORGRAM=cg;
-  KOL.monthly_channel={WAKEMAKE:recomputeMonthlyChannel(byday,'WAKEMAKE'),COLORGRAM:recomputeMonthlyChannel(byday,'COLORGRAM')};
+  KOL.kol.WAKEMAKE=wm; KOL.kol.COLORGRAM=cg; KOL.kol.TOTAL=[...wm,...cg].filter(r=>r.데이터상태==='최신');
+  KOL.monthly_channel={WAKEMAKE:recomputeMonthlyChannel(byday,'WAKEMAKE'),COLORGRAM:recomputeMonthlyChannel(byday,'COLORGRAM'),TOTAL:recomputeMonthlyChannel(byday,'TOTAL')};
   const all=[...wm,...cg];
-  KOL.sp.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','주력상품'); KOL.sp.COLORGRAM=recomputeAgg(all,'COLORGRAM','주력상품');
-  KOL.bundle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','상품_조합'); KOL.bundle.COLORGRAM=recomputeAgg(all,'COLORGRAM','상품_조합');
-  KOL.tier.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','팔로워구간'); KOL.tier.COLORGRAM=recomputeAgg(all,'COLORGRAM','팔로워구간');
-  KOL.angle.WAKEMAKE=recomputeAgg(all,'WAKEMAKE','콘텐츠앵글'); KOL.angle.COLORGRAM=recomputeAgg(all,'COLORGRAM','콘텐츠앵글');
+  ['WAKEMAKE','COLORGRAM','TOTAL'].forEach(b=>{ KOL.sp[b]=recomputeAgg(all,b,'주력상품'); KOL.bundle[b]=recomputeAgg(all,b,'상품_조합'); });
+  ['WAKEMAKE','COLORGRAM','TOTAL'].forEach(b=>{ KOL.tier[b]=recomputeAgg(all,b,'팔로워구간'); KOL.angle[b]=recomputeAgg(all,b,'콘텐츠앵글'); });
   const ts=new Date().toLocaleString('ko-KR',{hour12:false});
   setSyncStatus(`✓ 라이브 · ${ts} · WM ${wmRaw.length-wm.length}건, CG ${cgRaw.length-cg.length}건 dedup`,'live');
   render(); renderTable();
