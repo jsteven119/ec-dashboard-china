@@ -858,6 +858,7 @@ function brandMonthly(){
       const c=cg[i]||{};
       const out={...w};
       Object.keys(w).forEach(k=>{
+        if(k==='월') return; // 월 키는 합산 제외 (1+1=2 버그 방지)
         if(typeof w[k]==='number') out[k]=(w[k]||0)+(c[k]||0);
       });
       out.샤오홍싱ROI=out.쥐광비?(out.전점GMV/out.쥐광비):0;
