@@ -711,20 +711,20 @@ const SMAP={'wakemake':'브랜드','wakemake气垫':'쿠션','wakemake眼影':'�
 const COL={navy:'#7A1F1F',blue:'#4A6670',sky:'#6B8C99',accent:'#C8102E',green:'#1E5631',orange:'#B8941F',purple:'#6B3E5C',grey:'#8B7A65',gold:'#D4AF37',red:'#A52A2A',redDeep:'#5C0F0F',rice:'#F2EAD0',ink:'#2C2317'};
 // Chart.js 글로벌 디폴트 — 종이 위 묵필 톤
 if(typeof Chart!=='undefined'){
-  Chart.defaults.font.family="'Noto Sans SC','Malgun Gothic',sans-serif";
-  Chart.defaults.font.size=11.5;
-  Chart.defaults.color='#5C4D3A';
-  Chart.defaults.borderColor='rgba(212,201,168,0.5)';
-  Chart.defaults.plugins.legend.labels.font={family:"'Noto Serif SC',serif",size:11.5,weight:'600'};
-  Chart.defaults.plugins.legend.labels.color='#2C2317';
-  Chart.defaults.plugins.tooltip.backgroundColor='rgba(44,35,23,0.94)';
-  Chart.defaults.plugins.tooltip.titleColor='#D4AF37';
-  Chart.defaults.plugins.tooltip.titleFont={family:"'Noto Serif SC',serif",size:12,weight:'700'};
-  Chart.defaults.plugins.tooltip.bodyColor='#FFFDF5';
-  Chart.defaults.plugins.tooltip.borderColor='#D4AF37';
-  Chart.defaults.plugins.tooltip.borderWidth=1;
-  Chart.defaults.plugins.tooltip.padding=10;
-  Chart.defaults.plugins.tooltip.cornerRadius=6;
+  try{
+    Chart.defaults.font.family="'Noto Sans SC','Malgun Gothic',sans-serif";
+    Chart.defaults.font.size=11.5;
+    Chart.defaults.color='#5C4D3A';
+    Chart.defaults.borderColor='rgba(212,201,168,0.5)';
+    Chart.defaults.plugins.legend.labels.color='#2C2317';
+    Chart.defaults.plugins.tooltip.backgroundColor='rgba(44,35,23,0.94)';
+    Chart.defaults.plugins.tooltip.titleColor='#D4AF37';
+    Chart.defaults.plugins.tooltip.bodyColor='#FFFDF5';
+    Chart.defaults.plugins.tooltip.borderColor='#D4AF37';
+    Chart.defaults.plugins.tooltip.borderWidth=1;
+    Chart.defaults.plugins.tooltip.padding=10;
+    Chart.defaults.plugins.tooltip.cornerRadius=6;
+  }catch(e){console.warn('Chart defaults setup err:',e);}
 }
 // ===== 차트 최고값에 👑 자동 마커 plugin =====
 // option: plugins.crown = {enabled: true, lower:false} — enabled 차트에만 활성. lower=true면 최저값에 표시
@@ -732,29 +732,38 @@ const crownPlugin={
   id:'crown',
   afterDatasetsDraw(chart,args,opts){
     if(!opts||!opts.enabled)return;
-    const {ctx}=chart;
-    chart.data.datasets.forEach((ds,dsi)=>{
-      if(ds.type==='line'&&ds.borderDash)return; // 손익분기/forecast 같은 보조선 제외
-      const meta=chart.getDatasetMeta(dsi);
-      if(meta.hidden)return;
-      const vals=ds.data.map((d,i)=>({i,v:typeof d==='object'?d.y:d}));
-      const valid=vals.filter(x=>x.v!=null&&!isNaN(x.v));
-      if(!valid.length)return;
-      const target=opts.lower?valid.reduce((a,b)=>a.v<b.v?a:b):valid.reduce((a,b)=>a.v>b.v?a:b);
-      const pt=meta.data[target.i]; if(!pt)return;
-      const x=pt.x, y=pt.y;
-      ctx.save();
-      ctx.font='15px sans-serif';
-      ctx.textAlign='center';
-      ctx.textBaseline='bottom';
-      ctx.shadowColor='rgba(184,148,31,0.5)';
-      ctx.shadowBlur=4;
-      ctx.fillText(opts.lower?'⭐':'👑',x,y-4);
-      ctx.restore();
-    });
+    try{
+      const ctx=chart&&chart.ctx; if(!ctx)return;
+      const dss=chart.data&&chart.data.datasets; if(!Array.isArray(dss))return;
+      dss.forEach((ds,dsi)=>{
+        if(!ds||!ds.data)return;
+        if(ds.type==='line'&&ds.borderDash)return;
+        const meta=chart.getDatasetMeta(dsi); if(!meta||meta.hidden)return;
+        const arr=Array.isArray(ds.data)?ds.data:[];
+        let bestIdx=-1,bestVal=opts.lower?Infinity:-Infinity;
+        for(let i=0;i<arr.length;i++){
+          const d=arr[i];
+          const v=(d&&typeof d==='object')?d.y:d;
+          if(v==null||isNaN(v)||typeof v!=='number')continue;
+          if(opts.lower?v<bestVal:v>bestVal){bestVal=v;bestIdx=i;}
+        }
+        if(bestIdx<0)return;
+        const pt=meta.data&&meta.data[bestIdx]; if(!pt)return;
+        const x=pt.x,y=pt.y;
+        if(typeof x!=='number'||typeof y!=='number')return;
+        ctx.save();
+        ctx.font='15px sans-serif';
+        ctx.textAlign='center';
+        ctx.textBaseline='bottom';
+        ctx.shadowColor='rgba(184,148,31,0.5)';
+        ctx.shadowBlur=4;
+        ctx.fillText(opts.lower?'⭐':'👑',x,y-4);
+        ctx.restore();
+      });
+    }catch(e){if(window.console)console.warn('crownPlugin err:',e&&e.message);}
   }
 };
-if(typeof Chart!=='undefined') Chart.register(crownPlugin);
+if(typeof Chart!=='undefined'){try{Chart.register(crownPlugin);}catch(e){console.warn('Chart.register err:',e);}}
 // ===== 中国 e-commerce 캠페인 캘린더 (월-일 무관 년도) =====
 // type: big = 朱红 (618/쌍11) / mid = 황금 (520/38/818/99/12.12) / small = 회색
 const CN_CAMPAIGNS=[
@@ -1056,7 +1065,19 @@ function chSearch(){destroy('cSearch');
   const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const pal=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
   const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m][k]),borderColor:pal[i%pal.length],backgroundColor:pal[i%pal.length],tension:.3,pointRadius:2}));
   charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}}}});}
-function renderOverview(){renderAlerts();kpis();chSpend();chRoi();chDaily();chFunnel();chChannel();chSearch();renderBenchmark();document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}
+function renderOverview(){
+  const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(renderAlerts,'renderAlerts');
+  safe(kpis,'kpis');
+  safe(chSpend,'chSpend');
+  safe(chRoi,'chRoi');
+  safe(chDaily,'chDaily');
+  safe(chFunnel,'chFunnel');
+  safe(chChannel,'chChannel');
+  safe(chSearch,'chSearch');
+  safe(renderBenchmark,'renderBenchmark');
+  try{document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}catch(e){console.error('insightOv err:',e);}
+}
 
 // ===== KOL =====
 function kolKpis(){
