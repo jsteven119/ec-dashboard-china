@@ -124,28 +124,38 @@
     border-bottom-color:var(--gong-red);
     background:linear-gradient(180deg,transparent 0%,rgba(212,175,55,.08) 100%);
   }
-  /* ===== KPI 카드 ===== */
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin:20px 0}
+  /* ===== KPI 카드 (1줄 강제 · 콤팩트) ===== */
+  .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:18px 0}
+  @media(max-width:1100px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  @media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}}
   .kpi{
     background:var(--card);
     border:1px solid var(--line);
     border-top:3px solid var(--gold);
-    border-radius:10px;padding:16px 18px;
+    border-radius:9px;padding:12px 13px;
     box-shadow:0 1px 3px rgba(92,15,15,.05),inset 0 0 0 1px rgba(255,253,245,.5);
     position:relative;
     transition:.2s;
+    min-width:0;
   }
   .kpi:hover{box-shadow:0 4px 12px rgba(92,15,15,.1);transform:translateY(-1px)}
+  .kpi.best::after{
+    content:'👑';position:absolute;top:-10px;right:-6px;font-size:18px;
+    filter:drop-shadow(0 1px 2px rgba(184,148,31,.4));
+  }
   .kpi .lab{
-    font-size:12.5px;color:var(--ink-soft);font-weight:700;
-    font-family:'Noto Serif SC',serif;letter-spacing:.5px;
+    font-size:11.5px;color:var(--ink-soft);font-weight:700;
+    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
+  .kpi .lab .hint{font-size:9.5px;color:var(--grey);margin-left:4px;font-weight:500;font-family:inherit}
   .kpi .val{
-    font-size:28px;font-weight:900;color:var(--gong-red-deep);
-    margin-top:6px;letter-spacing:-.5px;
+    font-size:21px;font-weight:900;color:var(--gong-red-deep);
+    margin-top:5px;letter-spacing:-.5px;
     font-family:'Noto Serif SC',serif;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .kpi .sm{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+  .kpi .sm{font-size:11px;color:var(--ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* ===== 패널 (米黄 종이 카드) ===== */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:880px){.grid{grid-template-columns:1fr}}
@@ -166,6 +176,11 @@
     font-family:'Noto Serif SC',serif;
     font-size:15.5px;color:var(--gong-red-deep);
     margin-bottom:4px;font-weight:700;letter-spacing:.3px;
+  }
+  .panel h3 .hint-inline{
+    font-family:'Noto Sans SC',sans-serif;font-size:11.5px;color:var(--ink-soft);
+    font-weight:500;margin-left:8px;letter-spacing:0;
+    background:rgba(212,175,55,0.12);padding:2px 8px;border-radius:4px;
   }
   .panel .note{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;line-height:1.55}
   .full{grid-column:1/-1}
@@ -404,6 +419,26 @@
     .gfilter{flex:1;min-width:0}
     .gfilter select,.gfilter input[type=date]{min-width:0;width:100%}
   }
+  /* ===== 용어 가이드 (입문자용 펼침 박스) ===== */
+  .glossary{
+    margin-bottom:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:8px;padding:10px 16px;border-left:3px solid var(--gold);
+  }
+  .glossary summary{
+    cursor:pointer;font-size:13px;font-weight:700;color:var(--gong-red-deep);
+    font-family:'Noto Serif SC',serif;letter-spacing:.3px;list-style:none;
+    display:flex;align-items:center;gap:4px;outline:none;
+  }
+  .glossary summary::-webkit-details-marker{display:none}
+  .glossary summary::after{content:'▾';margin-left:auto;color:var(--ink-soft);transition:.2s}
+  .glossary[open] summary::after{transform:rotate(180deg)}
+  .glossary-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:8px 18px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
+  }
+  .glossary-grid div{font-size:12px;line-height:1.5;color:var(--ink)}
+  .glossary-grid b{color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-right:6px;font-weight:700}
+  .glossary-grid span{color:var(--ink-soft)}
   /* ===== 캠페인 캘린더 마커 ===== */
   .cal-event{
     display:inline-block;font-size:10.5px;font-weight:700;
@@ -490,18 +525,39 @@
 
   <!-- ===== OVERVIEW TAB ===== -->
   <div id="tab_overview">
+    <details class="glossary">
+      <summary>📘 처음 보시는 분을 위한 용어 가이드 (클릭해서 펼치기)</summary>
+      <div class="glossary-grid">
+        <div><b>GMV</b><span>스토어 총거래액 (광고로 발생한 매출 합계)</span></div>
+        <div><b>ROI / ROAS</b><span>광고비 1원당 매출 (높을수록 좋음 · 1 미만 = 적자)</span></div>
+        <div><b>노출(impression)</b><span>광고가 화면에 보인 횟수</span></div>
+        <div><b>인터랙션</b><span>좋아요·댓글·저장·공유·클릭 합계 (관심도)</span></div>
+        <div><b>CTR</b><span>인터랙션 ÷ 노출 (관심받은 비율 %)</span></div>
+        <div><b>UV</b><span>중복 제외 방문자 수 (Unique Visitor)</span></div>
+        <div><b>진입 UV</b><span>광고 → 스토어/노트로 들어온 순방문자</span></div>
+        <div><b>外행동(站外)</b><span>광고에서 타오바오/티몰 등 외부 EC로 이동</span></div>
+        <div><b>CPM</b><span>노출 1,000회당 광고비 (낮을수록 효율)</span></div>
+        <div><b>CPUV</b><span>외부 방문자 1명당 광고비 (낮을수록 효율)</span></div>
+        <div><b>KOL</b><span>전문 인플루언서 (Key Opinion Leader · 협업 비용 있음)</span></div>
+        <div><b>KOC</b><span>일반 소비자 후기 (Key Opinion Consumer · 진성·저비용)</span></div>
+        <div><b>쥐광(샤오홍싱)</b><span>샤오홍슈 광고 플랫폼 (피드 광고)</span></div>
+        <div><b>CID</b><span>전환광고 — 결제 완료 목표</span></div>
+        <div><b>爆文</b><span>인기콘텐츠 (평균 대비 노출·반응 폭발)</span></div>
+        <div><b>2σ 급변</b><span>최근 7일 평균에서 2배 표준편차 이탈 = 통계적 이상</span></div>
+      </div>
+    </details>
     <div id="alerts" class="alerts"></div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
-      <div class="panel"><h3>월별 광고비 vs 전점 GMV</h3><div class="note">막대=쥐광 광고비(￥), 선=샤오홍싱 전점 GMV(￥)</div><div class="cwrap"><canvas id="cSpend"></canvas></div></div>
-      <div class="panel"><h3>월별 ROI 추세</h3><div class="note">샤오홍싱 ROI(전점GMV/쥐광비), CID ROI(CG)</div><div class="cwrap"><canvas id="cRoi"></canvas></div></div>
+      <div class="panel"><h3>월별 광고비 vs 매출 (GMV)</h3><div class="note">막대 = 광고 집행액 / 선 = 발생한 매출 · 막대 위 👑 = 최고치 월 · <b>광고비가 늘면 매출도 늘어야 정상</b></div><div class="cwrap"><canvas id="cSpend"></canvas></div></div>
+      <div class="panel"><h3>월별 ROI 추세 <span class="hint-inline">광고비 1원당 매출</span></h3><div class="note">샤오홍싱 ROI = 매출÷광고비 · CID ROI = 전환광고 효율 · <b>1.0 미만 = 광고비가 매출보다 많은 적자 구간</b> · 👑 = 최고 ROI 월</div><div class="cwrap"><canvas id="cRoi"></canvas></div></div>
       <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
-      <div class="panel full"><h3>퍼널 구조 (CTR → 진입 → 站外행동 → GMV)</h3><div class="note">노출 → 인터랙션 → 진입UV → 외부행동(타오바오 진입) → 전점GMV · 누적 1~5월 전환율로 새는 단계 식별</div><div class="cwrap"><canvas id="cFunnel"></canvas></div></div>
-      <div class="panel"><h3>채널별 투자 구성 (월별)</h3><div class="note">KOL · 쥐광 · CID · SNS 비용(￥)</div><div class="cwrap"><canvas id="cChannel"></canvas></div></div>
-      <div class="panel"><h3>브랜드 검색지수 추세</h3><div class="note">샤오홍슈 검색 관심도 월평균</div><div class="cwrap"><canvas id="cSearch"></canvas></div></div>
+      <div class="panel full"><h3>구매 여정 (광고 → 스토어 → 구매)</h3><div class="note"><b>① 광고 노출</b> = 광고가 보인 횟수 · <b>② 스토어 진입</b> = 광고를 보고 샤오홍슈 스토어/노트로 들어온 사람 수 · <b>③ 타오바오 이동</b> = 외부 쇼핑몰로 넘어간 사람 수 · <b>④ 구매 완료</b> = 실제 결제한 사람 수 · 각 단계 사이의 % = 전환율(다음 단계로 넘어간 비율)</div><div class="cwrap"><canvas id="cFunnel"></canvas></div></div>
+      <div class="panel"><h3>매체별 광고비 구성 (월별)</h3><div class="note">어떤 광고에 얼마를 썼는지 비교 · KOL(인플루언서) · 쥐광(샤오홍슈 피드 광고) · CID(전환광고) · SNS</div><div class="cwrap"><canvas id="cChannel"></canvas></div></div>
+      <div class="panel"><h3>브랜드 검색지수 추세 <span class="hint-inline">소비자 관심도</span></h3><div class="note">샤오홍슈에서 브랜드 키워드를 얼마나 검색했는지 · 👑 = 최고 관심도 월 · <b>광고비를 늘렸을 때 검색이 따라 오르면 광고가 효과적</b></div><div class="cwrap"><canvas id="cSearch"></canvas></div></div>
       <div class="panel full"><h3>벤치마크 vs 경쟁사 (검색 모멘텀)</h3><div class="note">최신월 vs 1월 대비 검색지수 변화율 · 양수=상승, 음수=하락</div><div id="benchmark"></div></div>
-      <div class="panel full"><h3>📊 자동 인사이트</h3><div class="insight" id="insightOv"></div></div>
+      <div class="panel full"><h3>📊 자동 인사이트 <span class="hint-inline">데이터에서 자동으로 뽑은 핵심 한 줄들</span></h3><div class="insight" id="insightOv"></div></div>
     </div>
   </div>
 
@@ -670,6 +726,35 @@ if(typeof Chart!=='undefined'){
   Chart.defaults.plugins.tooltip.padding=10;
   Chart.defaults.plugins.tooltip.cornerRadius=6;
 }
+// ===== 차트 최고값에 👑 자동 마커 plugin =====
+// option: plugins.crown = {enabled: true, lower:false} — enabled 차트에만 활성. lower=true면 최저값에 표시
+const crownPlugin={
+  id:'crown',
+  afterDatasetsDraw(chart,args,opts){
+    if(!opts||!opts.enabled)return;
+    const {ctx}=chart;
+    chart.data.datasets.forEach((ds,dsi)=>{
+      if(ds.type==='line'&&ds.borderDash)return; // 손익분기/forecast 같은 보조선 제외
+      const meta=chart.getDatasetMeta(dsi);
+      if(meta.hidden)return;
+      const vals=ds.data.map((d,i)=>({i,v:typeof d==='object'?d.y:d}));
+      const valid=vals.filter(x=>x.v!=null&&!isNaN(x.v));
+      if(!valid.length)return;
+      const target=opts.lower?valid.reduce((a,b)=>a.v<b.v?a:b):valid.reduce((a,b)=>a.v>b.v?a:b);
+      const pt=meta.data[target.i]; if(!pt)return;
+      const x=pt.x, y=pt.y;
+      ctx.save();
+      ctx.font='15px sans-serif';
+      ctx.textAlign='center';
+      ctx.textBaseline='bottom';
+      ctx.shadowColor='rgba(184,148,31,0.5)';
+      ctx.shadowBlur=4;
+      ctx.fillText(opts.lower?'⭐':'👑',x,y-4);
+      ctx.restore();
+    });
+  }
+};
+if(typeof Chart!=='undefined') Chart.register(crownPlugin);
 // ===== 中国 e-commerce 캠페인 캘린더 (월-일 무관 년도) =====
 // type: big = 朱红 (618/쌍11) / mid = 황금 (520/38/818/99/12.12) / small = 회색
 const CN_CAMPAIGNS=[
@@ -798,31 +883,36 @@ function kpis(){
   const roi=spend?(gmv/spend):0;
   const cur=m[m.length-1]||{},prev=m[m.length-2]||{};
   const curRoi=cur.쥐광비?(cur.전점GMV/cur.쥐광비):0, prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
-  const sub=brand==='TOTAL'?'WM+CG 합산':'샤오홍싱';
+  // 각 카드: [라벨, 값, 보조설명(입문자용 한 줄), MoM html, _bestKey(▲ 변동률 비교용)]
   let cards=[
-    ['누적 쥐광 광고비',WON(spend),'1~5월',momPct(cur.쥐광비,prev.쥐광비)],
-    ['누적 전점 GMV',WON(gmv),sub,momPct(cur.전점GMV,prev.전점GMV)],
-    ['평균 샤오홍싱 ROI',F2(roi),'GMV/쥐광비',momPct(curRoi,prevRoi)],
-    ['누적 노출',FMT(imp),'쥐광',momPct(cur.노출,prev.노출)],
-    ['누적 KOL 비용',WON(kol),'达人',momPct(cur.KOL비,prev.KOL비)]
+    {lab:'누적 광고비',hint:'쥐광',val:WON(spend),sub:'전체 광고 집행액',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
+    {lab:'누적 매출(GMV)',hint:'전점',val:WON(gmv),sub:'스토어 총거래액',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV)},
+    {lab:'평균 ROI',hint:'GMV÷광고비',val:F2(roi),sub:'1원 광고비당 매출',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
+    {lab:'누적 노출',hint:'쥐광',val:FMT(imp),sub:'광고가 보여진 횟수',mom:momPct(cur.노출,prev.노출),delta:_pct(cur.노출,prev.노출)},
+    {lab:'누적 KOL 비용',hint:'达人',val:WON(kol),sub:'인플루언서 협업비',mom:momPct(cur.KOL비,prev.KOL비),delta:_pct(cur.KOL비,prev.KOL비)}
   ];
   if(brand==='COLORGRAM'||brand==='TOTAL'){
     const cs=sum('CID비'),cg=sum('CID성사GMV');
     const curCidRoi=cur.CID비?(cur.CID성사GMV/cur.CID비):0, prevCidRoi=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
-    cards.push(['CID 누적비',WON(cs),'전환광고',momPct(cur.CID비,prev.CID비)]);
-    cards.push(['CID ROI',F2(cs?cg/cs:0),'성사GMV/비용',momPct(curCidRoi,prevCidRoi)]);
+    cards.push({lab:'CID 누적비',hint:'전환광고',val:WON(cs),sub:'타깃 구매자 광고비',mom:momPct(cur.CID비,prev.CID비),delta:_pct(cur.CID비,prev.CID비)});
+    cards.push({lab:'CID ROI',hint:'성사GMV÷비용',val:F2(cs?cg/cs:0),sub:'전환광고 효율',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi)});
   }
-  document.getElementById('kpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div>${c[3]||''}</div>`).join('');
+  // 최고 변동률(▲ 가장 큰) 카드에 👑 표시
+  let bestIdx=-1,bestDelta=0;
+  cards.forEach((c,i)=>{if(c.delta!=null&&c.delta>bestDelta){bestDelta=c.delta;bestIdx=i;}});
+  document.getElementById('kpis').innerHTML=cards.map((c,i)=>`<div class="kpi${i===bestIdx&&bestDelta>5?' best':''}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div>${c.mom||''}</div>`).join('');
 }
+// MoM 변동률(%) 계산 — best 카드 판정용
+function _pct(cur,prev){if(!prev||prev===0||cur==null||isNaN(cur))return null;return((cur-prev)/Math.abs(prev))*100;}
 function chSpend(){destroy('cSpend');
   const m=brandMonthly();
-  charts.cSpend=new Chart(document.getElementById('cSpend'),{data:{labels:ML(m),datasets:[{type:'bar',label:'쥐광 광고비',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky,borderRadius:5},{type:'line',label:'전점 GMV',data:m.map(x=>x.전점GMV),borderColor:COL.accent,backgroundColor:COL.accent,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});}
+  charts.cSpend=new Chart(document.getElementById('cSpend'),{data:{labels:ML(m),datasets:[{type:'bar',label:'쥐광 광고비',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky,borderRadius:5},{type:'line',label:'전점 GMV',data:m.map(x=>x.전점GMV),borderColor:COL.accent,backgroundColor:COL.accent,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});}
 function chRoi(){destroy('cRoi');
   const m=brandMonthly();
   const ds=[{label:'샤오홍싱 ROI',data:m.map(x=>x.샤오홍싱ROI),borderColor:COL.blue,backgroundColor:COL.blue,tension:.3,pointRadius:3}];
   if(brand==='COLORGRAM'||brand==='TOTAL')ds.push({label:'CID ROI',data:m.map(x=>x.CID_ROI),borderColor:COL.green,backgroundColor:COL.green,tension:.3,pointRadius:3});
   ds.push({label:'손익분기(1.0)',data:m.map(()=>1),borderColor:COL.grey,borderDash:[5,5],pointRadius:0});
-  charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});}
+  charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{y:{beginAtZero:true}}}});}
 function chDaily(){destroy('cDaily');
   // brandByday: brand + 기간 필터 자동 적용
   const rows=brandByday().filter(r=>(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
@@ -893,7 +983,7 @@ function chDaily(){destroy('cDaily');
       ctx.restore();
     });
   }};
-  charts.cDaily=new Chart(document.getElementById('cDaily'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{ticks:{callback:v=>FMT(v)}}}},plugins:[mk]});
+  charts.cDaily=new Chart(document.getElementById('cDaily'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{ticks:{callback:v=>FMT(v)}}}},plugins:[mk]});
   renderCampCalendar(allDates,camps);
 }
 // 캠페인 캘린더 패널: 데이터 기간에 걸친 캠페인 + 다음 예정 캠페인 카드
@@ -959,12 +1049,12 @@ function chSearch(){destroy('cSearch');
     charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:[
       {label:'WAKEMAKE',data:months.map(m=>wm[m][wmKey]),borderColor:COL.red,backgroundColor:COL.red,tension:.3,pointRadius:3},
       {label:'COLORGRAM',data:months.map(m=>cg[m][cgKey]),borderColor:COL.gold,backgroundColor:COL.gold,tension:.3,pointRadius:3}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}}}});
     return;
   }
   const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const pal=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
   const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m][k]),borderColor:pal[i%pal.length],backgroundColor:pal[i%pal.length],tension:.3,pointRadius:2}));
-  charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});}
+  charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}}}});}
 function renderOverview(){renderAlerts();kpis();chSpend();chRoi();chDaily();chFunnel();chChannel();chSearch();renderBenchmark();document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}
 
 // ===== KOL =====
@@ -1079,13 +1169,13 @@ function renderTable(){
   const selA=document.getElementById('fAngle');if(selA&&selA.options.length<=1){const angles=Array.from(new Set(all.map(r=>r.콘텐츠앵글).filter(Boolean))).sort();angles.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;selA.appendChild(o);});}
   const rows=sortRows(all.filter(rowMatch));
   document.querySelector('#kolTable thead').innerHTML='<tr>'+TCOLS.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>';
-  document.querySelector('#kolTable tbody').innerHTML=rows.slice(0,200).map(r=>'<tr>'+TCOLS.map(c=>{
+  document.querySelector('#kolTable tbody').innerHTML=rows.slice(0,200).map((r,i)=>'<tr'+(i===0?' style="background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 65%)"':'')+'>'+TCOLS.map((c,ci)=>{
     let v=r[c[0]];
     if(c[0]==='인기콘텐츠')return `<td>${v?'<span class="pill hot">인기</span>':'<span class="pill gen">일반</span>'}</td>`;
     if(c[0]==='종합CPUV')return `<td>${F2(v)}</td>`;
-    if(c[0]==='인플루언서_한글'&&r.노트링크){const link=String(r.노트링크).trim();if(link.startsWith('http')){return `<td><a href="${link}" target="_blank" style="color:var(--gong-red);text-decoration:none;border-bottom:1px dashed var(--gold);font-weight:600">${v||'-'} ↗</a></td>`;}}
+    if(c[0]==='인플루언서_한글'&&r.노트링크){const link=String(r.노트링크).trim();if(link.startsWith('http')){return `<td>${i===0?'👑 ':''}<a href="${link}" target="_blank" style="color:var(--gong-red);text-decoration:none;border-bottom:1px dashed var(--gold);font-weight:600">${v||'-'} ↗</a></td>`;}}
     if(typeof v==='number')v=FMT(v);
-    return `<td>${v==null?'-':v}</td>`;
+    return `<td>${i===0&&ci===0?'👑 ':''}${v==null?'-':v}</td>`;
   }).join('')+'</tr>').join('');
   document.getElementById('rowcountK').textContent=rows.length+'건 (표시 최대 200)';
 }
@@ -1272,7 +1362,7 @@ function chMonthlyTrend(){destroy('cMonthlyTrend');
     borderColor:COL[ch], backgroundColor:COL[ch],tension:.3,pointRadius:3
   }));
   charts.cMonthlyTrend=new Chart(document.getElementById('cMonthlyTrend'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},title:{display:true,text:`${brand} · ${mMetric}`}},scales:{y:{ticks:{callback:v=>(mMetric.includes('%')?v.toFixed(1)+'%':(mMetric==='광고비'||mMetric==='GMV'?'￥'+FMT(v):FMT(v)))}}}}});
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},title:{display:true,text:`${brand} · ${mMetric}`},crown:{enabled:true}},scales:{y:{ticks:{callback:v=>(mMetric.includes('%')?v.toFixed(1)+'%':(mMetric==='광고비'||mMetric==='GMV'?'￥'+FMT(v):FMT(v)))}}}}});
 }
 
 function insightMonthly(){
@@ -1452,14 +1542,15 @@ function calcForecast(b,allDates,map){
 
 // --- 깔때기 차트 (CTR → 진입UV → 외부행동 → GMV) ---
 function chFunnel(){destroy('cFunnel');
-  // brand + 기간 필터 자동 적용. TOTAL이면 두 브랜드 합산 단일 퍼널
+  // 4단계 구매 여정: 노출 → 진입UV → 외부행동(타오바오) → 구매UV
+  // (인터랙션=좋아요/저장은 engagement 지표라 퍼널 순서에 부적합 — 제외)
   const rs=brandByday();
   const sum=k=>rs.reduce((a,r)=>a+(r[k]||0),0);
-  const imp=sum('쥐광_노출'),int_=sum('쥐광_상호작용'),uv=sum('샤오홍싱_진입UV'),ext=sum('쥐광_站外행동'),gmvUv=sum('샤오홍싱_성사UV');
-  const stages=[imp,int_,uv,ext,gmvUv];
+  const imp=sum('쥐광_노출'),uv=sum('샤오홍싱_진입UV'),ext=sum('쥐광_站外행동'),gmvUv=sum('샤오홍싱_성사UV');
+  const stages=[imp,uv,ext,gmvUv];
   const label=brand==='TOTAL'?'Total (WM + CG)':brand;
   const datasets=[{label,data:stages,backgroundColor:COL.red+'AA',borderColor:COL.red,borderWidth:1,borderRadius:5}];
-  const labels=['노출','상호작용','진입UV','站外행동(타오바오)','성사UV'];
+  const labels=['① 광고 노출','② 스토어 진입','③ 타오바오 이동','④ 구매 완료'];
   charts.cFunnel=new Chart(document.getElementById('cFunnel'),{type:'bar',data:{labels,datasets},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},
       tooltip:{callbacks:{label:c=>{
