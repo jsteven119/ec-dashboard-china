@@ -861,7 +861,7 @@ function rebuildKolAggregates(){
     KOL.tier[b]=recomputeAgg(all,b,'팔로워구간');
     KOL.angle[b]=recomputeAgg(all,b,'콘텐츠앵글');
   });
-  KOL.kol.TOTAL=all.filter(r=>r.데이터상태==='최신');
+  KOL.kol.TOTAL=all.filter(r=>r.데이터상태!=='이전작업');
 }
 
 // ===== OVERVIEW =====
@@ -1218,7 +1218,16 @@ function renderTable(){
   }).join('')+'</tr>').join('');
   document.getElementById('rowcountK').textContent=rows.length+'건 (표시 최대 200)';
 }
-function renderKol(){kolKpis();chScatter();chCType();chTier();chAngle();insightKol();renderTable();}
+function renderKol(){
+  const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(kolKpis,'kolKpis');
+  safe(chScatter,'chScatter');
+  safe(chCType,'chCType');
+  safe(chTier,'chTier');
+  safe(chAngle,'chAngle');
+  safe(insightKol,'insightKol');
+  safe(renderTable,'renderTable');
+}
 
 // ===== events =====
 // ===== 글로벌 필터 이벤트 (브랜드 · RETAIL · 매체 · 프로모션 · 기간 · 환율) =====
@@ -1421,7 +1430,12 @@ function insightMonthly(){
   document.getElementById('insightMonthly').innerHTML=html;
 }
 
-function renderMonthly(){renderMonthlyTable(); chMonthlyTrend(); insightMonthly();}
+function renderMonthly(){
+  const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(renderMonthlyTable,'renderMonthlyTable');
+  safe(chMonthlyTrend,'chMonthlyTrend');
+  safe(insightMonthly,'insightMonthly');
+}
 
 // wire filters (mChannel/mMonths는 글로벌 필터로 이관, mMetric만 컨텍스트 필터로 유지)
 document.getElementById('mMetric').addEventListener('change',e=>{
@@ -1970,7 +1984,7 @@ const FETCH_SHEETS = ['일별raw통합', 'KOL_WM', 'KOL_CG'];
 function setSyncStatus(text, color){const el=document.getElementById('syncStatus');if(!el)return;el.textContent=text;if(color==='live'){el.style.background='rgba(30,86,49,0.14)';el.style.color='#1E5631';el.style.borderColor='rgba(30,86,49,0.3)';}else if(color==='err'){el.style.background='rgba(200,16,46,0.12)';el.style.color='#5C0F0F';el.style.borderColor='rgba(200,16,46,0.3)';}else{el.style.background='rgba(184,148,31,0.15)';el.style.color='#B8941F';el.style.borderColor='rgba(184,148,31,0.3)';}}
 async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;const resp=await fetch(url,{cache:'no-store'});if(!resp.ok)throw new Error(`${name}: HTTP ${resp.status}`);return Papa.parse(await resp.text(),{header:true,dynamicTyping:true,skipEmptyLines:true}).data;}
 function dedupeByLatest(rows){const map=new Map();rows.forEach((r,i)=>{const k=r.인플루언서||r['인플루언서_한글']||Symbol(i);const ex=map.get(k);const dr=String(r.게시일||''),de=String(ex?.게시일||'');if(!ex||dr>de)map.set(k,r);});const cnt={};rows.forEach(r=>{const k=r.인플루언서;if(k){cnt[k]=(cnt[k]||0)+1;}});return Array.from(map.values()).map(r=>({...r,총협업횟수:cnt[r.인플루언서]||1}));}
-function recomputeAgg(kolRows,brand,col){const rows=kolRows.filter(r=>{if(brand!=='TOTAL'&&r.브랜드!==brand)return false;return r.데이터상태==='최신';});const g={};rows.forEach(r=>{const k=r[col]||'미입력';if(!g[k])g[k]={key:k,콘텐츠수:0,_imp:0,_int:0,_uv:0,_cpuv:0,_cost:0,_hot:0};const s=g[k];s.콘텐츠수++;s._imp+=r.노출량||0;s._int+=r.인터랙션||0;s._uv+=r.외부행동UV||0;s._cpuv+=r.종합CPUV||0;s._cost+=r.총비용||0;if(r.인기콘텐츠)s._hot++;});return Object.values(g).map(s=>({[col]:s.key,콘텐츠수:s.콘텐츠수,평균_노출량:Math.round(s._imp/s.콘텐츠수),평균_인터랙션:Math.round(s._int/s.콘텐츠수),평균_외부UV:Math.round(s._uv/s.콘텐츠수),평균CPUV:+(s._cpuv/s.콘텐츠수).toFixed(2),평균_총비용:Math.round(s._cost/s.콘텐츠수),인기콘텐츠비율:+(s._hot/s.콘텐츠수*100).toFixed(1)})).sort((a,b)=>b.콘텐츠수-a.콘텐츠수);}
+function recomputeAgg(kolRows,brand,col){const rows=kolRows.filter(r=>{if(brand!=='TOTAL'&&r.브랜드!==brand)return false;return r.데이터상태!=='이전작업';});const g={};rows.forEach(r=>{const k=r[col]||'미입력';if(!g[k])g[k]={key:k,콘텐츠수:0,_imp:0,_int:0,_uv:0,_cpuv:0,_cost:0,_hot:0};const s=g[k];s.콘텐츠수++;s._imp+=r.노출량||0;s._int+=r.인터랙션||0;s._uv+=r.외부행동UV||0;s._cpuv+=r.종합CPUV||0;s._cost+=r.총비용||0;if(r.인기콘텐츠)s._hot++;});return Object.values(g).map(s=>({[col]:s.key,콘텐츠수:s.콘텐츠수,평균_노출량:Math.round(s._imp/s.콘텐츠수),평균_인터랙션:Math.round(s._int/s.콘텐츠수),평균_외부UV:Math.round(s._uv/s.콘텐츠수),평균CPUV:+(s._cpuv/s.콘텐츠수).toFixed(2),평균_총비용:Math.round(s._cost/s.콘텐츠수),인기콘텐츠비율:+(s._hot/s.콘텐츠수*100).toFixed(1)})).sort((a,b)=>b.콘텐츠수-a.콘텐츠수);}
 function recomputeMonthly(byday,brand){const rows=byday.filter(r=>r.브랜드===brand);const m={};rows.forEach(r=>{const k=r.월;if(!m[k])m[k]={월:k,쥐광비:0,노출:0,상호작용:0,진입UV:0,전점GMV:0,타겟GMV:0,KOL비:0,KOL발행:0,CID비:0,CID노출:0,CID클릭:0,CID성사GMV:0,SNS비:0};const x=m[k];x.쥐광비+=r.쥐광_광고비||0;x.노출+=r.쥐광_노출||0;x.상호작용+=r.쥐광_상호작용||0;x.진입UV+=r['샤오홍싱_진입UV']||0;x.전점GMV+=r['샤오홍싱_전점GMV']||0;x.타겟GMV+=r['샤오홍싱_타겟GMV']||0;x.KOL비+=r.KOL_비용||0;x.KOL발행+=r.KOL_발행수||0;x.CID비+=r.CID_비용||0;x.CID노출+=r.CID_노출||0;x.CID클릭+=r.CID_클릭||0;x.CID성사GMV+=r.CID_성사GMV||0;x.SNS비+=r.SNS_비용||0;});return Object.values(m).sort((a,b)=>a.월-b.월).map(x=>({...x,쥐광비:Math.round(x.쥐광비),노출:Math.round(x.노출),상호작용:Math.round(x.상호작용),진입UV:Math.round(x.진입UV),전점GMV:Math.round(x.전점GMV),타겟GMV:Math.round(x.타겟GMV),샤오홍싱ROI:x.쥐광비?+(x.전점GMV/x.쥐광비).toFixed(2):0,KOL비:Math.round(x.KOL비),KOL발행:Math.round(x.KOL발행),CID비:Math.round(x.CID비),CID노출:Math.round(x.CID노출),CID클릭:Math.round(x.CID클릭),CID성사GMV:Math.round(x.CID성사GMV),CID_ROI:x.CID비?+(x.CID성사GMV/x.CID비).toFixed(2):0,SNS비:Math.round(x.SNS비)}));}
 function recomputeMonthlyChannel(byday,brand){const rows=byday.filter(r=>brand==='TOTAL'?true:r.브랜드===brand);const months=[...new Set(rows.map(r=>r.월))].filter(m=>typeof m==='number').sort();const out=[];months.forEach(m=>{const mrows=rows.filter(r=>r.월===m);const zg_cost=mrows.reduce((s,r)=>s+(r.쥐광_광고비||0),0),zg_imp=mrows.reduce((s,r)=>s+(r.쥐광_노출||0),0),zg_int=mrows.reduce((s,r)=>s+(r.쥐광_상호작용||0),0),zg_uv=mrows.reduce((s,r)=>s+(r['샤오홍싱_진입UV']||0),0),zg_gmv=mrows.reduce((s,r)=>s+(r['샤오홍싱_전점GMV']||0),0);out.push({브랜드:brand,매체:'쥐광(샤오홍싱)',월:m,노출:Math.round(zg_imp),인터랙션:Math.round(zg_int),'CTR(%)':zg_imp?+(zg_int/zg_imp*100).toFixed(2):0,광고비:Math.round(zg_cost),CPM:zg_imp?+(zg_cost/zg_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(zg_uv),GMV:Math.round(zg_gmv),'ROAS(%)':zg_cost?+(zg_gmv/zg_cost*100).toFixed(1):0});const ci_cost=mrows.reduce((s,r)=>s+(r.CID_비용||0),0),ci_imp=mrows.reduce((s,r)=>s+(r.CID_노출||0),0),ci_clk=mrows.reduce((s,r)=>s+(r.CID_클릭||0),0),ci_ord=mrows.reduce((s,r)=>s+(r.CID_성사주문||0),0),ci_gmv=mrows.reduce((s,r)=>s+(r.CID_성사GMV||0),0);if(ci_cost>0||ci_imp>0)out.push({브랜드:brand,매체:'CID(전환)',월:m,노출:Math.round(ci_imp),인터랙션:Math.round(ci_clk),'CTR(%)':ci_imp?+(ci_clk/ci_imp*100).toFixed(2):0,광고비:Math.round(ci_cost),CPM:ci_imp?+(ci_cost/ci_imp*1000).toFixed(2):0,'외부UV/구매':Math.round(ci_ord),GMV:Math.round(ci_gmv),'ROAS(%)':ci_cost?+(ci_gmv/ci_cost*100).toFixed(1):0});const k_cost=mrows.reduce((s,r)=>s+(r.KOL_비용||0),0),k_pub=mrows.reduce((s,r)=>s+(r.KOL_발행수||0),0);if(k_cost>0)out.push({브랜드:brand,매체:'KOL(达人)',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(k_cost),CPM:0,'외부UV/구매':Math.round(k_pub),GMV:0,'ROAS(%)':0});const sns=mrows.reduce((s,r)=>s+(r.SNS_비용||0),0);if(sns>0)out.push({브랜드:brand,매체:'SNS',월:m,노출:0,인터랙션:0,'CTR(%)':0,광고비:Math.round(sns),CPM:0,'외부UV/구매':0,GMV:0,'ROAS(%)':0});});return out;}
 async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{const [byday,wmRaw,cgRaw]=await Promise.all(FETCH_SHEETS.map(fetchSheet));if(!byday.length||!wmRaw.length||!cgRaw.length)throw new Error('빈 응답');
@@ -1981,7 +1995,7 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
   const cgL=[...byday].filter(r=>r.브랜드==='COLORGRAM').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   DATA.last={WAKEMAKE:wmL?.날짜||DATA.last.WAKEMAKE,COLORGRAM:cgL?.날짜||DATA.last.COLORGRAM};
   DATA.monthly.WAKEMAKE=recomputeMonthly(byday,'WAKEMAKE'); DATA.monthly.COLORGRAM=recomputeMonthly(byday,'COLORGRAM');
-  KOL.kol.WAKEMAKE=wm; KOL.kol.COLORGRAM=cg; KOL.kol.TOTAL=[...wm,...cg].filter(r=>r.데이터상태==='최신');
+  KOL.kol.WAKEMAKE=wm; KOL.kol.COLORGRAM=cg; KOL.kol.TOTAL=[...wm,...cg].filter(r=>r.데이터상태!=='이전작업');
   KOL.monthly_channel={WAKEMAKE:recomputeMonthlyChannel(byday,'WAKEMAKE'),COLORGRAM:recomputeMonthlyChannel(byday,'COLORGRAM'),TOTAL:recomputeMonthlyChannel(byday,'TOTAL')};
   const all=[...wm,...cg];
   ['WAKEMAKE','COLORGRAM','TOTAL'].forEach(b=>{ KOL.sp[b]=recomputeAgg(all,b,'주력상품'); KOL.bundle[b]=recomputeAgg(all,b,'상품_조합'); });
