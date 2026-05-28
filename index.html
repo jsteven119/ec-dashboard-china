@@ -584,8 +584,9 @@
       <div class="kpis" id="kolKpis"></div>
       <div class="grid">
         <div class="panel full">
-          <h3>소재 산점도: 총비용 → 인터랙션 (점 크기=노출량)</h3>
-          <div class="note">점 색 = 주력상품별 / 점 크기 = 노출량 / 빨간 테두리 = 인기콘텐츠(爆文) · <b>점 클릭 → 인플루언서 상세</b></div>
+          <h3>소재 산점도: CPUV × 인터랙션 <span class="hint-inline">화제성과 효율의 함정 구분</span></h3>
+          <div class="note">X = <b>CPUV</b>(낮을수록 효율 ↑) · Y = <b>인터랙션</b>(좋아요·댓글·저장 합계) · 점 크기 = <b>광고비</b> · 朱红 테두리 = 인기콘텐츠(爆文)<br>
+          황금 점선으로 4사분면: <b style="color:var(--green)">👑 좌상 = 베스트</b>(효율도 좋고 화제도 많음) · <b style="color:var(--accent)">⚠ 우상 = 화제만 — 비효율</b>(인기는 있는데 매장 방문 비용이 큼 = 자극적이지만 구매로 안 이어짐) · 좌하 = 조용한 효율 · 우하 = 제외 검토 · <b>점 클릭 → 인플루언서 상세</b></div>
           <div class="cwrap tall"><canvas id="cScatter"></canvas></div>
         </div>
         <div class="panel"><h3>주력상품별 평균 CPUV</h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수</div><div class="cwrap"><canvas id="cCType"></canvas></div></div>
@@ -1120,22 +1121,48 @@ function kolKpis(){
   document.getElementById('kolKpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div></div>`).join('');
 }
 function chScatter(){destroy('cScatter');
-  const rows=KOL.kol[brand].filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0&&r.인터랙션>=0);
+  // X=CPUV(낮을수록 효율), Y=인터랙션(높을수록 화제), 점크기=광고비(총비용)
+  // → 좌상=베스트(효율↑+화제↑) / 우상=화제만(비효율) / 좌하=조용한효율 / 우하=둘다미흡
+  const rows=KOL.kol[brand].filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0&&r.인터랙션>=0&&r.종합CPUV>0);
   const groups={};
   rows.forEach(r=>{const k=r.주력상품||'미입력';(groups[k]=groups[k]||[]).push(r);});
-  // 故宫 톤 상품 팔레트 (朱红/황금/청자/옥/묵자/단홍 등)
   const PRODUCT_COLORS={'코팅밤':'#4A6670','소프트블러링 아이팔레트':'#1E5631','컬러커버(립베이스)':'#A52A2A','탕후루(딥글레이즈)':'#B8941F','탕후루밀크':'#D4AF37','탕후루탱글틴트(小年糕)':'#6B3E5C','누디블러(매트)':'#8B4789','호박컬러':'#5C4033','립머드':'#7A1F1F','틴트(미분류)':'#8B7A65','미입력':'#D4C9A8','기타':'#8B7A65','기타·미입력':'#D4C9A8'};
   const palette=['#A52A2A','#D4AF37','#4A6670','#1E5631','#6B3E5C','#6B8C99','#B8941F','#8B4789','#5C4033','#8B7A65'];
+  // 점크기 스케일링: 총비용 sqrt × 0.05 (3~30px 범위)
+  const sizeOf=cost=>Math.max(3,Math.min(30,Math.sqrt(cost||0)*0.05));
   const ds=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([prod,arr],i)=>{
     const col=PRODUCT_COLORS[prod]||palette[i%palette.length];
-    return {label:`${prod} (${arr.length})`,data:arr.map(r=>({x:r.총비용,y:r.인터랙션,r:Math.max(3,Math.sqrt(r.노출량||0)/120),_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_hot:r.인기콘텐츠})),backgroundColor:col+'AA',borderColor:col,borderWidth:1,pointStyle:'circle'};
+    return {label:`${prod} (${arr.length})`,data:arr.map(r=>({x:r.종합CPUV,y:r.인터랙션,r:sizeOf(r.총비용),_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:r.인기콘텐츠})),backgroundColor:col+'AA',borderColor:col,borderWidth:1,pointStyle:'circle'};
   });
   const hot=rows.filter(r=>r.인기콘텐츠);
   if(hot.length){
-    ds.push({label:`인기콘텐츠(爆文) ${hot.length}건 · 朱红 테두리`,data:hot.map(r=>({x:r.총비용,y:r.인터랙션,r:Math.max(4,Math.sqrt(r.노출량||0)/120+2),_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_hot:true})),backgroundColor:'rgba(0,0,0,0)',borderColor:COL.red,borderWidth:2.5});
+    ds.push({label:`인기콘텐츠(爆文) ${hot.length}건 · 朱红 테두리`,data:hot.map(r=>({x:r.종합CPUV,y:r.인터랙션,r:sizeOf(r.총비용)+2,_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:true})),backgroundColor:'rgba(0,0,0,0)',borderColor:COL.red,borderWidth:2.5});
   }
+  // CPUV 중앙값 + 인터랙션 중앙값 가이드라인 (4사분면 구분)
+  const cpuvList=rows.map(r=>r.종합CPUV).sort((a,b)=>a-b);
+  const intList=rows.map(r=>r.인터랙션).sort((a,b)=>a-b);
+  const cpuvMed=cpuvList[Math.floor(cpuvList.length/2)]||0;
+  const intMed=intList[Math.floor(intList.length/2)]||0;
+  const quadrantPlugin={id:'quad4',afterDraw:c=>{
+    try{
+      const a=c.chartArea, ctx=c.ctx;
+      const xMid=c.scales.x.getPixelForValue(cpuvMed);
+      const yMid=c.scales.y.getPixelForValue(intMed);
+      ctx.save();
+      ctx.strokeStyle='rgba(184,148,31,0.4)';ctx.setLineDash([4,4]);ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(xMid,a.top);ctx.lineTo(xMid,a.bottom);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(a.left,yMid);ctx.lineTo(a.right,yMid);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font="bold 10.5px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 베스트 (효율↑+화제↑)',a.left+8,a.top+14);
+      ctx.fillStyle='rgba(200,16,46,0.85)';ctx.textAlign='right';ctx.fillText('⚠ 화제만 — 비효율',a.right-8,a.top+14);
+      ctx.fillStyle='rgba(74,102,112,0.85)';ctx.textAlign='left';ctx.fillText('조용한 효율',a.left+8,a.bottom-8);
+      ctx.fillStyle='rgba(139,122,101,0.85)';ctx.textAlign='right';ctx.fillText('제외 검토',a.right-8,a.bottom-8);
+      ctx.restore();
+    }catch(e){}
+  }};
   charts.cScatter=new Chart(document.getElementById('cScatter'),{type:'bubble',data:{datasets:ds},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:14,padding:8,font:{size:11}}},tooltip:{callbacks:{label:c=>{const d=c.raw;return [`${d._n} ${d._o&&d._o!==d._n?'('+d._o+')':''}`,`${d._t||'-'} · ${d._b||'-'}${d._a&&d._a!=='미입력'?' · 앵글: '+d._a:''}${d._hot?' · 🔥인기':''}`,`총비용 ￥${FMT(d.x)} · 인터랙션 ${FMT(d.y)}`,`노출 ${FMT(d._imp)} · 외부UV ${FMT(d._uv)} · CPUV ${F2(d._cpuv)}`];}}}},scales:{x:{title:{display:true,text:'총비용(￥)'},ticks:{callback:v=>FMT(v)}},y:{title:{display:true,text:'인터랙션'},ticks:{callback:v=>FMT(v)}}}}});}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:14,padding:8,font:{size:11}}},tooltip:{callbacks:{label:c=>{const d=c.raw;return [`${d._n} ${d._o&&d._o!==d._n?'('+d._o+')':''}`,`${d._t||'-'} · ${d._b||'-'}${d._a&&d._a!=='미입력'?' · 앵글: '+d._a:''}${d._hot?' · 🔥인기':''}`,`CPUV ${F2(d.x)} · 인터랙션 ${FMT(d.y)} · 광고비 ￥${FMT(d._cost)}`,`노출 ${FMT(d._imp)} · 외부UV ${FMT(d._uv)}`];}}}},scales:{x:{title:{display:true,text:'CPUV (낮을수록 매장 방문 효율 ↑)'},ticks:{callback:v=>F2(v)}},y:{title:{display:true,text:'인터랙션 (좋아요·댓글·저장 합계)'},ticks:{callback:v=>FMT(v)}}}},plugins:[quadrantPlugin]});}
 
 function chAngle(){destroy('cAngle');const ag=KOL.angle[brand].filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력').sort((a,b)=>a.평균CPUV-b.평균CPUV);
   if(!ag.length){const cv=document.getElementById('cAngle');if(cv){const ctx=cv.getContext('2d');ctx.fillStyle=COL.grey;ctx.font="13px 'Noto Sans SC',sans-serif";ctx.fillText('이 브랜드는 노트유형(앵글) 데이터가 부족합니다 (CG는 운영팀 입력 누락)',20,40);}return;}
