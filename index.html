@@ -560,14 +560,14 @@
     <div id="alerts" class="alerts"></div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
-      <div class="panel"><h3>월별 광고비 vs 매출 (GMV)</h3><div class="note">막대 = 광고 집행액 / 선 = 발생한 매출 · 막대 위 👑 = 최고치 월 · <b>광고비가 늘면 매출도 늘어야 정상</b></div><div class="cwrap"><canvas id="cSpend"></canvas></div></div>
-      <div class="panel"><h3>월별 ROI 추세 <span class="hint-inline">광고비 1원당 매출</span></h3><div class="note"><b style="color:var(--blue)">쥐광 ROI</b>(가는 청자선) = 샤오홍슈 → Tmall 유입 후 <b>추정 매출</b> ÷ 광고비 · <b style="color:var(--green)">★ CID ROI</b>(굵은 옥색 다이아) = 전환광고 <b>실제 결제 매출</b> ÷ 광고비 · 회색 점선 = 손익분기(1.0) · <b>1.0 미만 = 적자</b> · 👑 = 최고 ROI 월 · <b style="color:var(--green)">CID ROI가 비즈니스 의사결정 기준</b></div><div class="cwrap"><canvas id="cRoi"></canvas></div></div>
+      <div class="panel"><h3>월별 광고비 vs 매출 (GMV)</h3><div class="note">막대 = 광고 집행액 / 선 = 발생한 매출 · 막대 위 👑 = 최고치 월 · <b>광고비가 늘면 매출도 늘어야 정상</b><br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 막대↑선↓ 월 = 비효율 구간 (광고 효율 점검) · 막대↓선↑ 월 = 자연 유입 우위 (광고 의존도 낮춤 검토) · 동조 상승 = 광고 효과 정상</div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
+      <div class="panel"><h3>월별 ROI 추세 <span class="hint-inline">광고비 1원당 매출</span></h3><div class="note"><b style="color:var(--blue)">쥐광 ROI</b>(가는 청자선) = 샤오홍슈 → Tmall 유입 후 <b>추정 매출</b> ÷ 광고비 · <b style="color:var(--green)">★ CID ROI</b>(굵은 옥색 다이아) = 전환광고 <b>실제 결제 매출</b> ÷ 광고비 · 회색 점선 = 손익분기(1.0) · <b>1.0 미만 = 적자</b> · 👑 = 최고 ROI 월 · <b style="color:var(--green)">CID ROI가 비즈니스 의사결정 기준</b><br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션 기준:</span> CID ROI ≥ 1.5 = 예산 증액 검토 · 1.0~1.5 = 유지 · 1.0 미만 = 크리에이티브/타겟팅 즉시 점검</div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(30,86,49,0.06);border-left:3px solid var(--green);border-radius:4px"></div></div>
       <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
-      <div class="panel full"><h3>구매 여정 (광고 → 스토어 → 구매)</h3><div class="note"><b>① 광고 노출</b> = 광고가 보인 횟수 · <b>② 스토어 진입</b> = 광고를 보고 샤오홍슈 스토어/노트로 들어온 사람 수 · <b>③ 타오바오 이동</b> = 외부 쇼핑몰로 넘어간 사람 수 · <b>④ 구매 완료</b> = 실제 결제한 사람 수 · 각 단계 사이의 % = 전환율(다음 단계로 넘어간 비율)</div><div class="cwrap"><canvas id="cFunnel"></canvas></div></div>
-      <div class="panel"><h3>매체별 광고비 구성 (월별)</h3><div class="note">어떤 광고에 얼마를 썼는지 비교 · KOL(인플루언서) · 쥐광(샤오홍슈 피드 광고) · CID(전환광고) · SNS</div><div class="cwrap"><canvas id="cChannel"></canvas></div></div>
-      <div class="panel"><h3>브랜드 검색지수 추세 <span class="hint-inline">소비자 관심도</span></h3><div class="note">샤오홍슈에서 브랜드 키워드를 얼마나 검색했는지 · 👑 = 최고 관심도 월 · <b>광고비를 늘렸을 때 검색이 따라 오르면 광고가 효과적</b></div><div class="cwrap"><canvas id="cSearch"></canvas></div></div>
-      <div class="panel full"><h3>벤치마크 vs 경쟁사 (검색 모멘텀)</h3><div class="note">최신월 vs 1월 대비 검색지수 변화율 · 양수=상승, 음수=하락</div><div id="benchmark"></div></div>
+      <div class="panel full"><h3>구매 여정 (광고 → 스토어 → 구매)</h3><div class="note"><b>① 광고 노출</b> = 광고가 보인 횟수 · <b>② 스토어 진입</b> = 광고를 보고 샤오홍슈 스토어/노트로 들어온 사람 수 · <b>③ 타오바오 이동</b> = 외부 쇼핑몰로 넘어간 사람 수 · <b>④ 구매 완료</b> = 실제 결제한 사람 수 · 각 단계 사이의 % = 전환율(다음 단계로 넘어간 비율)<br><span style="color:var(--gong-red-deep);font-weight:700">→ 병목 진단:</span> ①→② 전환율 ↓ = 크리에이티브 매력도 부족 (소재 교체) · ②→③ 전환율 ↓ = 노트→타오바오 동선 약함 (CTA·딥링크 점검) · ③→④ 전환율 ↓ = 가격·리뷰·페이지 매력도 부족 (상세페이지 개선)</div><div class="cwrap"><canvas id="cFunnel"></canvas></div><div id="funnelInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(184,148,31,0.08);border-left:3px solid var(--orange);border-radius:4px"></div></div>
+      <div class="panel"><h3>매체별 광고비 구성 (월별)</h3><div class="note">어떤 광고에 얼마를 썼는지 비교 · KOL(인플루언서) · 쥐광(샤오홍슈 피드 광고) · CID(전환광고) · SNS<br><span style="color:var(--gong-red-deep);font-weight:700">→ 진단:</span> CID 비중 ↑ = 단기 매출 푸시 모드 · KOL 비중 ↑ = 브랜딩/유입 확장 모드 · 두 채널 균형(40~60% 사이)이 효율 정점</div><div class="cwrap"><canvas id="cChannel"></canvas></div><div id="channelInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.06);border-left:3px solid var(--blue);border-radius:4px"></div></div>
+      <div class="panel"><h3>브랜드 검색지수 추세 <span class="hint-inline">소비자 관심도</span></h3><div class="note">샤오홍슈에서 브랜드 키워드를 얼마나 검색했는지 · 👑 = 최고 관심도 월 · <b>광고비를 늘렸을 때 검색이 따라 오르면 광고가 효과적</b><br><span style="color:var(--gong-red-deep);font-weight:700">→ 진단:</span> 광고비 증가 → 검색지수 상승 = 인지도 효과 검증(예산 유지·증액) · 광고비↑ + 검색 정체 = 크리에이티브 피로(소재 리뉴얼 필요)</div><div class="cwrap"><canvas id="cSearch"></canvas></div><div id="searchInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(107,140,153,0.08);border-left:3px solid var(--sky);border-radius:4px"></div></div>
+      <div class="panel full"><h3>벤치마크 vs 경쟁사 (검색 모멘텀)</h3><div class="note">최신월 vs 1월 대비 검색지수 변화율 · 양수=상승, 음수=하락<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션 기준:</span> 자사 상승 + 경쟁사 하락 = <b style="color:var(--green)">공백 시장 (점유율 확장 기회)</b> · 자사 하락 + 경쟁사 상승 = <b style="color:var(--accent)">위협 신호 (긴급 대응 필요)</b> · 동반 상승 = 카테고리 성장 (절대값 비교)</div><div id="benchmark"></div><div id="benchInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(165,42,42,0.05);border-left:3px solid var(--gong-red);border-radius:4px"></div></div>
       <div class="panel full"><h3>📊 자동 인사이트 <span class="hint-inline">데이터에서 자동으로 뽑은 핵심 한 줄들</span></h3><div class="insight" id="insightOv"></div></div>
     </div>
   </div>
@@ -589,9 +589,9 @@
           황금 점선으로 4사분면: <b style="color:var(--green)">👑 좌상 = 베스트</b>(효율도 좋고 화제도 많음) · <b style="color:var(--accent)">⚠ 우상 = 화제만 — 비효율</b>(인기는 있는데 매장 방문 비용이 큼 = 자극적이지만 구매로 안 이어짐) · 좌하 = 조용한 효율 · 우하 = 제외 검토 · <b>점 클릭 → 인플루언서 상세</b></div>
           <div class="cwrap tall"><canvas id="cScatter"></canvas></div>
         </div>
-        <div class="panel"><h3>주력상품별 평균 CPUV</h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수</div><div class="cwrap"><canvas id="cCType"></canvas></div></div>
-        <div class="panel"><h3>팔로워 구간별 평균 CPUV</h3><div class="note">미들 KOL의 효율이 메가 대비 높은지 검증</div><div class="cwrap"><canvas id="cTier"></canvas></div></div>
-        <div class="panel full"><h3>콘텐츠 앵글별 성과 (CPUV ↔ 인기콘텐츠 비율)</h3><div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율 · 우측 하단(저CPUV+고인기)이 최적 앵글</div><div class="cwrap"><canvas id="cAngle"></canvas></div></div>
+        <div class="panel"><h3>주력상품별 평균 CPUV <span class="hint-inline">상품별 매장유입 효율</span></h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션:</span> 평균 대비 30% 낮은 상품 = 광고 집중 1순위 · 30% 높은 상품 = 소재 점검 또는 제외 검토</div><div class="cwrap"><canvas id="cCType"></canvas></div><div id="cTypeInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(30,86,49,0.05);border-left:3px solid var(--green);border-radius:4px"></div></div>
+        <div class="panel"><h3>팔로워 구간별 평균 CPUV <span class="hint-inline">KOL 등급별 효율</span></h3><div class="note">미들 KOL의 효율이 메가 대비 높은지 검증<br><span style="color:var(--gong-red-deep);font-weight:700">→ 가설 검증:</span> 미들 CPUV ＜ 메가 CPUV = 통설대로 미들 효율 우위 (예산 미들로 재배분) · 미들 CPUV ≥ 메가 = 메가 단가 정당화 (브랜딩 효과 별도 추적)</div><div class="cwrap"><canvas id="cTier"></canvas></div><div id="cTierInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(107,140,153,0.08);border-left:3px solid var(--sky);border-radius:4px"></div></div>
+        <div class="panel full"><h3>콘텐츠 앵글별 성과 (CPUV ↔ 인기콘텐츠 비율) <span class="hint-inline">앵글 = 콘텐츠 화두</span></h3><div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율 · 우측 하단(저CPUV+고인기)이 최적 앵글<br><span style="color:var(--gong-red-deep);font-weight:700">→ 추천 기준:</span> CPUV ＜ 평균 + 인기율 ≥ 30% = <b style="color:var(--green)">증량 권장</b> · CPUV ≥ 평균 + 인기율 ＜ 15% = <b style="color:var(--accent)">제외 검토</b> · 단일 건수 앵글은 표본 부족 — 추가 시드 테스트 후 판단</div><div class="cwrap"><canvas id="cAngle"></canvas></div><div id="cAngleInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(212,175,55,0.08);border-left:3px solid var(--gold);border-radius:4px"></div></div>
         <div class="panel full"><h3>📊 KOL 요약 인사이트</h3><div class="insight" id="insightKol"></div></div>
         <div class="panel full">
           <h3>소재 raw 테이블 <span class="badge" id="rowcountK"></span></h3>
@@ -619,18 +619,21 @@
           <span style="color:var(--green);font-weight:700">좌상=최우선 증량</span> ·
           <span style="color:var(--blue);font-weight:700">좌하=스텔스 효율</span> ·
           <span style="color:var(--gold-deep);font-weight:700">우상=브랜딩 자산</span> ·
-          <span style="color:var(--accent);font-weight:700">우하=제외 검토</span></div>
+          <span style="color:var(--accent);font-weight:700">우하=제외 검토</span>
+          <br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 좌상 = 효율+화제 동시 우위 (즉시 KOL 추가 매칭) · 좌하 = 효율 우수하지만 바이럴 부족 (소재 강화) · 우상 = 비싸지만 인지도 가치 (브랜딩 예산으로 분류) · 우하 = 즉시 종료 후보</div>
           <div class="cwrap tall"><canvas id="cQuadrant"></canvas></div>
+          <div id="quadrantInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.07);border-left:3px solid var(--gold);border-radius:4px"></div>
         </div>
         <div class="panel full">
           <h3>💡 다음 분기 액션 아이템</h3>
-          <div class="note">데이터 기반 자동 추천 · 우선순위 콘텐츠수 ≥ 2건 기준</div>
+          <div class="note">데이터 기반 자동 추천 · 우선순위 콘텐츠수 ≥ 2건 기준<br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 🟢 = 다음 라운드 N건 증량 + 동일 앵글 KOL 확장 · 🆕 = 시드 1~2건 추가 후 데이터 보강 · 🔴 = 즉시 종료, 예산 🟢로 이전</div>
           <div class="action-grid" id="angleActions"></div>
         </div>
         <div class="panel full">
           <h3>🗺️ 앵글 × 주력상품 매트릭스</h3>
-          <div class="note">셀=해당 조합의 평균 CPUV(￥) · 색 진할수록 효율 좋음 · 빈 셀=해당 조합 콘텐츠 없음 → 시드 테스트 후보</div>
+          <div class="note">셀=해당 조합의 평균 CPUV(￥) · 색 진할수록 효율 좋음 · 빈 셀=해당 조합 콘텐츠 없음 → 시드 테스트 후보<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션:</span> 가장 진한 셀의 앵글-상품 조합 = 다음 캠페인 메인 포맷 · 빈 셀 중 진한 셀 인접 = 시드 우선순위 (효율 가설 검증)</div>
           <div style="overflow:auto"><div id="angleProductHeatmap"></div></div>
+          <div id="matrixInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.07);border-left:3px solid var(--blue);border-radius:4px"></div>
         </div>
         <div class="panel full">
           <h3>📋 종합 앵글 방향성 제안</h3>
@@ -661,8 +664,8 @@
       </div>
       <div class="tbox" style="max-height:520px"><table id="monthlyTable"><thead></thead><tbody></tbody></table></div>
     </div>
-    <div class="panel full"><h3>월별 추세 그래프 (선택 지표)</h3><div class="note">위 지표 셀렉터로 변경 · 매체별 라인</div><div class="cwrap tall"><canvas id="cMonthlyTrend"></canvas></div></div>
-    <div class="panel full"><div class="insight" id="insightMonthly"></div></div>
+    <div class="panel full"><h3>월별 추세 그래프 (선택 지표)</h3><div class="note">위 지표 셀렉터로 변경 · 매체별 라인<br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 상승 라인 = 해당 매체 모멘텀 우위 (예산 증액 검토) · 하락 라인 = 효율 저하 (소재·타깃 점검) · 라인 교차점 = 매체 전환 신호</div><div class="cwrap tall"><canvas id="cMonthlyTrend"></canvas></div><div id="monthlyTrendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.06);border-left:3px solid var(--blue);border-radius:4px"></div></div>
+    <div class="panel full"><h3>📊 자동 인사이트 (월별)</h3><div class="note">월별 cross-tab에서 자동 추출된 핵심 변화</div><div class="insight" id="insightMonthly"></div></div>
     <div class="panel full">
       <h3>📐 지표별 계산 기준</h3>
       <div class="note">월별 매체 성과 표의 각 지표가 어떻게 산출되는지 정의 · 브랜드/매체 필터 적용 후 동일하게 계산</div>
@@ -1094,7 +1097,135 @@ function renderOverview(){
   safe(chChannel,'chChannel');
   safe(chSearch,'chSearch');
   safe(renderBenchmark,'renderBenchmark');
+  safe(renderOverviewInterp,'renderOverviewInterp');
   try{document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}catch(e){console.error('insightOv err:',e);}
+}
+
+// ===== Overview 카드별 동적 해석 텍스트 (JP qoo10 패턴 — 수치+비교+액션) =====
+function renderOverviewInterp(){
+  const m=brandMonthly(); if(!m||!m.length) return;
+  const cur=m[m.length-1]||{}, prev=m[m.length-2]||{};
+  const curMon=cur.월||cur.month||'최근월';
+  const set=(id,html)=>{const el=document.getElementById(id);if(el)el.innerHTML=html;};
+  const pct=(c,p)=>!p||!c?null:((c-p)/Math.abs(p)*100);
+  const arrow=v=>v==null?'—':(v>0?`<b style="color:var(--green)">▲${v.toFixed(1)}%</b>`:v<0?`<b style="color:var(--accent)">▼${Math.abs(v).toFixed(1)}%</b>`:`<b>±0%</b>`);
+
+  // 1) 광고비 vs 매출
+  try{
+    const curSpend=cur.쥐광비||0, curGmv=cur.전점GMV||0;
+    const prevSpend=prev.쥐광비||0, prevGmv=prev.전점GMV||0;
+    const spendChg=pct(curSpend,prevSpend), gmvChg=pct(curGmv,prevGmv);
+    let diag='—';
+    if(spendChg!=null&&gmvChg!=null){
+      if(spendChg>5 && gmvChg>5) diag='<b style="color:var(--green)">동조 상승 — 광고 효과 정상</b> · 예산 유지·증액 검토';
+      else if(spendChg>5 && gmvChg<-5) diag='<b style="color:var(--accent)">광고비↑·매출↓ — 비효율 구간</b> · 크리에이티브·타겟팅 즉시 점검';
+      else if(spendChg<-5 && gmvChg>5) diag='<b style="color:var(--green)">광고비↓·매출↑ — 자연 유입 우위</b> · 광고 의존도 낮춤 검토';
+      else if(spendChg<-5 && gmvChg<-5) diag='<b style="color:var(--accent)">동반 감소 — 모멘텀 약화</b> · 캠페인 활성화 필요';
+      else diag='<b>완만 변동 구간</b> · 추세 관찰';
+    }
+    set('spendInterp', `<b>${curMon}월:</b> 광고비 ${WON(curSpend)} (${arrow(spendChg)}) → 매출 ${WON(curGmv)} (${arrow(gmvChg)}) · 광고 1원당 매출 <b>${F2(curSpend?curGmv/curSpend:0)}원</b> <br>→ <b>진단:</b> ${diag}`);
+  }catch(e){}
+
+  // 2) ROI 추세
+  try{
+    const curRoi=cur.쥐광비?(cur.전점GMV/cur.쥐광비):0;
+    const prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
+    const curCid=cur.CID비?(cur.CID성사GMV/cur.CID비):0;
+    const prevCid=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
+    const roiJudge=v=>v>=1.5?`<b style="color:var(--green)">우수 (≥1.5)</b>`:v>=1.0?`<b style="color:var(--orange)">손익분기 부근</b>`:v>0?`<b style="color:var(--accent)">적자 (＜1.0)</b>`:`<b>—</b>`;
+    let lines=[`<b>${curMon}월 쥐광 ROI</b> ${F2(curRoi)} (${arrow(pct(curRoi,prevRoi))}) — ${roiJudge(curRoi)}`];
+    if(brand==='COLORGRAM'||brand==='TOTAL'){
+      lines.push(`<b>★ CID ROI</b> ${F2(curCid)} (${arrow(pct(curCid,prevCid))}) — ${roiJudge(curCid)} · 비즈니스 의사결정 기준`);
+    }
+    let act='유지 모니터링';
+    if(curCid>=1.5||curRoi>=1.5) act='<b style="color:var(--green)">→ 액션:</b> 손익분기 충분 초과 — 예산 10~20% 증액 검토';
+    else if(curCid>0&&curCid<1.0) act='<b style="color:var(--accent)">→ 액션:</b> CID 적자 — 타깃·크리에이티브·랜딩 즉시 점검';
+    else if(curRoi<1.0) act='<b style="color:var(--accent)">→ 액션:</b> 쥐광 효율 저하 — 키워드·소재 리뉴얼';
+    else act='<b>→ 액션:</b> 손익분기 부근 — 최적화 가능 영역 탐색';
+    set('roiInterp', lines.join('<br>')+'<br>'+act);
+  }catch(e){}
+
+  // 3) 구매 여정 (퍼널)
+  try{
+    const f=brandMonthly().reduce((a,x)=>{
+      a.imp+=(x.노출||0); a.uv+=(x.UV||x.샤오홍싱_UV||0);
+      a.tao+=(x.타오바오UV||x.타오바오이동||0); a.buy+=(x.구매||x.구매자수||0);
+      return a;
+    },{imp:0,uv:0,tao:0,buy:0});
+    const r1=f.imp?(f.uv/f.imp*100):0;
+    const r2=f.uv?(f.tao/f.uv*100):0;
+    const r3=f.tao?(f.buy/f.tao*100):0;
+    const rates=[{n:'①→② 노출→스토어',v:r1,th:0.5},{n:'②→③ 스토어→타오바오',v:r2,th:30},{n:'③→④ 타오바오→구매',v:r3,th:5}];
+    const weak=rates.filter(x=>x.v>0&&x.v<x.th).sort((a,b)=>(a.v/a.th)-(b.v/b.th))[0];
+    let diag = weak ? `<b style="color:var(--accent)">병목:</b> ${weak.n} ${weak.v.toFixed(2)}% (기준 ${weak.th}% 미만) → 해당 단계 집중 개선` : `<b style="color:var(--green)">전 단계 기준 충족</b> · 전체 볼륨 확장 모드`;
+    set('funnelInterp', `<b>누적 전환율:</b> ①→② ${r1.toFixed(2)}% · ②→③ ${r2.toFixed(1)}% · ③→④ ${r3.toFixed(1)}%<br>→ ${diag}`);
+  }catch(e){}
+
+  // 4) 매체별 광고비 구성
+  try{
+    const curCid=cur.CID비||0, curKol=cur.KOL비||0, curJu=cur.쥐광비||0, curSns=cur.SNS비||0;
+    const tot=curCid+curKol+curJu+curSns;
+    if(tot>0){
+      const p=v=>Math.round(v/tot*100);
+      const mix=[['쥐광',p(curJu)],['CID',p(curCid)],['KOL',p(curKol)],['SNS',p(curSns)]].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+      const top=mix[0];
+      let mode='—';
+      if(top[0]==='CID'&&top[1]>=50) mode='<b style="color:var(--green)">단기 매출 푸시 모드</b> (CID 집중)';
+      else if(top[0]==='KOL'&&top[1]>=50) mode='<b style="color:var(--orange)">브랜딩·유입 확장 모드</b> (KOL 집중) — 단기 매출 보완 필요';
+      else if(top[0]==='쥐광'&&top[1]>=50) mode='<b style="color:var(--blue)">노출형 확장 모드</b> (쥐광 집중)';
+      else mode='<b style="color:var(--green)">균형 분산</b> (효율 정점 구간)';
+      set('channelInterp', `<b>${curMon}월 믹스:</b> ${mix.map(x=>`${x[0]} ${x[1]}%`).join(' · ')}<br>→ <b>진단:</b> ${mode}`);
+    }
+  }catch(e){}
+
+  // 5) 검색지수
+  try{
+    const s=(typeof DATA!=='undefined'&&DATA.search&&DATA.search[brand])?DATA.search[brand]:null;
+    if(s){
+      const months=Object.keys(s).sort((a,b)=>a-b);
+      const last=months[months.length-1], prevM=months[months.length-2];
+      const keys=Object.keys(s[last]);
+      const lastSum=keys.reduce((a,k)=>a+(s[last][k]||0),0);
+      const prevSum=prevM?keys.reduce((a,k)=>a+(s[prevM][k]||0),0):0;
+      const chg=pct(lastSum,prevSum);
+      const spendChg=pct(cur.쥐광비,prev.쥐광비);
+      let diag='—';
+      if(chg!=null&&spendChg!=null){
+        if(spendChg>5&&chg>5) diag='<b style="color:var(--green)">광고비↑+검색↑ — 인지도 효과 검증</b> · 예산 유지·증액';
+        else if(spendChg>5&&chg<=0) diag='<b style="color:var(--accent)">광고비↑·검색 정체 — 크리에이티브 피로</b> · 소재 리뉴얼 필요';
+        else if(spendChg<-5&&chg>0) diag='<b style="color:var(--green)">광고비↓·검색↑ — 자연 인지 누적</b> · 효율적 구간';
+        else diag='<b>완만 추세</b> · 추가 데이터 확보 후 판단';
+      }
+      set('searchInterp', `<b>${last}월 검색지수 합계:</b> ${FMT(lastSum)} (${arrow(chg)})<br>→ <b>진단:</b> ${diag}`);
+    }
+  }catch(e){}
+
+  // 6) 벤치마크는 renderBenchmark에서 직접 처리 (별도)
+  try{
+    const el=document.getElementById('benchInterp');
+    if(el && (typeof DATA!=='undefined') && DATA.search){
+      const brands=Object.keys(DATA.search);
+      const calc=b=>{
+        const s=DATA.search[b]; if(!s) return null;
+        const months=Object.keys(s).sort((a,b)=>a-b);
+        const k=Object.keys(s[months[0]]);
+        const last=k.reduce((a,x)=>a+(s[months[months.length-1]][x]||0),0);
+        const first=k.reduce((a,x)=>a+(s[months[0]][x]||0),0);
+        return first?((last-first)/first*100):null;
+      };
+      const self=calc(brand);
+      const competitors=brands.filter(b=>b!==brand&&b!=='TOTAL').map(b=>({b,v:calc(b)})).filter(x=>x.v!=null);
+      const compAvg=competitors.length?competitors.reduce((a,x)=>a+x.v,0)/competitors.length:null;
+      let diag='—';
+      if(self!=null&&compAvg!=null){
+        if(self>0&&compAvg<0) diag='<b style="color:var(--green)">공백 시장 — 자사↑ 경쟁사↓</b> · 점유율 확장 기회. 키워드 신규 확장 검토';
+        else if(self<0&&compAvg>0) diag='<b style="color:var(--accent)">위협 신호 — 자사↓ 경쟁사↑</b> · 긴급 대응 (소재·KOL·예산 모두 점검)';
+        else if(self>0&&compAvg>0) diag='<b style="color:var(--orange)">카테고리 동반 성장</b> · 절대값 비교로 점유 추세 확인';
+        else diag='<b>전반 침체</b> · 카테고리 자체 모멘텀 약화';
+      }
+      el.innerHTML = `<b>${brand} 모멘텀:</b> ${self!=null?arrow(self):'—'} · 경쟁사 평균 ${compAvg!=null?arrow(compAvg):'—'}<br>→ <b>진단:</b> ${diag}`;
+    }
+  }catch(e){}
 }
 
 // ===== KOL =====
@@ -1110,13 +1241,22 @@ function kolKpis(){
   const sumUV=rows.reduce((a,r)=>a+(r.외부행동UV||0),0);
   const cpuvVals=rows.map(r=>r.종합CPUV).filter(v=>v>0&&!isNaN(v));
   const avgCpuv=cpuvVals.reduce((a,b)=>a+b,0)/cpuvVals.length;
+  // ===== 해석 라인 자동 생성 =====
+  const hotRate=n?Math.round(hot/n*100):0;
+  const intPerUV=sumUV?sumInt/sumUV:0; // 인터랙션 1당 외부행동 = 화제→실행 효율
+  const uvPerImp=sumImp?(sumUV/sumImp*100):0; // 노출 → 외부행동 전환율 %
+  // CPUV 해석: 업계 통상 ≤40 우수, 40~80 보통, >80 점검
+  const cpuvJudge = avgCpuv<=40 ? `<b style="color:var(--green)">우수 (≤40)</b>` : avgCpuv<=80 ? `<b style="color:var(--orange)">보통 (40~80)</b> · 효율 점검` : `<b style="color:var(--accent)">높음 (>80)</b> · 소재 교체 필요`;
+  const hotJudge = hotRate>=30 ? `<b style="color:var(--green)">상위 (≥30%)</b>` : hotRate>=15 ? `<b style="color:var(--orange)">평균</b>` : `<b style="color:var(--accent)">저조 (＜15%)</b> · 앵글 다양화`;
+  const uvActJudge = uvPerImp>=1.0 ? `<b style="color:var(--green)">전환 양호</b>` : uvPerImp>=0.5 ? `<b style="color:var(--orange)">평균</b>` : `<b style="color:var(--accent)">전환 약함</b> · CTA 점검`;
+
   const cards=[
-    ['총 소재 수(최신)',FMT(n),legacy?`+ 이전작업 ${legacy}건 별도`:(hot?`인기콘텐츠 ${hot}건 (${Math.round(hot/n*100)}%)`:'인기콘텐츠 마커 없음')],
-    ['누적 KOL 투자',WON(sumCost),'협업비+추가광고비'],
-    ['평균 종합 CPUV',F2(avgCpuv),'낮을수록 우수'],
-    ['총 노출량',FMT(sumImp),'합계'],
-    ['총 인터랙션',FMT(sumInt),'합계'],
-    ['총 외부 행동 UV',FMT(sumUV),'매장 방문 등'],
+    ['총 소재 수(최신)',FMT(n),legacy?`+ 이전작업 ${legacy}건 별도`:(hot?`인기콘텐츠 ${hot}건 (${hotRate}%) — ${hotJudge}`:'인기콘텐츠 마커 없음 — 데이터 갱신 필요')],
+    ['누적 KOL 투자',WON(sumCost),`협업비+추가광고비 · 평균 ¥${n?Math.round(sumCost/n).toLocaleString():0}/건`],
+    ['평균 종합 CPUV',F2(avgCpuv),`${cpuvJudge}`],
+    ['총 노출량',FMT(sumImp),`소재당 평균 ${n?Math.round(sumImp/n).toLocaleString():0} 노출`],
+    ['총 인터랙션',FMT(sumInt),`노출 대비 ${sumImp?(sumInt/sumImp*100).toFixed(2):0}% (반응률)`],
+    ['총 외부 행동 UV',FMT(sumUV),`노출 대비 ${uvPerImp.toFixed(2)}% — ${uvActJudge}`],
   ];
   document.getElementById('kolKpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div></div>`).join('');
 }
@@ -1254,6 +1394,54 @@ function renderKol(){
   safe(chAngle,'chAngle');
   safe(insightKol,'insightKol');
   safe(renderTable,'renderTable');
+  safe(renderKolInterp,'renderKolInterp');
+}
+
+// ===== KOL 카드별 동적 해석 (JP qoo10 패턴 — 수치+비교+액션) =====
+function renderKolInterp(){
+  const set=(id,html)=>{const el=document.getElementById(id);if(el)el.innerHTML=html;};
+  // 1) 주력상품별 평균 CPUV
+  try{
+    const ct=KOL.sp[brand].filter(c=>c.콘텐츠수>=3);
+    if(ct.length){
+      const sorted=[...ct].sort((a,b)=>a.평균CPUV-b.평균CPUV);
+      const best=sorted[0], worst=sorted[sorted.length-1];
+      const med=sorted[Math.floor(sorted.length/2)].평균CPUV;
+      const gap = best.평균CPUV>0 ? ((worst.평균CPUV-best.평균CPUV)/best.평균CPUV*100) : 0;
+      set('cTypeInterp', `<b>최우수:</b> ${best.주력상품} CPUV ¥${F2(best.평균CPUV)} · <b>최저:</b> ${worst.주력상품} ¥${F2(worst.평균CPUV)} (격차 ${gap.toFixed(0)}%) · 중간값 ¥${F2(med)}<br>→ <b>액션:</b> <b style="color:var(--green)">${best.주력상품}</b> = 다음 캠페인 광고 1순위 · <b style="color:var(--accent)">${worst.주력상품}</b> = 소재 점검 또는 제외 검토`);
+    }
+  }catch(e){}
+  // 2) 팔로워 구간별 평균 CPUV
+  try{
+    const tf=KOL.tier[brand].filter(c=>c.팔로워구간!=='미상');
+    if(tf.length){
+      const findT=k=>tf.find(t=>(t.팔로워구간||'').includes(k));
+      const mid=findT('미들')||findT('Mid'); const mega=findT('메가')||findT('Mega');
+      let line='';
+      if(mid&&mega){
+        const gap = mega.평균CPUV-mid.평균CPUV;
+        const verdict = gap>0 ? `<b style="color:var(--green)">통설 검증 — 미들 효율 우위 (¥${F2(Math.abs(gap))} 낮음)</b> · 예산을 미들로 재배분 검토` : `<b style="color:var(--orange)">메가가 더 효율적</b> · 메가 단가 정당화 — 브랜딩 효과 별도 추적`;
+        line = `<b>미들 KOL</b> CPUV ¥${F2(mid.평균CPUV)} · <b>메가 KOL</b> CPUV ¥${F2(mega.평균CPUV)}<br>→ <b>가설 검증:</b> ${verdict}`;
+      } else {
+        const sorted=[...tf].sort((a,b)=>a.평균CPUV-b.평균CPUV);
+        line = `<b>구간별 평균 CPUV:</b> ${sorted.map(t=>`${t.팔로워구간} ¥${F2(t.평균CPUV)}`).join(' · ')}<br>→ <b>액션:</b> ${sorted[0].팔로워구간} 구간 우선 — 차회 캠페인 집중`;
+      }
+      set('cTierInterp', line);
+    }
+  }catch(e){}
+  // 3) 앵글별 성과
+  try{
+    const ag=KOL.angle[brand].filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력');
+    if(ag.length){
+      const sortedC=[...ag].sort((a,b)=>a.평균CPUV-b.평균CPUV);
+      const avgCpuv=ag.reduce((a,x)=>a+x.평균CPUV,0)/ag.length;
+      const boost=ag.filter(a=>a.평균CPUV<avgCpuv&&a.인기콘텐츠비율>=30);
+      const cut=ag.filter(a=>a.평균CPUV>=avgCpuv&&a.인기콘텐츠비율<15);
+      let act=`<b style="color:var(--green)">증량 ${boost.length}건</b> · <b style="color:var(--accent)">제외 검토 ${cut.length}건</b>`;
+      let topLine = `<b>증량 권장 TOP:</b> ${boost.slice(0,3).map(a=>`${a.콘텐츠앵글}(${a.콘텐츠수}건·CPUV ¥${F2(a.평균CPUV)}·인기 ${a.인기콘텐츠비율.toFixed(0)}%)`).join(' · ')||'없음 — 모두 평균 또는 화제성 미흡'}`;
+      set('cAngleInterp', `${topLine}<br>→ <b>액션:</b> ${act} — 평균 CPUV ¥${F2(avgCpuv)} 기준 분류`);
+    }
+  }catch(e){}
 }
 
 // ===== events =====
@@ -1448,13 +1636,42 @@ function insightMonthly(){
     if(!totals[r.매체]) totals[r.매체]={광고비:0,GMV:0};
     totals[r.매체].광고비+=r.광고비||0; totals[r.매체].GMV+=r.GMV||0;
   });
-  let html=`<b>${brand} · 1~5월 누적</b> — `;
+  let html=`<b>${brand} · 1~5월 누적</b><br>`;
   const items=Object.entries(totals).filter(([_,v])=>v.광고비>0).map(([ch,v])=>{
     const roas=v.광고비?(v.GMV/v.광고비*100):0;
-    return `<b>${ch}</b>: 비용 ￥${FMT(v.광고비)} → ROAS ${roas.toFixed(0)}%`;
+    const judge=roas>=150?`<b style="color:var(--green)">우수</b>`:roas>=100?`<b style="color:var(--orange)">손익분기</b>`:roas>0?`<b style="color:var(--accent)">적자</b>`:`<b>—</b>`;
+    return {ch,cost:v.광고비,gmv:v.GMV,roas,judge};
   });
-  html+=items.join(' · ');
+  html+=items.map(i=>`<b>${i.ch}</b>: 비용 ￥${FMT(i.cost)} → ROAS ${i.roas.toFixed(0)}% (${i.judge})`).join(' · ');
+  // 액션 라인 (best/worst)
+  const sorted=[...items].sort((a,b)=>b.roas-a.roas);
+  if(sorted.length>=2){
+    const best=sorted[0], worst=sorted[sorted.length-1];
+    html+=`<br>→ <b>액션:</b> <b style="color:var(--green)">${best.ch}</b> ROAS ${best.roas.toFixed(0)}% — 예산 증액 검토 · <b style="color:var(--accent)">${worst.ch}</b> ROAS ${worst.roas.toFixed(0)}% — 효율 점검 또는 ${best.ch}로 예산 이전`;
+  }
   document.getElementById('insightMonthly').innerHTML=html;
+}
+
+function renderMonthlyTrendInterp(){
+  const el=document.getElementById('monthlyTrendInterp'); if(!el) return;
+  const all=KOL.monthly_channel?.[brand]||[];
+  if(!all.length){el.innerHTML='—';return;}
+  // mMetric 기준 채널별 모멘텀(첫달 vs 마지막달)
+  const channels=['쥐광(샤오홍싱)','CID(전환)','KOL(达人)','SNS'];
+  const months=[1,2,3,4,5];
+  const trend=channels.map(ch=>{
+    const vals=months.map(m=>{const r=all.find(x=>x.매체===ch&&x.월===m); return r?r[mMetric]:null;}).filter(v=>v!=null&&v>0);
+    if(vals.length<2) return null;
+    const first=vals[0], last=vals[vals.length-1];
+    const chg=first?((last-first)/first*100):0;
+    return {ch,first,last,chg};
+  }).filter(Boolean);
+  if(!trend.length){el.innerHTML='데이터 부족';return;}
+  trend.sort((a,b)=>b.chg-a.chg);
+  const up=trend[0], down=trend[trend.length-1];
+  const fmt=v=>mMetric.includes('%')?v.toFixed(1)+'%':(mMetric==='광고비'||mMetric==='GMV'?'￥'+FMT(v):FMT(v));
+  el.innerHTML = `<b>${mMetric} 모멘텀 (1월→5월):</b> 상승 1위 <b style="color:var(--green)">${up.ch} ${up.chg>=0?'▲':'▼'}${Math.abs(up.chg).toFixed(0)}%</b> (${fmt(up.first)} → ${fmt(up.last)}) · 하락 1위 <b style="color:var(--accent)">${down.ch} ${down.chg>=0?'▲':'▼'}${Math.abs(down.chg).toFixed(0)}%</b>
+  <br>→ <b>액션:</b> ${up.ch} 예산 비중 확대 검토 · ${down.ch} 효율 저하 원인 분석 (소재 피로·시즈널·경쟁 강화 등)`;
 }
 
 function renderMonthly(){
@@ -1462,6 +1679,7 @@ function renderMonthly(){
   safe(renderMonthlyTable,'renderMonthlyTable');
   safe(chMonthlyTrend,'chMonthlyTrend');
   safe(insightMonthly,'insightMonthly');
+  safe(renderMonthlyTrendInterp,'renderMonthlyTrendInterp');
 }
 
 // wire filters (mChannel/mMonths는 글로벌 필터로 이관, mMetric만 컨텍스트 필터로 유지)
@@ -1508,9 +1726,24 @@ function renderCompareKpis(){
     ];
     return cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div>${c[2]}</div>`).join('');
   };
+  // 브랜드 비교 해석 라인
+  const compare=(b)=>{
+    const m=DATA.monthly[b]; if(!m||!m.length) return '';
+    const sum=k=>m.reduce((a,x)=>a+(x[k]||0),0);
+    const spend=sum('쥐광비'),gmv=sum('전점GMV'),roi=spend?(gmv/spend):0;
+    return {spend,gmv,roi};
+  };
+  const W=compare('WAKEMAKE'),C=compare('COLORGRAM');
+  let wmInterp='', cgInterp='';
+  if(W&&C){
+    const gmvLead = W.gmv>C.gmv ? `<b style="color:#7A1F1F">📕 매출 리딩 (+${WON(W.gmv-C.gmv)})</b>` : `<b>📒 매출 추격 대상</b>`;
+    const roiCmp = W.roi>C.roi ? `<b style="color:var(--green)">📕 ROI 우위 (${F2(W.roi)} vs ${F2(C.roi)})</b>` : `<b style="color:var(--orange)">📒 ROI 우위 (${F2(C.roi)} vs ${F2(W.roi)})</b>`;
+    wmInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(165,42,42,0.06);border-left:3px solid #A52A2A;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(W.spend)} / 매출 ${WON(W.gmv)} / ROI ${F2(W.roi)}<br>→ ${gmvLead} · 1원당 매출 ${F2(W.roi)}원</div>`;
+    cgInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(212,175,55,0.08);border-left:3px solid #D4AF37;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(C.spend)} / 매출 ${WON(C.gmv)} / ROI ${F2(C.roi)}<br>→ ${roiCmp}</div>`;
+  }
   document.getElementById('kpis').innerHTML=
-    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(135deg,rgba(165,42,42,0.08) 0%,#FFFDF5 70%);border-top-color:#A52A2A"><div class="lab" style="color:#7A1F1F">📕 WAKEMAKE 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('WAKEMAKE')}</div></div>`+
-    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(135deg,rgba(212,175,55,0.12) 0%,#FFFDF5 70%);border-top-color:#D4AF37"><div class="lab" style="color:#B8941F">📒 COLORGRAM 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('COLORGRAM')}</div></div>`;
+    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(135deg,rgba(165,42,42,0.08) 0%,#FFFDF5 70%);border-top-color:#A52A2A"><div class="lab" style="color:#7A1F1F">📕 WAKEMAKE 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('WAKEMAKE')}</div>${wmInterp}</div>`+
+    `<div class="kpi" style="grid-column:span 2;background:linear-gradient(135deg,rgba(212,175,55,0.12) 0%,#FFFDF5 70%);border-top-color:#D4AF37"><div class="lab" style="color:#B8941F">📒 COLORGRAM 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('COLORGRAM')}</div>${cgInterp}</div>`;
 }
 
 // --- Anomaly 자동 감지 ---
@@ -1757,6 +1990,52 @@ function renderAngleInsight(){
   renderAngleActions(b,ok);
   renderAngleProductHeatmap(b);
   renderAngleStrategy(b,ok);
+  try{renderQuadrantInterp(b,ok);}catch(e){console.error('quadInterp err:',e);}
+  try{renderMatrixInterp(b);}catch(e){console.error('matrixInterp err:',e);}
+}
+
+// ===== 4사분면 동적 해석 =====
+function renderQuadrantInterp(b,hasAngle){
+  const el=document.getElementById('quadrantInterp'); if(!el) return;
+  if(!hasAngle){el.innerHTML='<b>앵글 데이터 부족</b> — 시트에 콘텐츠앵글 컬럼 추가 후 정밀 해석 활성화';return;}
+  const ag=(KOL.angle[b]||[]).filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력');
+  if(!ag.length){el.innerHTML='—';return;}
+  const cpuvMed=median(ag.map(a=>a.평균CPUV));
+  const hotMed=median(ag.map(a=>a.인기콘텐츠비율));
+  const Q1=ag.filter(a=>a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율>=hotMed); // 좌상 최우선
+  const Q2=ag.filter(a=>a.평균CPUV<=cpuvMed&&a.인기콘텐츠비율<hotMed);  // 좌하 스텔스
+  const Q3=ag.filter(a=>a.평균CPUV>cpuvMed&&a.인기콘텐츠비율>=hotMed);  // 우상 브랜딩
+  const Q4=ag.filter(a=>a.평균CPUV>cpuvMed&&a.인기콘텐츠비율<hotMed);   // 우하 제외
+  const tot=ag.length;
+  const ratio=arr=>tot?Math.round(arr.length/tot*100):0;
+  const top=Q1[0]||Q2[0]||Q3[0]||Q4[0];
+  el.innerHTML = `<b>분포:</b> <span style="color:var(--green)">좌상 ${Q1.length} (${ratio(Q1)}%)</span> · <span style="color:var(--blue)">좌하 ${Q2.length} (${ratio(Q2)}%)</span> · <span style="color:var(--gold-deep)">우상 ${Q3.length} (${ratio(Q3)}%)</span> · <span style="color:var(--accent)">우하 ${Q4.length} (${ratio(Q4)}%)</span> · 중앙값 기준선 CPUV ¥${F2(cpuvMed)} / 인기율 ${hotMed.toFixed(0)}%
+  <br>→ <b>액션 권장:</b> ${Q1.length?`<b style="color:var(--green)">좌상 ${Q1.slice(0,3).map(a=>a.콘텐츠앵글).join(', ')}</b> 즉시 증량 · `:'<b style="color:var(--accent)">좌상 공백 — 효율+화제 동시 우위 앵글 부재. 시드 테스트 우선. </b>'}${Q4.length?`<b style="color:var(--accent)">우하 ${Q4.length}개</b> 종료 검토 → 예산 좌상으로 이전`:'우하 정리 완료'}`;
+}
+
+// ===== 앵글 × 주력상품 매트릭스 동적 해석 =====
+function renderMatrixInterp(b){
+  const el=document.getElementById('matrixInterp'); if(!el) return;
+  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태==='최신'&&r.총비용>0);
+  const grid={};
+  rows.forEach(r=>{
+    const ag=(r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력')?r.콘텐츠앵글:'(앵글 미입력)';
+    const sp=r.주력상품||'기타';
+    const k=ag+'|'+sp;
+    if(!grid[k])grid[k]={ag,sp,cpuv:0,n:0};
+    if(r.종합CPUV>0){grid[k].cpuv+=r.종합CPUV; grid[k].n++;}
+  });
+  const cells=Object.values(grid).filter(c=>c.n>0).map(c=>({...c,avg:c.cpuv/c.n}));
+  if(!cells.length){el.innerHTML='데이터 부족';return;}
+  const angles=Array.from(new Set(cells.map(c=>c.ag)));
+  const products=Array.from(new Set(cells.map(c=>c.sp)));
+  const totalCells=angles.length*products.length;
+  const filled=cells.length;
+  const empty=totalCells-filled;
+  const best=[...cells].sort((a,b)=>a.avg-b.avg)[0];
+  const worst=[...cells].sort((a,b)=>b.avg-a.avg)[0];
+  el.innerHTML = `<b>매트릭스 채움률:</b> ${filled}/${totalCells} (${Math.round(filled/totalCells*100)}%) · 빈 셀 ${empty}개 — 시드 테스트 후보
+  <br>→ <b>액션:</b> <b style="color:var(--green)">최우수 조합</b> [${best.ag} × ${best.sp}] CPUV ¥${F2(best.avg)} = 다음 캠페인 메인 포맷 · <b style="color:var(--accent)">최저 효율</b> [${worst.ag} × ${worst.sp}] ¥${F2(worst.avg)} = 제외 검토 · 빈 셀 중 진한 셀 인접 조합부터 시드 1~2건 추가`;
 }
 
 function chQuadrant(b,hasAngle){
