@@ -196,6 +196,36 @@
   .full{grid-column:1/-1}
   .cwrap{position:relative;height:300px}
   .cwrap.tall{height:360px}
+  .cwrap.huge{height:600px}
+  @media(max-width:880px){.cwrap.huge{height:500px}}
+  /* ===== 4분면 의미 범례 (그래프 위에 좋은점/나쁜점/기타 표시) ===== */
+  .quad-legend{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px;
+  }
+  @media(max-width:880px){.quad-legend{grid-template-columns:repeat(2,1fr)}}
+  .quad-legend .ql{
+    padding:10px 14px;border-radius:7px;font-size:12.5px;line-height:1.5;
+    border-left:5px solid;background:var(--card);
+    box-shadow:0 1px 3px rgba(92,15,15,.05);
+    position:relative;
+  }
+  .quad-legend .ql .qpos{
+    font-size:10px;font-weight:700;color:var(--ink-soft);letter-spacing:.4px;
+    text-transform:uppercase;margin-bottom:3px;font-family:'Noto Serif SC',serif;
+  }
+  .quad-legend .ql .qttl{
+    font-size:14px;font-weight:900;display:block;margin-bottom:4px;
+    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+  }
+  .quad-legend .ql .qdesc{font-size:11.5px;color:var(--ink-soft);line-height:1.5}
+  .quad-legend .ql.good{background:linear-gradient(135deg,rgba(30,86,49,0.10) 0%,var(--card) 70%);border-left-color:var(--green)}
+  .quad-legend .ql.good .qttl{color:var(--green)}
+  .quad-legend .ql.bad{background:linear-gradient(135deg,rgba(200,16,46,0.09) 0%,var(--card) 70%);border-left-color:var(--accent)}
+  .quad-legend .ql.bad .qttl{color:var(--accent)}
+  .quad-legend .ql.mid{background:linear-gradient(135deg,rgba(74,102,112,0.08) 0%,var(--card) 70%);border-left-color:var(--blue)}
+  .quad-legend .ql.mid .qttl{color:var(--blue)}
+  .quad-legend .ql.brand{background:linear-gradient(135deg,rgba(184,148,31,0.12) 0%,var(--card) 70%);border-left-color:var(--gold-deep)}
+  .quad-legend .ql.brand .qttl{color:var(--gold-deep)}
   /* ===== 인사이트 박스 ===== */
   .insight{
     background:linear-gradient(135deg,#FFFDF5 0%,#F8F0DC 100%);
@@ -585,9 +615,30 @@
       <div class="grid">
         <div class="panel full">
           <h3>소재 산점도: CPUV × 인터랙션 <span class="hint-inline">화제성과 효율의 함정 구분</span></h3>
-          <div class="note">X = <b>CPUV</b>(낮을수록 효율 ↑) · Y = <b>인터랙션</b>(좋아요·댓글·저장 합계) · 점 크기 = <b>광고비</b> · 朱红 테두리 = 인기콘텐츠(爆文)<br>
-          황금 점선으로 4사분면: <b style="color:var(--green)">👑 좌상 = 베스트</b>(효율도 좋고 화제도 많음) · <b style="color:var(--accent)">⚠ 우상 = 화제만 — 비효율</b>(인기는 있는데 매장 방문 비용이 큼 = 자극적이지만 구매로 안 이어짐) · 좌하 = 조용한 효율 · 우하 = 제외 검토 · <b>점 클릭 → 인플루언서 상세</b></div>
-          <div class="cwrap tall"><canvas id="cScatter"></canvas></div>
+          <div class="note">X = <b>CPUV</b>(낮을수록 효율 ↑) · Y = <b>인터랙션</b>(좋아요·댓글·저장 합계) · 점 크기 = <b>광고비</b> · 朱红 테두리 = 인기콘텐츠(爆文) · <b>점 클릭 → 인플루언서 상세</b></div>
+          <div class="quad-legend">
+            <div class="ql good">
+              <div class="qpos">↖ 좌상 · 좋은점</div>
+              <span class="qttl">👑 베스트</span>
+              <div class="qdesc">효율 좋고 화제도 많음 — <b style="color:var(--green)">즉시 KOL 확장</b></div>
+            </div>
+            <div class="ql brand">
+              <div class="qpos">↗ 우상 · 기타</div>
+              <span class="qttl">⚠ 함정 (비효율 화제)</span>
+              <div class="qdesc">인기는 있는데 매장 방문 비용 큼 — <b style="color:var(--gold-deep)">자극적이지만 구매 X</b></div>
+            </div>
+            <div class="ql mid">
+              <div class="qpos">↙ 좌하 · 기타</div>
+              <span class="qttl">💎 스텔스 효율</span>
+              <div class="qdesc">조용히 효율 좋음 — <b style="color:var(--blue)">소재 강화로 화제 만들기</b></div>
+            </div>
+            <div class="ql bad">
+              <div class="qpos">↘ 우하 · 나쁜점</div>
+              <span class="qttl">🔴 제외 검토</span>
+              <div class="qdesc">효율도 화제도 모두 미흡 — <b style="color:var(--accent)">즉시 종료 후보</b></div>
+            </div>
+          </div>
+          <div class="cwrap huge"><canvas id="cScatter"></canvas></div>
         </div>
         <div class="panel"><h3>주력상품별 평균 CPUV <span class="hint-inline">상품별 매장유입 효율</span></h3><div class="note">최신 데이터 기준 · 낮을수록 매장 방문 효율 우수<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션:</span> 평균 대비 30% 낮은 상품 = 광고 집중 1순위 · 30% 높은 상품 = 소재 점검 또는 제외 검토</div><div class="cwrap"><canvas id="cCType"></canvas></div><div id="cTypeInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(30,86,49,0.05);border-left:3px solid var(--green);border-radius:4px"></div></div>
         <div class="panel"><h3>팔로워 구간별 평균 CPUV <span class="hint-inline">KOL 등급별 효율</span></h3><div class="note">미들 KOL의 효율이 메가 대비 높은지 검증<br><span style="color:var(--gong-red-deep);font-weight:700">→ 가설 검증:</span> 미들 CPUV ＜ 메가 CPUV = 통설대로 미들 효율 우위 (예산 미들로 재배분) · 미들 CPUV ≥ 메가 = 메가 단가 정당화 (브랜딩 효과 별도 추적)</div><div class="cwrap"><canvas id="cTier"></canvas></div><div id="cTierInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(107,140,153,0.08);border-left:3px solid var(--sky);border-radius:4px"></div></div>
@@ -615,13 +666,30 @@
       <div class="grid">
         <div class="panel full">
           <h3>🎯 효율 × 화제성 4사분면 (앵글별)</h3>
-          <div class="note">X축=평균 CPUV(↓좋음) · Y축=인기콘텐츠 비율(↑좋음) · 점 크기=콘텐츠 수 ·
-          <span style="color:var(--green);font-weight:700">좌상=최우선 증량</span> ·
-          <span style="color:var(--blue);font-weight:700">좌하=스텔스 효율</span> ·
-          <span style="color:var(--gold-deep);font-weight:700">우상=브랜딩 자산</span> ·
-          <span style="color:var(--accent);font-weight:700">우하=제외 검토</span>
-          <br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 좌상 = 효율+화제 동시 우위 (즉시 KOL 추가 매칭) · 좌하 = 효율 우수하지만 바이럴 부족 (소재 강화) · 우상 = 비싸지만 인지도 가치 (브랜딩 예산으로 분류) · 우하 = 즉시 종료 후보</div>
-          <div class="cwrap tall"><canvas id="cQuadrant"></canvas></div>
+          <div class="note">X축=평균 CPUV(↓좋음) · Y축=인기콘텐츠 비율(↑좋음) · 점 크기=콘텐츠 수 · 중앙값 기준선으로 4분면 분할</div>
+          <div class="quad-legend">
+            <div class="ql good">
+              <div class="qpos">↖ 좌상 · 좋은점</div>
+              <span class="qttl">👑 최우선 증량</span>
+              <div class="qdesc">효율 + 화제 동시 우위 — <b style="color:var(--green)">즉시 KOL 추가 매칭</b></div>
+            </div>
+            <div class="ql brand">
+              <div class="qpos">↗ 우상 · 기타</div>
+              <span class="qttl">🏆 브랜딩 자산</span>
+              <div class="qdesc">비싸지만 인지도 가치 — <b style="color:var(--gold-deep)">브랜딩 예산으로 분류</b></div>
+            </div>
+            <div class="ql mid">
+              <div class="qpos">↙ 좌하 · 기타</div>
+              <span class="qttl">💎 스텔스 효율</span>
+              <div class="qdesc">효율 우수하지만 바이럴 부족 — <b style="color:var(--blue)">소재 강화 필요</b></div>
+            </div>
+            <div class="ql bad">
+              <div class="qpos">↘ 우하 · 나쁜점</div>
+              <span class="qttl">🔴 제외 검토</span>
+              <div class="qdesc">효율↓ + 화제↓ 동시 하위 — <b style="color:var(--accent)">즉시 종료 후보</b></div>
+            </div>
+          </div>
+          <div class="cwrap huge"><canvas id="cQuadrant"></canvas></div>
           <div id="quadrantInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.07);border-left:3px solid var(--gold);border-radius:4px"></div>
         </div>
         <div class="panel full">
@@ -1283,21 +1351,69 @@ function chScatter(){destroy('cScatter');
   const intList=rows.map(r=>r.인터랙션).sort((a,b)=>a-b);
   const cpuvMed=cpuvList[Math.floor(cpuvList.length/2)]||0;
   const intMed=intList[Math.floor(intList.length/2)]||0;
-  const quadrantPlugin={id:'quad4',afterDraw:c=>{
+  const quadrantPlugin={id:'quad4',beforeDatasetsDraw:c=>{
     try{
       const a=c.chartArea, ctx=c.ctx;
       const xMid=c.scales.x.getPixelForValue(cpuvMed);
       const yMid=c.scales.y.getPixelForValue(intMed);
       ctx.save();
-      ctx.strokeStyle='rgba(184,148,31,0.4)';ctx.setLineDash([4,4]);ctx.lineWidth=1;
+      // === 4분면 배경 채우기 (좋은점/나쁜점/기타 색상) ===
+      // 좌상 = 베스트 (옥색 연하게)
+      ctx.fillStyle='rgba(30,86,49,0.07)';
+      ctx.fillRect(a.left,a.top,xMid-a.left,yMid-a.top);
+      // 우상 = 함정 (황금색 연하게)
+      ctx.fillStyle='rgba(184,148,31,0.08)';
+      ctx.fillRect(xMid,a.top,a.right-xMid,yMid-a.top);
+      // 좌하 = 스텔스 효율 (청자색 연하게)
+      ctx.fillStyle='rgba(74,102,112,0.06)';
+      ctx.fillRect(a.left,yMid,xMid-a.left,a.bottom-yMid);
+      // 우하 = 제외 (적색 연하게)
+      ctx.fillStyle='rgba(200,16,46,0.07)';
+      ctx.fillRect(xMid,yMid,a.right-xMid,a.bottom-yMid);
+      // === 중앙 십자선 (굵게·진하게) ===
+      ctx.strokeStyle='rgba(184,148,31,0.7)';ctx.setLineDash([6,4]);ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(xMid,a.top);ctx.lineTo(xMid,a.bottom);ctx.stroke();
       ctx.beginPath();ctx.moveTo(a.left,yMid);ctx.lineTo(a.right,yMid);ctx.stroke();
       ctx.setLineDash([]);
-      ctx.font="bold 10.5px 'Noto Serif SC',serif";
-      ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 베스트 (효율↑+화제↑)',a.left+8,a.top+14);
-      ctx.fillStyle='rgba(200,16,46,0.85)';ctx.textAlign='right';ctx.fillText('⚠ 화제만 — 비효율',a.right-8,a.top+14);
-      ctx.fillStyle='rgba(74,102,112,0.85)';ctx.textAlign='left';ctx.fillText('조용한 효율',a.left+8,a.bottom-8);
-      ctx.fillStyle='rgba(139,122,101,0.85)';ctx.textAlign='right';ctx.fillText('제외 검토',a.right-8,a.bottom-8);
+      ctx.restore();
+    }catch(e){}
+  },afterDraw:c=>{
+    try{
+      const a=c.chartArea, ctx=c.ctx;
+      ctx.save();
+      // === 큰 의미 라벨 (좋은점/나쁜점/기타) ===
+      // 좌상 = 베스트 / 좋은점
+      ctx.textAlign='left';ctx.textBaseline='top';
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(30,86,49,0.55)';ctx.fillText('좋은점',a.left+12,a.top+8);
+      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 베스트',a.left+12,a.top+22);
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(30,86,49,0.75)';ctx.fillText('효율↑ + 화제↑',a.left+12,a.top+50);
+      // 우상 = 함정 / 기타
+      ctx.textAlign='right';
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(184,148,31,0.65)';ctx.fillText('기타',a.right-12,a.top+8);
+      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(184,148,31,0.95)';ctx.fillText('⚠ 함정',a.right-12,a.top+22);
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(165,124,28,0.85)';ctx.fillText('화제만 — 비효율',a.right-12,a.top+50);
+      // 좌하 = 스텔스 / 기타
+      ctx.textAlign='left';ctx.textBaseline='bottom';
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(74,102,112,0.75)';ctx.fillText('조용한 효율',a.left+12,a.bottom-12);
+      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(74,102,112,0.85)';ctx.fillText('💎 스텔스',a.left+12,a.bottom-30);
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(74,102,112,0.55)';ctx.fillText('기타',a.left+12,a.bottom-58);
+      // 우하 = 제외 / 나쁜점
+      ctx.textAlign='right';
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(200,16,46,0.85)';ctx.fillText('효율↓ + 화제↓',a.right-12,a.bottom-12);
+      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(200,16,46,0.95)';ctx.fillText('🔴 제외',a.right-12,a.bottom-30);
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(200,16,46,0.65)';ctx.fillText('나쁜점',a.right-12,a.bottom-58);
       ctx.restore();
     }catch(e){}
   }};
@@ -2056,18 +2172,67 @@ function chQuadrant(b,hasAngle){
   };
   const data=ag.map(a=>({x:a.평균CPUV,y:a.인기콘텐츠비율,r:Math.max(5,Math.sqrt(a.콘텐츠수)*4),_n:a.콘텐츠앵글,_c:a.콘텐츠수,_cost:a.평균_총비용,_imp:a.평균_노출량}));
   const colors=ag.map(colorOf);
-  // 중앙 십자선 plugin
-  const cross={id:'cross',afterDraw:c=>{const a=c.chartArea;const ctx=c.ctx;
-    const xPx=c.scales.x.getPixelForValue(cpuvMed); const yPx=c.scales.y.getPixelForValue(hotMed);
-    ctx.save();ctx.strokeStyle='#D4C9A8';ctx.setLineDash([3,3]);ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(xPx,a.top);ctx.lineTo(xPx,a.bottom);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(a.left,yPx);ctx.lineTo(a.right,yPx);ctx.stroke();
-    ctx.fillStyle='#8B7A65';ctx.font="10.5px 'Noto Sans SC',sans-serif";
-    ctx.fillText('좌상: 최우선 증량',a.left+8,a.top+14);
-    ctx.fillText('우상: 브랜딩 자산',a.right-110,a.top+14);
-    ctx.fillText('좌하: 스텔스 효율',a.left+8,a.bottom-6);
-    ctx.fillText('우하: 제외 검토',a.right-95,a.bottom-6);
-    ctx.restore();
+  // 중앙 십자선 + 4분면 배경 + 큰 의미 라벨
+  const cross={id:'cross',beforeDatasetsDraw:c=>{
+    try{
+      const a=c.chartArea, ctx=c.ctx;
+      const xPx=c.scales.x.getPixelForValue(cpuvMed);
+      const yPx=c.scales.y.getPixelForValue(hotMed);
+      ctx.save();
+      // === 4분면 배경 채우기 ===
+      ctx.fillStyle='rgba(30,86,49,0.07)';   // 좌상 = 최우선
+      ctx.fillRect(a.left,a.top,xPx-a.left,yPx-a.top);
+      ctx.fillStyle='rgba(184,148,31,0.08)'; // 우상 = 브랜딩
+      ctx.fillRect(xPx,a.top,a.right-xPx,yPx-a.top);
+      ctx.fillStyle='rgba(74,102,112,0.06)'; // 좌하 = 스텔스
+      ctx.fillRect(a.left,yPx,xPx-a.left,a.bottom-yPx);
+      ctx.fillStyle='rgba(200,16,46,0.07)';  // 우하 = 제외
+      ctx.fillRect(xPx,yPx,a.right-xPx,a.bottom-yPx);
+      // === 중앙 십자선 (굵게) ===
+      ctx.strokeStyle='rgba(184,148,31,0.7)';ctx.setLineDash([6,4]);ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(xPx,a.top);ctx.lineTo(xPx,a.bottom);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(a.left,yPx);ctx.lineTo(a.right,yPx);ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }catch(e){}
+  },afterDraw:c=>{
+    try{
+      const a=c.chartArea, ctx=c.ctx;
+      ctx.save();
+      // 좌상 = 최우선 / 좋은점
+      ctx.textAlign='left';ctx.textBaseline='top';
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(30,86,49,0.55)';ctx.fillText('좋은점',a.left+12,a.top+8);
+      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 최우선',a.left+12,a.top+22);
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(30,86,49,0.75)';ctx.fillText('효율↑ + 화제↑ · 즉시 증량',a.left+12,a.top+50);
+      // 우상 = 브랜딩 / 기타
+      ctx.textAlign='right';
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(184,148,31,0.65)';ctx.fillText('기타',a.right-12,a.top+8);
+      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(184,148,31,0.95)';ctx.fillText('🏆 브랜딩',a.right-12,a.top+22);
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(165,124,28,0.85)';ctx.fillText('비싸지만 인지도 가치',a.right-12,a.top+50);
+      // 좌하 = 스텔스 / 기타
+      ctx.textAlign='left';ctx.textBaseline='bottom';
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(74,102,112,0.75)';ctx.fillText('소재 강화 필요',a.left+12,a.bottom-12);
+      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(74,102,112,0.85)';ctx.fillText('💎 스텔스',a.left+12,a.bottom-30);
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(74,102,112,0.55)';ctx.fillText('기타',a.left+12,a.bottom-58);
+      // 우하 = 제외 / 나쁜점
+      ctx.textAlign='right';
+      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
+      ctx.fillStyle='rgba(200,16,46,0.85)';ctx.fillText('효율↓ + 화제↓ · 즉시 종료',a.right-12,a.bottom-12);
+      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(200,16,46,0.95)';ctx.fillText('🔴 제외',a.right-12,a.bottom-30);
+      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.fillStyle='rgba(200,16,46,0.65)';ctx.fillText('나쁜점',a.right-12,a.bottom-58);
+      ctx.restore();
+    }catch(e){}
   }};
   charts.cQuadrant=new Chart(document.getElementById('cQuadrant'),{type:'bubble',data:{datasets:[{label:'앵글',data,backgroundColor:colors.map(c=>c+'AA'),borderColor:colors,borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
