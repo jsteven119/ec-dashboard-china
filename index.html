@@ -1358,7 +1358,7 @@ function kolKpis(){
     ['총 노출량 (曝光)',FMT(sumImp),`소재당 평균 ${n?Math.round(sumImp/n).toLocaleString():0} 노출`],
     ['총 조회수 (阅读)',FMT(sumViews),`노출 대비 ${viewRate.toFixed(1)}% — 노트 열람 전환율`],
     ['총 인터랙션 (互动)',FMT(sumInt),`노출 대비 ${sumImp?(sumInt/sumImp*100).toFixed(2):0}% (반응률)`],
-    ['ER (인터랙션/조회수)',ER.toFixed(2)+'%',`${erJudge} — 콘텐츠 자체 매력도`],
+    ['ER (互动率)',ER.toFixed(2)+'%',`인터랙션 ${FMT(sumInt)} ÷ 조회수 ${FMT(sumViews)} — ${erJudge}`],
     ['총 외부 행동 UV',FMT(sumUV),`노출 대비 ${uvPerImp.toFixed(2)}% — ${uvActJudge}`],
   ];
   document.getElementById('kolKpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div><div class="sm">${c[2]}</div></div>`).join('');
@@ -2597,6 +2597,19 @@ renderTable=function(){_origRenderTable();
 
 // 임베드 데이터에도 WM 노트유형 → 앵글 자동 매핑 적용 + 집계 재계산
 window._wmAutoAngleN=deriveWmAngleFromNoteType(KOL.kol.WAKEMAKE);
+
+// 내장 KOL 데이터 부트스트랩 — ER(=인터랙션/조회수%) + 조회수 정규화
+// sync 전 첫 렌더에서도 산점도/KPI/상관분석에 ER이 정상 표시되도록 필수
+['WAKEMAKE','COLORGRAM'].forEach(b=>{
+  (KOL.kol[b]||[]).forEach(r=>{
+    const views=+r.조회수||0, inter=+r.인터랙션||0;
+    r.조회수 = views;
+    r.인터랙션 = inter;
+    r.ER = views>0 ? +(inter/views*100).toFixed(2) : 0;
+  });
+});
+KOL.kol.TOTAL = [...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])].filter(r=>r.데이터상태!=='이전작업');
+
 rebuildKolAggregates();
 
 render();
