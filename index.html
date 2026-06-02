@@ -226,6 +226,51 @@
   .quad-legend .ql.mid .qttl{color:var(--blue)}
   .quad-legend .ql.brand{background:linear-gradient(135deg,rgba(184,148,31,0.12) 0%,var(--card) 70%);border-left-color:var(--gold-deep)}
   .quad-legend .ql.brand .qttl{color:var(--gold-deep)}
+  /* ===== 월별 매체 통합안 — 카드 그리드 + 신호등 + 스파크라인 ===== */
+  #monthlyVerdict{padding:18px 22px;margin:0 0 14px;border-radius:12px;position:relative}
+  #monthlyVerdict .v-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 22px;font-family:'Noto Serif SC',serif}
+  #monthlyVerdict .v-top .v-label{font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px}
+  #monthlyVerdict .v-top .v-val{font-size:24px;font-weight:900;color:var(--gong-red-deep);letter-spacing:-.3px}
+  #monthlyVerdict .v-top .v-delta{font-size:13px;font-weight:800}
+  #monthlyVerdict .v-action{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink);line-height:1.7}
+  #monthlyVerdict .v-action b{color:var(--gong-red-deep)}
+  .delta-up{color:var(--green)} .delta-down{color:var(--accent)} .delta-flat{color:var(--ink-soft)}
+  .media-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  @media(max-width:1100px){.media-cards{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:680px){.media-cards{grid-template-columns:1fr}}
+  .mcard{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px 14px;
+    border-top:4px solid var(--gold);box-shadow:0 1px 3px rgba(92,15,15,.05);
+    position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;
+  }
+  .mcard.signal-good{border-top-color:var(--green)}
+  .mcard.signal-good{background:linear-gradient(180deg,rgba(30,86,49,0.06) 0%,var(--card) 60%)}
+  .mcard.signal-warn{border-top-color:var(--orange)}
+  .mcard.signal-warn{background:linear-gradient(180deg,rgba(184,148,31,0.07) 0%,var(--card) 60%)}
+  .mcard.signal-bad{border-top-color:var(--accent)}
+  .mcard.signal-bad{background:linear-gradient(180deg,rgba(200,16,46,0.06) 0%,var(--card) 60%)}
+  .mcard.signal-neu{border-top-color:var(--blue)}
+  .mcard .m-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .mcard .m-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:900;color:var(--gong-red-deep);letter-spacing:.2px}
+  .mcard .m-name .m-sub{font-size:11px;font-weight:500;color:var(--ink-soft);margin-left:4px;font-family:'Noto Sans SC',sans-serif}
+  .mcard .m-signal{font-size:16px;line-height:1}
+  .mcard .m-primary{margin-top:2px}
+  .mcard .m-primary .m-pkey{font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.3px}
+  .mcard .m-primary .m-pval{font-size:24px;font-weight:900;color:var(--ink);font-family:'Noto Serif SC',serif;letter-spacing:-.5px}
+  .mcard .m-primary .m-pdelta{font-size:12px;font-weight:800;margin-left:6px}
+  .mcard .m-spark{margin:2px 0 4px;height:34px;display:flex;align-items:flex-end;gap:2px}
+  .mcard .m-spark svg{width:100%;height:100%;display:block;overflow:visible}
+  .mcard .m-spark .s-label{font-size:9.5px;color:var(--ink-soft);font-weight:600}
+  .mcard .m-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:11.5px;line-height:1.5}
+  .mcard .m-meta .mk{color:var(--ink-soft);font-weight:600}
+  .mcard .m-meta .mv{color:var(--ink);font-weight:700;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mcard .m-tag{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--rice-deep);color:var(--ink-soft);display:inline-block;letter-spacing:.2px}
+  .mcard .m-act{margin-top:6px;padding-top:8px;border-top:1px dashed var(--line-soft);font-size:12px;color:var(--ink);line-height:1.5;font-weight:600}
+  .mcard .m-act b{color:var(--gong-red-deep)}
+  .monthly-details{margin-bottom:14px}
+  .monthly-details summary{cursor:pointer;list-style:none;padding:4px 0;outline:none;display:flex;align-items:center;gap:6px}
+  .monthly-details summary::-webkit-details-marker{display:none}
+  .monthly-details[open] summary{padding-bottom:8px;border-bottom:1px dashed var(--line);margin-bottom:8px}
   /* ===== 인사이트 박스 ===== */
   .insight{
     background:linear-gradient(135deg,#FFFDF5 0%,#F8F0DC 100%);
@@ -733,10 +778,17 @@
 
   <!-- ===== MONTHLY TAB ===== -->
   <div id="tab_monthly" class="hide">
-    <div class="panel full">
-      <h3>매체 × 월별 성과</h3>
-      <div class="note">매체별 월간 지표 cross-tab · 브랜드/기간/매체는 상단 글로벌 필터 사용 · 합계는 표시 월만의 합</div>
-      <div class="ctrl">
+    <!-- 종합 진단 배너 (5초 룰) -->
+    <div class="panel full" id="monthlyVerdict" style="background:linear-gradient(135deg,#FFFDF5 0%,#F2EAD0 100%);border-top:3px solid var(--gong-red)"></div>
+    <!-- 매체 카드 그리드 (의사결정용 4장) -->
+    <div class="media-cards" id="mediaCards"></div>
+    <!-- 상세 cross-tab 표 (접힘) -->
+    <details class="panel full monthly-details">
+      <summary>
+        <span style="font-weight:800;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif">▾ 매체 × 월별 상세 cross-tab (펼치기)</span>
+        <span style="font-size:11.5px;color:var(--ink-soft);margin-left:8px">매월 × 8지표 = 40 컬럼 · 정밀 비교용</span>
+      </summary>
+      <div class="ctrl" style="margin-top:12px">
         <label>그래프 지표</label>
         <select id="mMetric">
           <option value="광고비">광고비 (₩)</option>
@@ -750,7 +802,7 @@
         </select>
       </div>
       <div class="tbox" style="max-height:520px"><table id="monthlyTable"><thead></thead><tbody></tbody></table></div>
-    </div>
+    </details>
     <div class="panel full"><h3>월별 추세 그래프 (선택 지표)</h3><div class="note">위 지표 셀렉터로 변경 · 매체별 라인<br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 상승 라인 = 해당 매체 모멘텀 우위 (예산 증액 검토) · 하락 라인 = 효율 저하 (소재·타깃 점검) · 라인 교차점 = 매체 전환 신호</div><div class="cwrap tall"><canvas id="cMonthlyTrend"></canvas></div><div id="monthlyTrendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.06);border-left:3px solid var(--blue);border-radius:4px"></div></div>
     <div class="panel full"><h3>📊 자동 인사이트 (월별)</h3><div class="note">월별 cross-tab에서 자동 추출된 핵심 변화</div><div class="insight" id="insightMonthly"></div></div>
     <div class="panel full">
@@ -1936,10 +1988,188 @@ function renderMonthlyTrendInterp(){
 
 function renderMonthly(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(renderMonthlyVerdict,'renderMonthlyVerdict');
+  safe(renderMediaCards,'renderMediaCards');
   safe(renderMonthlyTable,'renderMonthlyTable');
   safe(chMonthlyTrend,'chMonthlyTrend');
   safe(insightMonthly,'insightMonthly');
   safe(renderMonthlyTrendInterp,'renderMonthlyTrendInterp');
+}
+
+// ============ 월별 매체 통합안 — 종합 배너 + 매체 카드 ============
+// SVG 스파크라인 (월별 값 → 인라인 line + 영역)
+function sparkline(values, color, opts){
+  const opts2=opts||{};
+  const w=opts2.w||120, h=opts2.h||30, pad=2;
+  const arr=(values||[]).map(v=>+v||0);
+  if(arr.length<2) return `<svg viewBox="0 0 ${w} ${h}"><text x="2" y="${h-4}" font-size="9" fill="#8B7A65">데이터 부족</text></svg>`;
+  const min=Math.min(...arr), max=Math.max(...arr), range=max-min||1;
+  const xs=arr.map((_,i)=>pad+i*(w-2*pad)/(arr.length-1));
+  const ys=arr.map(v=>h-pad-(v-min)/range*(h-2*pad));
+  const linePath = xs.map((x,i)=>(i===0?'M':'L')+x.toFixed(1)+' '+ys[i].toFixed(1)).join(' ');
+  const areaPath = linePath + ` L ${xs[xs.length-1].toFixed(1)} ${h-pad} L ${xs[0].toFixed(1)} ${h-pad} Z`;
+  // 추세: 첫 vs 마지막
+  const trend = arr[arr.length-1] >= arr[0]*1.03 ? '▲' : arr[arr.length-1] <= arr[0]*0.97 ? '▼' : '▶';
+  const trendColor = trend==='▲'?'#1E5631':trend==='▼'?'#C8102E':'#8B7A65';
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <path d="${areaPath}" fill="${color}" opacity="0.18"/>
+    <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="1.8" fill="${color}"/>`).join('')}
+    <text x="${w-2}" y="10" text-anchor="end" font-size="11" font-weight="800" fill="${trendColor}">${trend}</text>
+  </svg>`;
+}
+
+// 매체별 월간 집계 (1~5월)
+function getMediaMonthly(brand){
+  const all=KOL.monthly_channel?.[brand]||[];
+  const channels=['쥐광(샤오홍싱)','CID(전환)','KOL(达人)','SNS'];
+  const months=[1,2,3,4,5];
+  return channels.map(ch=>{
+    const rows=months.map(m=>all.find(x=>x.매체===ch&&x.월===m)||{});
+    const tot=k=>rows.reduce((a,r)=>a+(+r[k]||0),0);
+    const spendArr=rows.map(r=>+r.광고비||0);
+    const gmvArr=rows.map(r=>+r.GMV||0);
+    const roasArr=rows.map(r=>+r['ROAS(%)']||0);
+    const ctrArr=rows.map(r=>+r['CTR(%)']||0);
+    const sumSpend=tot('광고비'), sumGmv=tot('GMV'), sumImp=tot('노출'), sumInt=tot('인터랙션'), sumUV=tot('외부UV/구매');
+    const roas=sumSpend?(sumGmv/sumSpend*100):0;
+    const ctr=sumImp?(sumInt/sumImp*100):0;
+    const cpm=sumImp?(sumSpend/sumImp*1000):0;
+    // 5월 vs 4월 변동
+    const curRoas=roasArr[4]||0, prevRoas=roasArr[3]||0;
+    const curSpend=spendArr[4]||0, prevSpend=spendArr[3]||0;
+    const curGmv=gmvArr[4]||0, prevGmv=gmvArr[3]||0;
+    return {매체:ch, spendArr, gmvArr, roasArr, ctrArr,
+      sumSpend, sumGmv, sumImp, sumInt, sumUV, roas, ctr, cpm,
+      curRoas, prevRoas, curSpend, prevSpend, curGmv, prevGmv};
+  });
+}
+
+// 매체별 신호등 + 액션 (지표 차별화)
+function judgeMedia(m){
+  const ch=m.매체;
+  const hasAdData = m.sumImp>0 || m.sumInt>0;
+  const hasGmv = m.sumGmv>0;
+  // 쥐광·CID: ROAS 기준
+  if(ch.includes('쥐광')||ch.includes('CID')){
+    if(!hasAdData) return {sig:'neu',icon:'⚪',tag:'데이터 없음',act:''};
+    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:'우수',act:'<b style="color:var(--green)">→ 예산 +20% 즉시</b> (한도 내)'};
+    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:'손익분기',act:'<b style="color:var(--orange)">→ 소재·타깃 교체 검토</b> · 유지'};
+    if(m.roas>0) return {sig:'bad',icon:'🔴',tag:'적자',act:'<b style="color:var(--accent)">→ 즉시 일시중단</b> · 원인 분석'};
+    return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
+  }
+  // KOL: 발행수·객단가 기준
+  if(ch.includes('KOL')){
+    const pubs=m.sumUV; // KOL의 외부UV/구매 컬럼 = 발행수로 재해석
+    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
+    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:`발행 ${FMT(pubs)}건 · 효율 우수`,act:'<b style="color:var(--green)">→ 다음 라운드 추가 KOL 매칭</b>'};
+    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:`발행 ${FMT(pubs)}건 · 평균`,act:'<b style="color:var(--orange)">→ 인기콘텐츠 비율 점검</b>'};
+    return {sig:'bad',icon:'🔴',tag:`발행 ${FMT(pubs)}건 · 효율 낮음`,act:'<b style="color:var(--accent)">→ 앵글/주력상품 재선정</b>'};
+  }
+  // SNS: 비용만
+  if(ch.includes('SNS')){
+    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
+    return {sig:'neu',icon:'⚪',tag:'정액 운영',act:'<b>→ 별도 액션 無</b> · 비용 모니터링'};
+  }
+  return {sig:'neu',icon:'⚪',tag:'',act:''};
+}
+
+function renderMonthlyVerdict(){
+  const box=document.getElementById('monthlyVerdict'); if(!box) return;
+  const arr=getMediaMonthly(brand);
+  const totSpend=arr.reduce((a,x)=>a+x.sumSpend,0);
+  const totGmv=arr.reduce((a,x)=>a+x.sumGmv,0);
+  const totRoas=totSpend?(totGmv/totSpend*100):0;
+  // 5월 vs 4월 종합
+  const cur5Spend=arr.reduce((a,x)=>a+(x.spendArr[4]||0),0);
+  const prev4Spend=arr.reduce((a,x)=>a+(x.spendArr[3]||0),0);
+  const cur5Gmv=arr.reduce((a,x)=>a+(x.gmvArr[4]||0),0);
+  const prev4Gmv=arr.reduce((a,x)=>a+(x.gmvArr[3]||0),0);
+  const cur5Roas=cur5Spend?(cur5Gmv/cur5Spend*100):0;
+  const prev4Roas=prev4Spend?(prev4Gmv/prev4Spend*100):0;
+  const roasDelta=cur5Roas-prev4Roas;
+  const spendChg=prev4Spend?((cur5Spend-prev4Spend)/prev4Spend*100):0;
+  const arrowR = roasDelta>1?`<span class="delta-up">▲+${roasDelta.toFixed(0)}%p</span>`:roasDelta<-1?`<span class="delta-down">▼${Math.abs(roasDelta).toFixed(0)}%p</span>`:`<span class="delta-flat">±0%p</span>`;
+  const arrowS = spendChg>1?`<span class="delta-up">▲${spendChg.toFixed(0)}%</span>`:spendChg<-1?`<span class="delta-down">▼${Math.abs(spendChg).toFixed(0)}%</span>`:`<span class="delta-flat">±0%</span>`;
+  // 자동 액션 추천 (매체별 신호 합)
+  const acts=arr.map(m=>{
+    const j=judgeMedia(m);
+    const short = j.sig==='good'?`${m.매체.split('(')[0].trim()} 증액`:j.sig==='bad'?`${m.매체.split('(')[0].trim()} 중단`:j.sig==='warn'?`${m.매체.split('(')[0].trim()} 점검`:null;
+    return short;
+  }).filter(Boolean);
+  box.innerHTML = `
+    <div class="v-top">
+      <span><span class="v-label">📊 5월 종합 ROAS</span> <span class="v-val">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
+      <span><span class="v-label">광고비</span> <span class="v-val" style="font-size:20px">${WON(cur5Spend)}</span> ${arrowS}</span>
+      <span><span class="v-label">매출</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
+      <span><span class="v-label">1~5월 누적 ROAS</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${totRoas.toFixed(0)}%</span></span>
+    </div>
+    <div class="v-action">
+      <b>📌 한 줄 액션:</b> ${acts.length?acts.join(' · '):'추세 안정 — 현 운영 유지'}
+    </div>`;
+}
+
+function renderMediaCards(){
+  const box=document.getElementById('mediaCards'); if(!box) return;
+  const arr=getMediaMonthly(brand);
+  const COL_MAP={'쥐광(샤오홍싱)':'#4A6670','CID(전환)':'#1E5631','KOL(达人)':'#A52A2A','SNS':'#B8941F'};
+  const SUB_MAP={'쥐광(샤오홍싱)':'샤오홍슈 피드','CID(전환)':'전환광고','KOL(达人)':'인플루언서','SNS':'운영비'};
+  box.innerHTML = arr.map(m=>{
+    const j=judgeMedia(m);
+    const col=COL_MAP[m.매체]||'#8B7A65';
+    const cur=m.curRoas, prev=m.prevRoas;
+    const roasDelta=cur-prev;
+    const arrowR = roasDelta>1?`<span class="delta-up m-pdelta">▲+${roasDelta.toFixed(0)}%p</span>`:roasDelta<-1?`<span class="delta-down m-pdelta">▼${Math.abs(roasDelta).toFixed(0)}%p</span>`:`<span class="delta-flat m-pdelta">±0</span>`;
+    const ch=m.매체;
+    const isKol = ch.includes('KOL');
+    const isSns = ch.includes('SNS');
+    // 매체별 차별 KPI
+    let primaryKey='5월 ROAS', primaryVal=cur.toFixed(0)+'%', primaryDelta=arrowR;
+    let sparkArr=m.roasArr, sparkLabel='1~5월 ROAS';
+    let meta=[
+      ['광고비 (1~5월)', WON(m.sumSpend)],
+      ['GMV (1~5월)', WON(m.sumGmv)],
+      ['평균 CTR', m.ctr.toFixed(2)+'%'],
+      ['평균 CPM', '¥'+m.cpm.toFixed(0)]
+    ];
+    if(isKol){
+      primaryKey='1~5월 GMV'; primaryVal=WON(m.sumGmv); primaryDelta='';
+      sparkArr=m.gmvArr; sparkLabel='1~5월 GMV 추이';
+      const aov = m.sumUV>0 ? m.sumSpend/m.sumUV : 0;
+      meta=[
+        ['협업비 합계', WON(m.sumSpend)],
+        ['발행수', FMT(m.sumUV)],
+        ['건당 비용', WON(aov)],
+        ['ROAS', m.roas.toFixed(0)+'%']
+      ];
+    }
+    if(isSns){
+      primaryKey='1~5월 비용'; primaryVal=WON(m.sumSpend); primaryDelta='';
+      sparkArr=m.spendArr; sparkLabel='1~5월 비용 추이';
+      const share = (arr.reduce((a,x)=>a+x.sumSpend,0)>0) ? m.sumSpend/arr.reduce((a,x)=>a+x.sumSpend,0)*100 : 0;
+      meta=[
+        ['1~5월 합계', WON(m.sumSpend)],
+        ['전체 점유', share.toFixed(1)+'%'],
+        ['5월 비용', WON(m.curSpend)],
+        ['', '']
+      ];
+    }
+    return `<div class="mcard signal-${j.sig}">
+      <div class="m-head">
+        <div class="m-name">${ch.split('(')[0].trim()}<span class="m-sub">${SUB_MAP[ch]||''}</span></div>
+        <div class="m-signal" title="${j.tag}">${j.icon}</div>
+      </div>
+      <div class="m-primary">
+        <div class="m-pkey">${primaryKey}</div>
+        <div><span class="m-pval">${primaryVal}</span>${primaryDelta}</div>
+      </div>
+      <div class="m-spark">${sparkline(sparkArr, col)}</div>
+      <div style="font-size:10px;color:var(--ink-soft);font-weight:600;margin-top:-4px">${sparkLabel}</div>
+      <div class="m-meta">${meta.filter(x=>x[0]).map(x=>`<div class="mk">${x[0]}</div><div class="mv">${x[1]}</div>`).join('')}</div>
+      <div class="m-tag">${j.tag||'—'}</div>
+      ${j.act?`<div class="m-act">${j.act}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
 // wire filters (mChannel/mMonths는 글로벌 필터로 이관, mMetric만 컨텍스트 필터로 유지)
