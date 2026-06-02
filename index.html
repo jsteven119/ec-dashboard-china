@@ -785,8 +785,8 @@
     <!-- 상세 cross-tab 표 (접힘) -->
     <details class="panel full monthly-details">
       <summary>
-        <span style="font-weight:800;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif">▾ 매체 × 월별 상세 cross-tab (펼치기)</span>
-        <span style="font-size:11.5px;color:var(--ink-soft);margin-left:8px">매월 × 8지표 = 40 컬럼 · 정밀 비교용</span>
+        <span style="font-weight:800;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif">▾ 媒介 × 月度详细交叉表 (매체 × 월별 상세 · 펼치기)</span>
+        <span style="font-size:11.5px;color:var(--ink-soft);margin-left:8px">每月 × 8指标 = 40列 · 精确对比用 (매월 × 8지표 · 정밀 비교용)</span>
       </summary>
       <div class="ctrl" style="margin-top:12px">
         <label>그래프 지표</label>
@@ -2045,31 +2045,30 @@ function getMediaMonthly(brand){
   });
 }
 
-// 매체별 신호등 + 액션 (지표 차별화)
+// 매체별 신호등 + 액션 (지표 차별화) — 中文 우선 + (한국어 병기)
 function judgeMedia(m){
   const ch=m.매체;
   const hasAdData = m.sumImp>0 || m.sumInt>0;
-  const hasGmv = m.sumGmv>0;
   // 쥐광·CID: ROAS 기준
   if(ch.includes('쥐광')||ch.includes('CID')){
-    if(!hasAdData) return {sig:'neu',icon:'⚪',tag:'데이터 없음',act:''};
-    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:'우수',act:'<b style="color:var(--green)">→ 예산 +20% 즉시</b> (한도 내)'};
-    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:'손익분기',act:'<b style="color:var(--orange)">→ 소재·타깃 교체 검토</b> · 유지'};
-    if(m.roas>0) return {sig:'bad',icon:'🔴',tag:'적자',act:'<b style="color:var(--accent)">→ 즉시 일시중단</b> · 원인 분석'};
-    return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
+    if(!hasAdData) return {sig:'neu',icon:'⚪',tag:'无数据 (데이터 없음)',act:''};
+    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:'优秀 (우수)',act:'<b style="color:var(--green)">→ 加投 +20% 立即执行</b> (예산 +20% 즉시 · 한도 내)'};
+    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:'盈亏平衡 (손익분기)',act:'<b style="color:var(--orange)">→ 素材·受众 替换检讨</b> (소재·타깃 교체 검토 · 维持 유지)'};
+    if(m.roas>0) return {sig:'bad',icon:'🔴',tag:'亏损 (적자)',act:'<b style="color:var(--accent)">→ 立即暂停</b> (즉시 일시중단 · 原因分析 원인 분석)'};
+    return {sig:'neu',icon:'⚪',tag:'未运营 (미운영)',act:''};
   }
   // KOL: 발행수·객단가 기준
   if(ch.includes('KOL')){
-    const pubs=m.sumUV; // KOL의 외부UV/구매 컬럼 = 발행수로 재해석
-    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
-    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:`발행 ${FMT(pubs)}건 · 효율 우수`,act:'<b style="color:var(--green)">→ 다음 라운드 추가 KOL 매칭</b>'};
-    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:`발행 ${FMT(pubs)}건 · 평균`,act:'<b style="color:var(--orange)">→ 인기콘텐츠 비율 점검</b>'};
-    return {sig:'bad',icon:'🔴',tag:`발행 ${FMT(pubs)}건 · 효율 낮음`,act:'<b style="color:var(--accent)">→ 앵글/주력상품 재선정</b>'};
+    const pubs=m.sumUV;
+    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'未运营 (미운영)',act:''};
+    if(m.roas>=200) return {sig:'good',icon:'🟢',tag:`发布 ${FMT(pubs)}条 · 效率优秀 (발행 ${FMT(pubs)}건 · 효율 우수)`,act:'<b style="color:var(--green)">→ 下轮新增达人匹配</b> (다음 라운드 추가 KOL 매칭)'};
+    if(m.roas>=100) return {sig:'warn',icon:'🟡',tag:`发布 ${FMT(pubs)}条 · 平均 (발행 ${FMT(pubs)}건 · 평균)`,act:'<b style="color:var(--orange)">→ 爆文比率检查</b> (인기콘텐츠 비율 점검)'};
+    return {sig:'bad',icon:'🔴',tag:`发布 ${FMT(pubs)}条 · 效率低 (발행 ${FMT(pubs)}건 · 효율 낮음)`,act:'<b style="color:var(--accent)">→ 内容角度/主力商品 重新选定</b> (앵글/주력상품 재선정)'};
   }
   // SNS: 비용만
   if(ch.includes('SNS')){
-    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'미운영',act:''};
-    return {sig:'neu',icon:'⚪',tag:'정액 운영',act:'<b>→ 별도 액션 無</b> · 비용 모니터링'};
+    if(m.sumSpend<=0) return {sig:'neu',icon:'⚪',tag:'未运营 (미운영)',act:''};
+    return {sig:'neu',icon:'⚪',tag:'定额运营 (정액 운영)',act:'<b>→ 无额外行动</b> (별도 액션 없음 · 费用监控 비용 모니터링)'};
   }
   return {sig:'neu',icon:'⚪',tag:'',act:''};
 }
@@ -2091,21 +2090,26 @@ function renderMonthlyVerdict(){
   const spendChg=prev4Spend?((cur5Spend-prev4Spend)/prev4Spend*100):0;
   const arrowR = roasDelta>1?`<span class="delta-up">▲+${roasDelta.toFixed(0)}%p</span>`:roasDelta<-1?`<span class="delta-down">▼${Math.abs(roasDelta).toFixed(0)}%p</span>`:`<span class="delta-flat">±0%p</span>`;
   const arrowS = spendChg>1?`<span class="delta-up">▲${spendChg.toFixed(0)}%</span>`:spendChg<-1?`<span class="delta-down">▼${Math.abs(spendChg).toFixed(0)}%</span>`:`<span class="delta-flat">±0%</span>`;
-  // 자동 액션 추천 (매체별 신호 합)
+  // 자동 액션 추천 (매체별 신호 합) — 中文 우선 + (한국어 병기)
+  const CN_NAME = {'쥐광(샤오홍싱)':'聚光','CID(전환)':'CID','KOL(达人)':'达人','SNS':'SNS'};
+  const KO_NAME = {'쥐광(샤오홍싱)':'쥐광','CID(전환)':'CID','KOL(达人)':'KOL','SNS':'SNS'};
   const acts=arr.map(m=>{
     const j=judgeMedia(m);
-    const short = j.sig==='good'?`${m.매체.split('(')[0].trim()} 증액`:j.sig==='bad'?`${m.매체.split('(')[0].trim()} 중단`:j.sig==='warn'?`${m.매체.split('(')[0].trim()} 점검`:null;
-    return short;
+    const cn=CN_NAME[m.매체]||m.매체, ko=KO_NAME[m.매체]||m.매체;
+    if(j.sig==='good') return `${cn} 加投 (${ko} 증액)`;
+    if(j.sig==='bad')  return `${cn} 暂停 (${ko} 중단)`;
+    if(j.sig==='warn') return `${cn} 检查 (${ko} 점검)`;
+    return null;
   }).filter(Boolean);
   box.innerHTML = `
     <div class="v-top">
-      <span><span class="v-label">📊 5월 종합 ROAS</span> <span class="v-val">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
-      <span><span class="v-label">광고비</span> <span class="v-val" style="font-size:20px">${WON(cur5Spend)}</span> ${arrowS}</span>
-      <span><span class="v-label">매출</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
-      <span><span class="v-label">1~5월 누적 ROAS</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${totRoas.toFixed(0)}%</span></span>
+      <span><span class="v-label">📊 5月综合ROAS (5월 종합 ROAS)</span> <span class="v-val">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
+      <span><span class="v-label">广告费 (광고비)</span> <span class="v-val" style="font-size:20px">${WON(cur5Spend)}</span> ${arrowS}</span>
+      <span><span class="v-label">GMV (매출)</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
+      <span><span class="v-label">1~5月累计ROAS (1~5월 누적)</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${totRoas.toFixed(0)}%</span></span>
     </div>
     <div class="v-action">
-      <b>📌 한 줄 액션:</b> ${acts.length?acts.join(' · '):'추세 안정 — 현 운영 유지'}
+      <b>📌 行动建议 (한 줄 액션):</b> ${acts.length?acts.join(' · '):'趋势稳定 — 维持现状 (추세 안정 — 현 운영 유지)'}
     </div>`;
 }
 
@@ -2113,7 +2117,9 @@ function renderMediaCards(){
   const box=document.getElementById('mediaCards'); if(!box) return;
   const arr=getMediaMonthly(brand);
   const COL_MAP={'쥐광(샤오홍싱)':'#4A6670','CID(전환)':'#1E5631','KOL(达人)':'#A52A2A','SNS':'#B8941F'};
-  const SUB_MAP={'쥐광(샤오홍싱)':'샤오홍슈 피드','CID(전환)':'전환광고','KOL(达人)':'인플루언서','SNS':'운영비'};
+  // 中文 우선 + (한국어 병기)
+  const NAME_MAP={'쥐광(샤오홍싱)':['聚光','쥐광'],'CID(전환)':['CID','전환광고'],'KOL(达人)':['达人','KOL'],'SNS':['SNS','운영']};
+  const SUB_MAP={'쥐광(샤오홍싱)':'小红书信息流 (샤오홍슈 피드)','CID(전환)':'转化广告 (전환광고)','KOL(达人)':'达人合作 (인플루언서)','SNS':'运营费 (운영비)'};
   box.innerHTML = arr.map(m=>{
     const j=judgeMedia(m);
     const col=COL_MAP[m.매체]||'#8B7A65';
@@ -2123,40 +2129,41 @@ function renderMediaCards(){
     const ch=m.매체;
     const isKol = ch.includes('KOL');
     const isSns = ch.includes('SNS');
-    // 매체별 차별 KPI
-    let primaryKey='5월 ROAS', primaryVal=cur.toFixed(0)+'%', primaryDelta=arrowR;
-    let sparkArr=m.roasArr, sparkLabel='1~5월 ROAS';
+    // 매체별 차별 KPI — 中文 우선 + 한국어 병기
+    let primaryKey='5月 ROAS (5월 ROAS)', primaryVal=cur.toFixed(0)+'%', primaryDelta=arrowR;
+    let sparkArr=m.roasArr, sparkLabel='1~5月 ROAS 趋势 (ROAS 추이)';
     let meta=[
-      ['광고비 (1~5월)', WON(m.sumSpend)],
-      ['GMV (1~5월)', WON(m.sumGmv)],
-      ['평균 CTR', m.ctr.toFixed(2)+'%'],
-      ['평균 CPM', '¥'+m.cpm.toFixed(0)]
+      ['广告费 1~5月 (광고비)', WON(m.sumSpend)],
+      ['GMV 1~5月 (매출)', WON(m.sumGmv)],
+      ['平均CTR (평균 CTR)', m.ctr.toFixed(2)+'%'],
+      ['平均CPM (평균 CPM)', '¥'+m.cpm.toFixed(0)]
     ];
     if(isKol){
-      primaryKey='1~5월 GMV'; primaryVal=WON(m.sumGmv); primaryDelta='';
-      sparkArr=m.gmvArr; sparkLabel='1~5월 GMV 추이';
+      primaryKey='1~5月 GMV (1~5월 GMV)'; primaryVal=WON(m.sumGmv); primaryDelta='';
+      sparkArr=m.gmvArr; sparkLabel='1~5月 GMV 趋势 (1~5월 GMV 추이)';
       const aov = m.sumUV>0 ? m.sumSpend/m.sumUV : 0;
       meta=[
-        ['협업비 합계', WON(m.sumSpend)],
-        ['발행수', FMT(m.sumUV)],
-        ['건당 비용', WON(aov)],
+        ['合作费合计 (협업비 합계)', WON(m.sumSpend)],
+        ['发布数 (발행수)', FMT(m.sumUV)],
+        ['单条费用 (건당 비용)', WON(aov)],
         ['ROAS', m.roas.toFixed(0)+'%']
       ];
     }
     if(isSns){
-      primaryKey='1~5월 비용'; primaryVal=WON(m.sumSpend); primaryDelta='';
-      sparkArr=m.spendArr; sparkLabel='1~5월 비용 추이';
+      primaryKey='1~5月 费用 (1~5월 비용)'; primaryVal=WON(m.sumSpend); primaryDelta='';
+      sparkArr=m.spendArr; sparkLabel='1~5月 费用 趋势 (1~5월 비용 추이)';
       const share = (arr.reduce((a,x)=>a+x.sumSpend,0)>0) ? m.sumSpend/arr.reduce((a,x)=>a+x.sumSpend,0)*100 : 0;
       meta=[
-        ['1~5월 합계', WON(m.sumSpend)],
-        ['전체 점유', share.toFixed(1)+'%'],
-        ['5월 비용', WON(m.curSpend)],
+        ['1~5月 合计 (합계)', WON(m.sumSpend)],
+        ['整体占比 (전체 점유)', share.toFixed(1)+'%'],
+        ['5月 费用 (5월 비용)', WON(m.curSpend)],
         ['', '']
       ];
     }
+    const [cn,ko]=NAME_MAP[ch]||[ch,ch];
     return `<div class="mcard signal-${j.sig}">
       <div class="m-head">
-        <div class="m-name">${ch.split('(')[0].trim()}<span class="m-sub">${SUB_MAP[ch]||''}</span></div>
+        <div class="m-name">${cn}<span class="m-sub">(${ko}) · ${SUB_MAP[ch]||''}</span></div>
         <div class="m-signal" title="${j.tag}">${j.icon}</div>
       </div>
       <div class="m-primary">
