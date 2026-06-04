@@ -638,7 +638,7 @@
     <div class="kpis" id="kpis"></div>
     <div class="grid">
       <div class="panel"><h3>月度广告费 vs GMV <span class="hint-inline">월별 광고비 vs 매출</span></h3><div class="note"><b class="cn">柱=广告费 · 线=GMV · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=매출 · 동조상승=정상 / 막대↑선↓=비효율</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
-      <div class="panel"><h3>月度ROI趋势 <span class="hint-inline">월별 ROI · 广告1元/매출</span></h3><div class="note"><b class="cn"><span style="color:var(--green)">★ CID ROI</span>=核心决策基准 · ≥1.5加投 / 1.0~1.5维持 / &lt;1.0立即检查</b><br><span class="ko">★ CID ROI=의사결정 기준 · 손익분기 1.0</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(30,86,49,0.06);border-left:3px solid var(--green);border-radius:4px"></div></div>
+      <div class="panel"><h3>月度ROI趋势 <span class="hint-inline">월별 ROI · 广告1元/매출</span></h3><div class="note"><b class="cn"><span style="color:var(--green)">★ CID ROI</span>=核心决策基准 · ≥1.5加投 / 1.0~1.5维持 / &lt;1.0立即检查</b><br><span class="ko">★ CID ROI=의사결정 기준 · 손익분기 1.0</span><br><span style="font-size:10.5px;background:rgba(165,42,42,0.08);padding:2px 6px;border-radius:3px;color:var(--gong-red-deep);font-weight:700">📅 归因窗口 30天 · 红猫计划升级 (美妆类目) · 어트리뷰션 30일 (뷰티 카테고리)</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(30,86,49,0.06);border-left:3px solid var(--green);border-radius:4px"></div></div>
       <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
       <div class="panel full"><h3>购买漏斗 <span class="hint-inline">구매 여정 · 曝光→进店→淘宝→购买</span></h3><div class="note"><b class="cn">①曝光 → ②进店UV → ③淘宝跳转 → ④购买 · 各阶段间%=转化率</b><br><span class="ko">①→② 약함=소재 교체 / ②→③ 약함=CTA·딥링크 / ③→④ 약함=상세페이지</span></div><div class="cwrap"><canvas id="cFunnel"></canvas></div><div id="funnelInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(184,148,31,0.08);border-left:3px solid var(--orange);border-radius:4px"></div></div>
@@ -2137,6 +2137,9 @@ function renderMonthlyVerdict(){
     </div>
     <div class="v-action">
       <b>📌 行动建议 (한 줄 액션):</b> ${acts.length?acts.join(' · '):'趋势稳定 — 维持现状 (추세 안정 — 현 운영 유지)'}
+    </div>
+    <div style="margin-top:6px;font-size:10.5px;color:var(--ink-soft);font-style:italic">
+      📅 CID归因窗口 30天 · 红猫计划 (美妆类目升级) · CID 어트리뷰션 30일 · 红猫计划 (뷰티 30일 윈도우 적용)
     </div>`;
 }
 
@@ -2146,7 +2149,7 @@ function renderMediaCards(){
   const COL_MAP={'쥐광(샤오홍싱)':'#4A6670','CID(전환)':'#1E5631','KOL(达人)':'#A52A2A','SNS':'#B8941F'};
   // 中文 우선 + (한국어 병기)
   const NAME_MAP={'쥐광(샤오홍싱)':['聚光','쥐광'],'CID(전환)':['CID','전환광고'],'KOL(达人)':['达人','KOL'],'SNS':['SNS','운영']};
-  const SUB_MAP={'쥐광(샤오홍싱)':'小红书信息流 (샤오홍슈 피드)','CID(전환)':'转化广告 (전환광고)','KOL(达人)':'达人合作 (인플루언서)','SNS':'运营费 (운영비)'};
+  const SUB_MAP={'쥐광(샤오홍싱)':'小红书信息流 (샤오홍슈 피드)','CID(전환)':'转化广告 · 归因30天 (전환광고 · 30일)','KOL(达人)':'达人合作 (인플루언서)','SNS':'运营费 (운영비)'};
   box.innerHTML = arr.map(m=>{
     const j=judgeMedia(m);
     const col=COL_MAP[m.매체]||'#8B7A65';
