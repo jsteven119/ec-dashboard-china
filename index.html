@@ -2937,29 +2937,67 @@ function normalizeBrand(v){
   if(/^COLORGRAM$|컬러그램|^CG$/i.test(s)) return 'COLORGRAM';
   return s;
 }
+// 시트 헤더가 한·중 결합 ('品牌 브랜드', '聚光 广告费 쥐광_광고비' 등)이라도 인식
+// 핵심 키워드(예: ['聚光','广告费'])가 모두 포함된 첫 번째 키를 찾는 방식
+function findKeyBy(sampleRow, ...keywordSets){
+  if(!sampleRow) return null;
+  const keys=Object.keys(sampleRow);
+  for(const set of keywordSets){
+    const arr=Array.isArray(set)?set:[set];
+    const hit=keys.find(k=>arr.every(kw=>k.includes(kw)));
+    if(hit) return hit;
+  }
+  return null;
+}
 function normalizeByday(rows){
-  return (rows||[]).map(r=>{
-    const month = pickNum(r,['월','月','month']) || (String(r.날짜||r['日期']||'').slice(5,7) ? +String(r.날짜||r['日期']||'').slice(5,7) : 0);
+  if(!rows||!rows.length) return [];
+  const s=rows[0];
+  // 시트 헤더에서 키워드 기반으로 실제 컬럼 키를 찾음 (한·중 결합 형태 자동 처리)
+  const K = {
+    brand   : findKeyBy(s, ['品牌'],['브랜드'],['brand'],['Brand']),
+    date    : findKeyBy(s, ['日期'],['날짜'],['date']),
+    month   : findKeyBy(s, ['月份'],['月'],['월'],['month']),
+    jgCost  : findKeyBy(s, ['聚光','广告费'],['쥐광','광고비']),
+    jgImp   : findKeyBy(s, ['聚光','曝光'],['쥐광','노출']),
+    jgView  : findKeyBy(s, ['聚光','阅读'],['쥐광','조회']),
+    jgInt   : findKeyBy(s, ['聚光','互动'],['쥐광','상호작용']),
+    xhxUV   : findKeyBy(s, ['小红星','进店'],['샤오홍싱','진입']),
+    xhxGmv  : findKeyBy(s, ['小红星','全店GMV'],['샤오홍싱','전점GMV']),
+    xhxGmvT : findKeyBy(s, ['小红星','目标GMV'],['샤오홍싱','타겟GMV']),
+    kolCost : findKeyBy(s, ['KOL','费用'],['KOL','비용']),
+    kolPub  : findKeyBy(s, ['KOL','发布'],['KOL','발행']),
+    cidCost : findKeyBy(s, ['CID','费用'],['CID','비용']),
+    cidImp  : findKeyBy(s, ['CID','曝光'],['CID','노출']),
+    cidClk  : findKeyBy(s, ['CID','点击'],['CID','클릭']),
+    cidOrd  : findKeyBy(s, ['CID','成交订单'],['CID','성사주문']),
+    cidGmv  : findKeyBy(s, ['CID','成交GMV'],['CID','성사GMV']),
+    sns     : findKeyBy(s, ['SNS','费用'],['SNS','비용'])
+  };
+  console.log('[byday] key mapping:', K);
+  const numAt=(r,k)=>k?(+r[k]||0):0;
+  return rows.map(r=>{
+    const dateStr = K.date ? String(r[K.date]||'') : '';
+    const month = K.month ? (+r[K.month]||0) : (dateStr.length>=7 ? +dateStr.slice(5,7) : 0);
     return {
       ...r,
-      브랜드: normalizeBrand(r.브랜드 || r['品牌'] || r.brand),
-      날짜: r.날짜 || r['日期'] || r.date || '',
+      브랜드: normalizeBrand(K.brand ? r[K.brand] : (r.브랜드||r['品牌'])),
+      날짜: dateStr,
       월: month,
-      쥐광_광고비: pickNum(r,['쥐광_광고비','聚光_广告费','聚光广告费','쥐광광고비']),
-      쥐광_노출: pickNum(r,['쥐광_노출','聚光_曝光','聚光曝光','쥐광노출']),
-      쥐광_조회: pickNum(r,['쥐광_조회','聚光_阅读','쥐광조회']),
-      쥐광_상호작용: pickNum(r,['쥐광_상호작용','聚光_互动','聚光互动','쥐광상호작용']),
-      '샤오홍싱_진입UV': pickNum(r,['샤오홍싱_진입UV','小红星_进店UV','샤오홍슈_진입UV','샤오홍싱진입UV']),
-      '샤오홍싱_전점GMV': pickNum(r,['샤오홍싱_전점GMV','小红星_全店GMV','샤오홍슈_전점GMV','전점GMV']),
-      '샤오홍싱_타겟GMV': pickNum(r,['샤오홍싱_타겟GMV','小红星_目标GMV','타겟GMV']),
-      KOL_비용: pickNum(r,['KOL_비용','KOL_费用','KOL비용','达人_费用']),
-      KOL_발행수: pickNum(r,['KOL_발행수','KOL_发布数','达人_发布数']),
-      CID_비용: pickNum(r,['CID_비용','CID_费用']),
-      CID_노출: pickNum(r,['CID_노출','CID_曝光']),
-      CID_클릭: pickNum(r,['CID_클릭','CID_点击']),
-      CID_성사주문: pickNum(r,['CID_성사주문','CID_成交订单']),
-      CID_성사GMV: pickNum(r,['CID_성사GMV','CID_成交GMV']),
-      SNS_비용: pickNum(r,['SNS_비용','SNS_费用'])
+      쥐광_광고비: numAt(r,K.jgCost),
+      쥐광_노출: numAt(r,K.jgImp),
+      쥐광_조회: numAt(r,K.jgView),
+      쥐광_상호작용: numAt(r,K.jgInt),
+      '샤오홍싱_진입UV': numAt(r,K.xhxUV),
+      '샤오홍싱_전점GMV': numAt(r,K.xhxGmv),
+      '샤오홍싱_타겟GMV': numAt(r,K.xhxGmvT),
+      KOL_비용: numAt(r,K.kolCost),
+      KOL_발행수: numAt(r,K.kolPub),
+      CID_비용: numAt(r,K.cidCost),
+      CID_노출: numAt(r,K.cidImp),
+      CID_클릭: numAt(r,K.cidClk),
+      CID_성사주문: numAt(r,K.cidOrd),
+      CID_성사GMV: numAt(r,K.cidGmv),
+      SNS_비용: numAt(r,K.sns)
     };
   }).filter(r=>r.브랜드==='WAKEMAKE'||r.브랜드==='COLORGRAM');
 }
@@ -3009,6 +3047,10 @@ function recomputeMonthlyChannel(byday,brand){const rows=byday.filter(r=>brand==
 async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{const [bydayRaw,wmRaw,cgRaw]=await Promise.all(FETCH_SHEETS.map(fetchSheet));if(!bydayRaw.length||!wmRaw.length||!cgRaw.length)throw new Error('빈 응답');
   // byday 정규화 — 한·중 컬럼명 fallback. 정규화 후 0건이면 원본을 fallback으로 사용 (sync 중단 X)
   let byday = normalizeByday(bydayRaw);
+  if(byday.length>0){
+    // 정규화 성공 — 진단 박스가 떠 있으면 제거
+    const box=document.getElementById('bydayDiagBox'); if(box) box.remove();
+  }
   if(byday.length===0){
     // (1) 원본 그대로 — 표준 브랜드 컬럼명 매칭
     byday = bydayRaw.filter(r=>r && (r.브랜드==='WAKEMAKE'||r.브랜드==='COLORGRAM'||r['品牌']==='WAKEMAKE'||r['品牌']==='COLORGRAM'));
