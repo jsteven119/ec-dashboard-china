@@ -6,86 +6,77 @@
 <title>Global EC Dashboard · China 🇨🇳 · WAKEMAKE × COLORGRAM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-  /* ===== 故宫 황실 클래식 디자인 토큰 ===== */
+  /* ===== 일본 대시보드 톤 이식 — 모던 SaaS (네이비/화이트/그레이) ===== */
   :root{
-    /* 朱红 / 故宫红 — 메인 */
-    --navy:#7A1F1F;          /* 메인 강조 (기존 navy 위치 — 깊은 주홍) */
-    --gong-red:#A52A2A;      /* 고궁 외벽 적 */
-    --gong-red-soft:#C44A4A; /* 밝은 적 */
-    --gong-red-deep:#5C0F0F; /* 짙은 적 (위험) */
-    /* 황금 */
-    --gold:#D4AF37;          /* 황금 메인 */
-    --gold-light:#E8C766;
-    --gold-deep:#B8941F;
-    --gold-shadow:rgba(184,148,31,.18);
-    /* 米色 / 종이 */
-    --bg:#FAF6E9;            /* 米黄 페이지 바탕 */
-    --card:#FFFDF5;          /* 米白 카드 */
-    --rice-paper:#F2EAD0;    /* 종이질감 보조 */
-    --rice-deep:#EDE0BA;     /* 짙은 미색 (헤더) */
-    /* 묵 / 텍스트 */
-    --ink:#2C2317;           /* 묵흑 본문 */
-    --ink-soft:#5C4D3A;      /* 부 본문 */
-    --grey:#8B7A65;          /* 회 (기존 --grey 위치) */
+    /* 강조 색 (메인 = 네이비 블루) */
+    --navy:#1E40AF;          /* 딥 네이비 */
+    --gong-red:#2563EB;      /* 메인 블루 (액션) */
+    --gong-red-soft:#3B82F6; /* 밝은 블루 */
+    --gong-red-deep:#1E3A8A; /* 짙은 네이비 (제목) */
+    /* 액센트 (황금 자리에 오렌지 warning 톤) */
+    --gold:#D97706;          /* 오렌지 (강조) */
+    --gold-light:#FCD34D;
+    --gold-deep:#B45309;
+    --gold-shadow:rgba(217,119,6,.10);
+    /* 배경 / 카드 (흰색·라이트 그레이) */
+    --bg:#F1F1F1;            /* 페이지 바탕 (light gray) */
+    --card:#FFFFFF;          /* 카드 흰색 */
+    --rice-paper:#F8F8F8;    /* 보조 배경 */
+    --rice-deep:#F3F4F6;     /* 헤더/필터바 */
+    /* 텍스트 */
+    --ink:#111827;           /* 본문 진잉크 */
+    --ink-soft:#6B7280;      /* 보조 텍스트 */
+    --grey:#9CA3AF;          /* 회색 (보조) */
     /* 보조 색상 */
-    --blue:#4A6670;          /* 청자 (기존 --blue) */
-    --sky:#6B8C99;
-    --accent:#C8102E;        /* 단홍 (강조) */
-    --green:#1E5631;         /* 옥색 (긍정) */
-    --orange:#B8941F;        /* 황동 (주의) */
-    --purple:#6B3E5C;        /* 묵자 (선택) */
+    --blue:#2563EB;          /* 블루 */
+    --sky:#3B82F6;
+    --accent:#DC2626;        /* 빨강 (위험) */
+    --green:#16A34A;         /* 초록 (긍정) */
+    --orange:#D97706;        /* 오렌지 (주의) */
+    --purple:#7C3AED;        /* 보라 (선택) */
     /* 라인 */
-    --line:#D4C9A8;          /* 미색 보더 */
-    --line-soft:#E8DFC0;
-    --line-ink:#8B7A65;      /* 묵필 굵은 라인 */
-    /* 그라데이션 / 패턴 */
-    --paper-grain:radial-gradient(ellipse at top,rgba(212,175,55,.04) 0%,transparent 60%),radial-gradient(ellipse at bottom right,rgba(165,42,42,.03) 0%,transparent 50%);
-    --gold-grad:linear-gradient(135deg,#D4AF37 0%,#E8C766 50%,#B8941F 100%);
-    --red-grad:linear-gradient(180deg,#A52A2A 0%,#7A1F1F 100%);
+    --line:#E5E7EB;          /* 일반 보더 */
+    --line-soft:#F1F1F1;
+    --line-ink:#D1D5DB;
+    /* 그라데이션 / 패턴 — 일본 톤은 그라데이션 최소 */
+    --paper-grain:none;
+    --gold-grad:linear-gradient(135deg,#D97706 0%,#F59E0B 50%,#B45309 100%);
+    --red-grad:linear-gradient(180deg,#2563EB 0%,#1E40AF 100%);
+    --r:12px;
+    --rs:8px;
+    --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg:0 4px 14px rgba(0,0,0,0.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    font-family:'Noto Sans SC','Malgun Gothic','맑은 고딕',-apple-system,'Segoe UI',sans-serif;
-    background:var(--bg) var(--paper-grain);
-    background-attachment:fixed;
-    color:var(--ink);line-height:1.6;
+    font-family:'Inter','Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','맑은 고딕',sans-serif;
+    background:var(--bg);
+    color:var(--ink);line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    font-size:14px;
   }
   .wrap{max-width:1280px;margin:0 auto;padding:24px 20px 64px}
-  /* ===== 헤더 (印章 / 황실 느낌) ===== */
+  /* ===== 헤더 (모던 SaaS 톤) ===== */
   header{
     display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;
-    margin-bottom:12px;padding:18px 22px;
-    background:linear-gradient(135deg,#FFFDF5 0%,#F2EAD0 100%);
+    margin-bottom:14px;padding:14px 22px;
+    background:var(--card);
     border:1px solid var(--line);
-    border-radius:12px;
-    box-shadow:0 2px 0 var(--gold-shadow),0 1px 3px rgba(92,15,15,.06);
+    border-radius:var(--r);
+    box-shadow:var(--shadow);
     position:relative;
   }
-  header::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:3px;
-    background:var(--gold-grad);
-    border-radius:12px 12px 0 0;
-  }
+  header::before{display:none}
   h1{
-    font-family:'Noto Serif SC','Nanum Myeongjo',serif;
-    font-size:26px;color:var(--gong-red-deep);font-weight:900;letter-spacing:-.2px;
+    font-family:inherit;
+    font-size:20px;color:var(--ink);font-weight:700;letter-spacing:-.3px;
     display:flex;align-items:center;gap:10px;
   }
-  h1::before{
-    content:'印';
-    display:inline-flex;align-items:center;justify-content:center;
-    width:32px;height:32px;font-size:18px;font-weight:900;
-    background:var(--red-grad);color:#FFFDF5;
-    border:2px solid var(--gold);border-radius:4px;
-    font-family:'ZCOOL XiaoWei','Noto Serif SC',serif;
-    box-shadow:0 2px 4px rgba(92,15,15,.3);
-    transform:rotate(-3deg);
-  }
+  h1::before{display:none}
   .sub{color:var(--ink-soft);font-size:13px;margin-top:6px;font-weight:500}
   /* ===== 토글 (브랜드) ===== */
   .toggle{
@@ -98,31 +89,28 @@
     transition:.18s;font-family:inherit;
   }
   .toggle button.on{
-    background:var(--red-grad);color:#FFFDF5;
-    box-shadow:0 2px 6px rgba(92,15,15,.3),inset 0 0 0 1px var(--gold);
+    background:var(--gong-red);color:#fff;
+    box-shadow:0 1px 2px rgba(37,99,235,.25);
   }
-  /* ===== 탭 ===== */
+  /* ===== 탭 (모던 SaaS) ===== */
   .tabs{
-    display:flex;gap:4px;margin:18px 0 16px;
-    border-bottom:2px solid var(--line);flex-wrap:wrap;
+    display:flex;gap:2px;margin:16px 0 14px;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;
     position:relative;
   }
-  .tabs::after{
-    content:'';position:absolute;bottom:-2px;left:0;width:60px;height:2px;
-    background:var(--gold);
-  }
+  .tabs::after{display:none}
   .tabs button{
-    border:0;background:transparent;padding:11px 20px;
-    font-family:'Noto Serif SC',serif;
-    font-weight:700;font-size:14.5px;cursor:pointer;color:var(--ink-soft);
-    border-bottom:3px solid transparent;margin-bottom:-2px;
-    transition:.15s;
+    border:0;background:transparent;padding:10px 18px;
+    font-family:inherit;
+    font-weight:500;font-size:13px;cursor:pointer;color:var(--ink-soft);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+    transition:color .15s,border-color .15s;
   }
   .tabs button:hover{color:var(--gong-red)}
   .tabs button.on{
-    color:var(--gong-red-deep);
+    color:var(--gong-red);
     border-bottom-color:var(--gong-red);
-    background:linear-gradient(180deg,transparent 0%,rgba(212,175,55,.08) 100%);
+    background:transparent;font-weight:600;
   }
   /* ===== KPI 카드 (1줄 강제 · 콤팩트) ===== */
   .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:18px 0}
@@ -131,38 +119,37 @@
   .kpi{
     background:var(--card);
     border:1px solid var(--line);
-    border-top:3px solid var(--gold);
-    border-radius:9px;padding:12px 13px;
-    box-shadow:0 1px 3px rgba(92,15,15,.05),inset 0 0 0 1px rgba(255,253,245,.5);
+    border-radius:var(--rs);padding:14px 15px;
+    box-shadow:var(--shadow);
     position:relative;
-    transition:.2s;
+    transition:box-shadow .15s,transform .15s;
     min-width:0;
   }
-  .kpi:hover{box-shadow:0 4px 12px rgba(92,15,15,.1);transform:translateY(-1px)}
+  .kpi:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+  .kpi.best{border-color:var(--gong-red)}
   .kpi.best::after{
-    content:'👑';position:absolute;top:-10px;right:-6px;font-size:18px;
-    filter:drop-shadow(0 1px 2px rgba(184,148,31,.4));
+    content:'BEST';position:absolute;top:-8px;right:8px;font-size:9px;font-weight:700;
+    background:var(--gong-red);color:#fff;padding:2px 6px;border-radius:3px;letter-spacing:.3px;
   }
   .kpi.core{
-    border-top-color:var(--gong-red);border-top-width:4px;
-    background:linear-gradient(180deg,rgba(165,42,42,0.04) 0%,var(--card) 60%);
+    border-top:3px solid var(--gong-red);
+    background:var(--card);
   }
   .kpi.core::before{
-    content:'★ 핵심';position:absolute;top:-8px;left:8px;font-size:9.5px;font-weight:700;
-    background:var(--red-grad);color:#FFFDF5;padding:2px 7px;border-radius:3px;
-    letter-spacing:.3px;font-family:'Noto Serif SC',serif;
-    box-shadow:0 1px 2px rgba(92,15,15,.25);
+    content:'CORE';position:absolute;top:-9px;left:10px;font-size:9px;font-weight:700;
+    background:var(--gong-red);color:#fff;padding:2px 6px;border-radius:3px;
+    letter-spacing:.5px;font-family:inherit;
   }
   .kpi .lab{
-    font-size:11.5px;color:var(--ink-soft);font-weight:700;
-    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+    font-size:11.5px;color:var(--ink-soft);font-weight:600;
+    font-family:inherit;letter-spacing:.2px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .kpi .lab .hint{font-size:9.5px;color:var(--grey);margin-left:4px;font-weight:500;font-family:inherit}
+  .kpi .lab .hint{font-size:10px;color:var(--grey);margin-left:4px;font-weight:500;font-family:inherit}
   .kpi .val{
-    font-size:21px;font-weight:900;color:var(--gong-red-deep);
-    margin-top:5px;letter-spacing:-.5px;
-    font-family:'Noto Serif SC',serif;
+    font-size:22px;font-weight:700;color:var(--ink);
+    margin-top:6px;letter-spacing:-.5px;
+    font-family:inherit;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .kpi .sm{font-size:11px;color:var(--ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -172,20 +159,16 @@
   .panel{
     background:var(--card);
     border:1px solid var(--line);
-    border-radius:10px;
+    border-radius:var(--r);
     padding:18px 20px 20px;
-    box-shadow:0 1px 3px rgba(92,15,15,.05);
+    box-shadow:var(--shadow);
     position:relative;
   }
-  .panel::before{
-    content:'';position:absolute;top:0;left:18px;right:18px;height:2px;
-    background:linear-gradient(90deg,transparent 0%,var(--gold) 20%,var(--gold) 80%,transparent 100%);
-    opacity:.6;
-  }
+  .panel::before{display:none}
   .panel h3{
-    font-family:'Noto Serif SC',serif;
-    font-size:15.5px;color:var(--gong-red-deep);
-    margin-bottom:4px;font-weight:700;letter-spacing:.3px;
+    font-family:inherit;
+    font-size:15px;color:var(--ink);
+    margin-bottom:6px;font-weight:600;letter-spacing:-.2px;
   }
   .panel h3 .hint-inline{
     font-family:'Noto Sans SC',sans-serif;font-size:11.5px;color:var(--ink-soft);
@@ -213,11 +196,11 @@
   }
   .quad-legend .ql .qpos{
     font-size:10px;font-weight:700;color:var(--ink-soft);letter-spacing:.4px;
-    text-transform:uppercase;margin-bottom:3px;font-family:'Noto Serif SC',serif;
+    text-transform:uppercase;margin-bottom:3px;font-family:inherit;
   }
   .quad-legend .ql .qttl{
     font-size:14px;font-weight:900;display:block;margin-bottom:4px;
-    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+    font-family:inherit;letter-spacing:.3px;
   }
   .quad-legend .ql .qdesc{font-size:11.5px;color:var(--ink-soft);line-height:1.5}
   .quad-legend .ql.good{background:linear-gradient(135deg,rgba(30,86,49,0.10) 0%,var(--card) 70%);border-left-color:var(--green)}
@@ -230,7 +213,7 @@
   .quad-legend .ql.brand .qttl{color:var(--gold-deep)}
   /* ===== 월별 매체 통합안 — 카드 그리드 + 신호등 + 스파크라인 ===== */
   #monthlyVerdict{padding:18px 22px;margin:0 0 14px;border-radius:12px;position:relative}
-  #monthlyVerdict .v-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 22px;font-family:'Noto Serif SC',serif}
+  #monthlyVerdict .v-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px 22px;font-family:inherit}
   #monthlyVerdict .v-top .v-label{font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px}
   #monthlyVerdict .v-top .v-val{font-size:24px;font-weight:900;color:var(--gong-red-deep);letter-spacing:-.3px}
   #monthlyVerdict .v-top .v-delta{font-size:13px;font-weight:800}
@@ -253,12 +236,12 @@
   .mcard.signal-bad{background:linear-gradient(180deg,rgba(200,16,46,0.06) 0%,var(--card) 60%)}
   .mcard.signal-neu{border-top-color:var(--blue)}
   .mcard .m-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .mcard .m-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:900;color:var(--gong-red-deep);letter-spacing:.2px}
+  .mcard .m-name{font-family:inherit;font-size:15px;font-weight:900;color:var(--gong-red-deep);letter-spacing:.2px}
   .mcard .m-name .m-sub{font-size:11px;font-weight:500;color:var(--ink-soft);margin-left:4px;font-family:'Noto Sans SC',sans-serif}
   .mcard .m-signal{font-size:16px;line-height:1}
   .mcard .m-primary{margin-top:2px}
   .mcard .m-primary .m-pkey{font-size:11px;font-weight:700;color:var(--ink-soft);letter-spacing:.3px}
-  .mcard .m-primary .m-pval{font-size:24px;font-weight:900;color:var(--ink);font-family:'Noto Serif SC',serif;letter-spacing:-.5px}
+  .mcard .m-primary .m-pval{font-size:24px;font-weight:900;color:var(--ink);font-family:inherit;letter-spacing:-.5px}
   .mcard .m-primary .m-pdelta{font-size:12px;font-weight:800;margin-left:6px}
   .mcard .m-spark{margin:2px 0 4px;height:34px;display:flex;align-items:flex-end;gap:2px}
   .mcard .m-spark svg{width:100%;height:100%;display:block;overflow:visible}
@@ -290,7 +273,7 @@
     background:var(--red-grad);color:#FFFDF5;
     position:sticky;top:0;font-weight:700;text-align:right;
     cursor:pointer;user-select:none;
-    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+    font-family:inherit;letter-spacing:.3px;
     border-bottom:2px solid var(--gold);
   }
   th:first-child,td:first-child,th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:left}
@@ -319,7 +302,7 @@
     display:inline-block;font-size:11px;font-weight:700;
     padding:3px 9px;border-radius:4px;
     background:var(--gold-grad);color:#5C0F0F;
-    font-family:'Noto Serif SC',serif;letter-spacing:.3px;
+    font-family:inherit;letter-spacing:.3px;
     box-shadow:inset 0 0 0 1px rgba(92,15,15,.15);
   }
   .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px}
@@ -328,7 +311,7 @@
   footer{
     margin-top:32px;color:var(--ink-soft);font-size:11.5px;text-align:center;line-height:1.8;
     padding-top:18px;border-top:1px solid var(--line);
-    font-family:'Noto Serif SC',serif;
+    font-family:inherit;
   }
   .hide{display:none}
   /* ===== 서브탭 ===== */
@@ -366,7 +349,7 @@
   .alert-card.down{border-left-color:var(--accent)}
   .alert-card.neu{border-left-color:var(--blue)}
   .alert-card .lbl{font-size:11px;color:var(--ink-soft);font-weight:600;letter-spacing:.2px}
-  .alert-card .ttl{font-weight:700;color:var(--gong-red-deep);font-size:13px;margin-top:2px;font-family:'Noto Serif SC',serif}
+  .alert-card .ttl{font-weight:700;color:var(--gong-red-deep);font-size:13px;margin-top:2px;font-family:inherit}
   .alert-card .delta{font-weight:700;font-size:13.5px}
   .alert-card .delta.up{color:var(--green)}
   .alert-card .delta.down{color:var(--accent)}
@@ -387,7 +370,7 @@
   .action-card.test{border-top-color:var(--blue);background:linear-gradient(180deg,rgba(74,102,112,.06) 0%,var(--card) 50%)}
   .action-card.cut{border-top-color:var(--accent);background:linear-gradient(180deg,rgba(200,16,46,.06) 0%,var(--card) 50%)}
   .action-card h4{
-    font-family:'Noto Serif SC',serif;
+    font-family:inherit;
     font-size:14px;color:var(--gong-red-deep);margin-bottom:8px;font-weight:700;letter-spacing:.3px;
   }
   .action-card ul{list-style:none;padding:0;font-size:12.5px;color:var(--ink)}
@@ -400,7 +383,7 @@
   .heatmap th{
     background:var(--red-grad);color:#FFFDF5;padding:7px 9px;font-weight:700;
     text-align:center;writing-mode:initial;white-space:nowrap;
-    font-family:'Noto Serif SC',serif;
+    font-family:inherit;
   }
   .heatmap th:first-child{text-align:left;background:var(--card);color:var(--gong-red-deep)}
   .heatmap td{padding:8px 6px;text-align:center;border-radius:4px;font-weight:700;color:var(--ink)}
@@ -418,11 +401,11 @@
     display:flex;justify-content:space-between;align-items:center;
     padding:18px 22px;border-bottom:1px solid var(--line);
     position:sticky;top:0;
-    background:linear-gradient(135deg,#FFFDF5 0%,#F2EAD0 100%);
+    background:var(--card);
     z-index:1;
   }
   .modal-head h3{
-    font-family:'Noto Serif SC',serif;
+    font-family:inherit;
     font-size:17px;color:var(--gong-red-deep);font-weight:900;letter-spacing:.3px;
   }
   .modal-close{
@@ -434,7 +417,7 @@
   .modal-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px}
   .modal-kpi .k{background:var(--rice-paper);border-radius:6px;padding:9px 11px;border:1px solid var(--line-soft)}
   .modal-kpi .k .lab{font-size:11px;color:var(--ink-soft);font-weight:600}
-  .modal-kpi .k .val{font-size:15px;font-weight:800;color:var(--gong-red-deep);margin-top:2px;font-family:'Noto Serif SC',serif}
+  .modal-kpi .k .val{font-size:15px;font-weight:800;color:var(--gong-red-deep);margin-top:2px;font-family:inherit}
   .modal-tl{font-size:12px}
   .modal-tl th{background:var(--rice-paper);color:var(--gong-red-deep)}
   /* ===== 벤치마크 ===== */
@@ -447,7 +430,7 @@
   /* ===== 비교 모드 2칼럼 ===== */
   .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:880px){.cmp{grid-template-columns:1fr}}
-  .cmp .col h4{font-size:13px;font-weight:700;color:var(--gong-red-deep);margin-bottom:6px;letter-spacing:.3px;font-family:'Noto Serif SC',serif}
+  .cmp .col h4{font-size:13px;font-weight:700;color:var(--gong-red-deep);margin-bottom:6px;letter-spacing:.3px;font-family:inherit}
   /* ===== 동기화 상태 / 버튼 ===== */
   #syncStatus{
     font-size:11.5px !important;padding:6px 12px !important;border-radius:6px !important;
@@ -458,7 +441,7 @@
     padding:7px 14px !important;border:1px solid var(--gong-red) !important;
     background:var(--card) !important;color:var(--gong-red) !important;
     border-radius:6px !important;font-weight:700 !important;cursor:pointer;font-size:12px !important;
-    font-family:'Noto Serif SC',serif !important;letter-spacing:.3px;transition:.15s;
+    font-family:inherit !important;letter-spacing:.3px;transition:.15s;
   }
   #btnSync:hover{background:var(--gong-red) !important;color:var(--card) !important;box-shadow:0 2px 6px rgba(92,15,15,.25)}
   /* ===== 스크롤바 ===== */
@@ -475,10 +458,7 @@
     box-shadow:0 1px 3px rgba(92,15,15,.04);
     position:relative;
   }
-  .gfilters::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:2px;
-    background:var(--gold-grad);border-radius:10px 10px 0 0;opacity:.6;
-  }
+  .gfilters::before{display:none}
   .gfilter{display:flex;align-items:center;gap:8px}
   .gfilter .gicon{
     color:var(--ink-soft);font-size:14px;opacity:.7;
@@ -486,7 +466,7 @@
   }
   .gfilter label{
     font-size:12px;color:var(--ink-soft);font-weight:700;
-    font-family:'Noto Serif SC',serif;letter-spacing:.4px;text-transform:uppercase;
+    font-family:inherit;letter-spacing:.4px;text-transform:uppercase;
     white-space:nowrap;
   }
   .gfilter select,.gfilter input[type=date],.gfilter input[type=number]{
@@ -513,7 +493,7 @@
   }
   .glossary summary{
     cursor:pointer;font-size:13px;font-weight:700;color:var(--gong-red-deep);
-    font-family:'Noto Serif SC',serif;letter-spacing:.3px;list-style:none;
+    font-family:inherit;letter-spacing:.3px;list-style:none;
     display:flex;align-items:center;gap:4px;outline:none;
   }
   .glossary summary::-webkit-details-marker{display:none}
@@ -524,13 +504,13 @@
     gap:8px 18px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
   }
   .glossary-grid div{font-size:12px;line-height:1.5;color:var(--ink)}
-  .glossary-grid b{color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-right:6px;font-weight:700}
+  .glossary-grid b{color:var(--gong-red-deep);font-family:inherit;margin-right:6px;font-weight:700}
   .glossary-grid span{color:var(--ink-soft)}
   /* ===== 캠페인 캘린더 마커 ===== */
   .cal-event{
     display:inline-block;font-size:10.5px;font-weight:700;
     padding:2px 7px;border-radius:3px;margin:1px 2px;
-    font-family:'Noto Serif SC',serif;letter-spacing:.2px;
+    font-family:inherit;letter-spacing:.2px;
   }
   .cal-event.big{background:var(--red-grad);color:#FFFDF5;box-shadow:inset 0 0 0 1px var(--gold)}
   .cal-event.mid{background:var(--gold-grad);color:#5C0F0F}
@@ -787,13 +767,13 @@
   <!-- ===== MONTHLY TAB ===== -->
   <div id="tab_monthly" class="hide">
     <!-- 종합 진단 배너 (5초 룰) -->
-    <div class="panel full" id="monthlyVerdict" style="background:linear-gradient(135deg,#FFFDF5 0%,#F2EAD0 100%);border-top:3px solid var(--gong-red)"></div>
+    <div class="panel full" id="monthlyVerdict" style="background:var(--card);border-top:3px solid var(--gong-red)"></div>
     <!-- 매체 카드 그리드 (의사결정용 4장) -->
     <div class="media-cards" id="mediaCards"></div>
     <!-- 상세 cross-tab 표 (접힘) -->
     <details class="panel full monthly-details">
       <summary>
-        <span style="font-weight:800;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif">▾ 媒介 × 月度详细交叉表 (매체 × 월별 상세 · 펼치기)</span>
+        <span style="font-weight:800;color:var(--gong-red-deep);font-family:inherit">▾ 媒介 × 月度详细交叉表 (매체 × 월별 상세 · 펼치기)</span>
         <span style="font-size:11.5px;color:var(--ink-soft);margin-left:8px">每月 × 8指标 = 40列 · 精确对比用 (매월 × 8지표 · 정밀 비교용)</span>
       </summary>
       <div class="ctrl" style="margin-top:12px">
@@ -818,27 +798,27 @@
       <div class="note">월별 매체 성과 표의 각 지표가 어떻게 산출되는지 정의 · 브랜드/매체 필터 적용 후 동일하게 계산</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:8px">
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">광고비 (¥)</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">광고비 (¥)</div>
           매체별 월간 광고 집행 비용 합계. KOL은 협업비 + 사용소재비 합산, 쥐광/CID는 플랫폼 결산 기준.
         </div>
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">노출량 · 인터랙션</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">노출량 · 인터랙션</div>
           노출 = 광고 송출 횟수(impression). 인터랙션 = 좋아요/댓글/저장/공유/클릭 합계 (플랫폼 정의).
         </div>
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">CTR (%)</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">CTR (%)</div>
           <code>인터랙션 / 노출량 × 100</code> · 매체별 가중평균(노출 가중) 사용.
         </div>
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">CPM</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">CPM</div>
           <code>광고비 / 노출량 × 1000</code> · 천 노출당 비용. KOL 매체는 협업비 기반이라 보수적 비교용.
         </div>
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">외부UV · 구매건수</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">외부UV · 구매건수</div>
           외부UV = 站外행동(타오바오/티몰 진입) UV. 구매건수 = CID(전환광고) 결제 완료 건수.
         </div>
         <div style="padding:11px 14px;background:rgba(212,175,55,0.06);border:1px solid var(--line);border-radius:8px;font-size:12.5px;line-height:1.6">
-          <div style="font-weight:700;color:var(--gong-red-deep);font-family:'Noto Serif SC',serif;margin-bottom:4px">GMV · ROAS (%)</div>
+          <div style="font-weight:700;color:var(--gong-red-deep);font-family:inherit;margin-bottom:4px">GMV · ROAS (%)</div>
           GMV = 광고 기여 매출(￥). <code>ROAS = GMV / 광고비 × 100</code> · 200% 이상 옅은 옥, 100% 미만 단홍 표시.
         </div>
       </div>
@@ -1161,7 +1141,7 @@ function chDaily(){destroy('cDaily');
       ctx.beginPath();ctx.moveTo(x,a.top);ctx.lineTo(x,a.bottom);ctx.stroke();
       // 라벨 배경 (가독성)
       const label=cp.ko;
-      ctx.font="bold 10.5px 'Noto Serif SC',serif";
+      ctx.font="bold 10.5px Inter,system-ui,sans-serif";
       const w=ctx.measureText(label).width+10;
       const yOff=a.top+10+((i%3)*16); // 세 줄 stagger
       ctx.fillStyle=cp.type==='big'?'rgba(165,42,42,0.95)':'rgba(212,175,55,0.95)';
@@ -1213,11 +1193,11 @@ function renderCampCalendar(dates,inRange){
   el.innerHTML=`
     <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;padding:10px 14px;background:rgba(212,175,55,0.06);border:1px dashed var(--gold);border-radius:8px">
       <div style="flex:1;min-width:200px">
-        <div style="font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;margin-bottom:4px;font-family:'Noto Serif SC',serif">📍 데이터 기간 內 캠페인</div>
+        <div style="font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;margin-bottom:4px;font-family:inherit">📍 데이터 기간 內 캠페인</div>
         <div>${inRangeHtml}</div>
       </div>
       <div style="flex:1;min-width:200px">
-        <div style="font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;margin-bottom:4px;font-family:'Noto Serif SC',serif">🗓 다음 예정 (TOP 3)</div>
+        <div style="font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px;margin-bottom:4px;font-family:inherit">🗓 다음 예정 (TOP 3)</div>
         <div>${upcomingHtml||'<span style="color:var(--ink-soft);font-size:12px">-</span>'}</div>
       </div>
     </div>`;
@@ -1507,17 +1487,17 @@ function chScatter(){destroy('cScatter');
       // === 큰 의미 라벨 (좋은점/나쁜점/기타) ===
       // 좌상 = 베스트 / 좋은점
       ctx.textAlign='left';ctx.textBaseline='top';
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.55)';ctx.fillText('좋은점',a.left+12,a.top+8);
-      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.font="900 22px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 베스트',a.left+12,a.top+22);
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.75)';ctx.fillText('효율↑ + 화제↑',a.left+12,a.top+50);
       // 우상 = 함정 / 기타
       ctx.textAlign='right';
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(184,148,31,0.65)';ctx.fillText('기타',a.right-12,a.top+8);
-      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.font="900 22px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(184,148,31,0.95)';ctx.fillText('⚠ 함정',a.right-12,a.top+22);
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(165,124,28,0.85)';ctx.fillText('화제만 — 비효율',a.right-12,a.top+50);
@@ -1525,17 +1505,17 @@ function chScatter(){destroy('cScatter');
       ctx.textAlign='left';ctx.textBaseline='bottom';
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.75)';ctx.fillText('조용한 효율',a.left+12,a.bottom-12);
-      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.font="900 20px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.85)';ctx.fillText('💎 스텔스',a.left+12,a.bottom-30);
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.55)';ctx.fillText('기타',a.left+12,a.bottom-58);
       // 우하 = 제외 / 나쁜점
       ctx.textAlign='right';
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.85)';ctx.fillText('효율↓ + 화제↓',a.right-12,a.bottom-12);
-      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.font="900 20px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.95)';ctx.fillText('🔴 제외',a.right-12,a.bottom-30);
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.65)';ctx.fillText('나쁜점',a.right-12,a.bottom-58);
       ctx.restore();
     }catch(e){}
@@ -1695,8 +1675,8 @@ function renderCorrAnalysis(){
     return `<b style="color:var(--${cls})">|r|=${a.toFixed(3)} · ${txt}</b>`;
   };
   const card=(ttl, r, hint, color)=>`<div style="padding:14px 16px;border-radius:8px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--${color})">
-    <div style="font-size:12px;color:var(--ink-soft);font-weight:700;font-family:'Noto Serif SC',serif">${ttl}</div>
-    <div style="font-size:24px;font-weight:900;color:var(--gong-red-deep);margin:6px 0;font-family:'Noto Serif SC',serif">r = ${fmtR(r)}</div>
+    <div style="font-size:12px;color:var(--ink-soft);font-weight:700;font-family:inherit">${ttl}</div>
+    <div style="font-size:24px;font-weight:900;color:var(--gong-red-deep);margin:6px 0;font-family:inherit">r = ${fmtR(r)}</div>
     <div style="font-size:11.5px">${badge(r)}</div>
     <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.5">${hint}</div>
   </div>`;
@@ -2612,17 +2592,17 @@ function chQuadrant(b,hasAngle){
       ctx.save();
       // 좌상 = 최우선 / 좋은점
       ctx.textAlign='left';ctx.textBaseline='top';
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.55)';ctx.fillText('좋은점',a.left+12,a.top+8);
-      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.font="900 22px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 최우선',a.left+12,a.top+22);
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(30,86,49,0.75)';ctx.fillText('효율↑ + 화제↑ · 즉시 증량',a.left+12,a.top+50);
       // 우상 = 브랜딩 / 기타
       ctx.textAlign='right';
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(184,148,31,0.65)';ctx.fillText('기타',a.right-12,a.top+8);
-      ctx.font="900 22px 'Noto Serif SC',serif";
+      ctx.font="900 22px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(184,148,31,0.95)';ctx.fillText('🏆 브랜딩',a.right-12,a.top+22);
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(165,124,28,0.85)';ctx.fillText('비싸지만 인지도 가치',a.right-12,a.top+50);
@@ -2630,17 +2610,17 @@ function chQuadrant(b,hasAngle){
       ctx.textAlign='left';ctx.textBaseline='bottom';
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.75)';ctx.fillText('소재 강화 필요',a.left+12,a.bottom-12);
-      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.font="900 20px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.85)';ctx.fillText('💎 스텔스',a.left+12,a.bottom-30);
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(74,102,112,0.55)';ctx.fillText('기타',a.left+12,a.bottom-58);
       // 우하 = 제외 / 나쁜점
       ctx.textAlign='right';
       ctx.font="bold 11px 'Noto Sans SC',sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.85)';ctx.fillText('효율↓ + 화제↓ · 즉시 종료',a.right-12,a.bottom-12);
-      ctx.font="900 20px 'Noto Serif SC',serif";
+      ctx.font="900 20px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.95)';ctx.fillText('🔴 제외',a.right-12,a.bottom-30);
-      ctx.font="bold 11px 'Noto Serif SC',serif";
+      ctx.font="bold 11px Inter,system-ui,sans-serif";
       ctx.fillStyle='rgba(200,16,46,0.65)';ctx.fillText('나쁜점',a.right-12,a.bottom-58);
       ctx.restore();
     }catch(e){}
@@ -2663,7 +2643,7 @@ function chQuadrant(b,hasAngle){
       }},
     plugins:[cross,{id:'lbl',afterDatasetDraw:c=>{
       const ctx=c.ctx; const ds=c.data.datasets[0]; const meta=c.getDatasetMeta(0);
-      ctx.fillStyle='#5C0F0F';ctx.font="bold 10.5px 'Noto Serif SC',serif";ctx.textAlign='center';
+      ctx.fillStyle='#5C0F0F';ctx.font="bold 10.5px Inter,system-ui,sans-serif";ctx.textAlign='center';
       ds.data.forEach((p,i)=>{const el=meta.data[i];if(!el)return;ctx.fillText(p._n,el.x,el.y-el.options.radius-3);});
     }}]});
 }
@@ -2813,7 +2793,7 @@ function openInfluencerModal(name){
     <div class="k"><div class="lab">총 외부UV</div><div class="val">${FMT(totalUv)}</div></div>
     <div class="k"><div class="lab">인기콘텐츠</div><div class="val">${hot}/${rows.length}</div></div>
   </div>`;
-  if(bestAngle){body+=`<div style="background:linear-gradient(135deg,rgba(30,86,49,0.08) 0%,var(--card) 70%);border-left:3px solid var(--green);padding:11px 15px;border-radius:6px;margin-bottom:12px;font-size:13px;color:var(--ink)"><b style="color:var(--gong-red-deep);font-family:'Noto Serif SC',serif">💡 베스트 앵글</b>: ${bestAngle[0]} (${bestAngle[1].n}건, UV/￥ ${F2(bestAngle[1].uv/Math.max(bestAngle[1].cost,1)*1000)}‰)</div>`;}
+  if(bestAngle){body+=`<div style="background:linear-gradient(135deg,rgba(30,86,49,0.08) 0%,var(--card) 70%);border-left:3px solid var(--green);padding:11px 15px;border-radius:6px;margin-bottom:12px;font-size:13px;color:var(--ink)"><b style="color:var(--gong-red-deep);font-family:inherit">💡 베스트 앵글</b>: ${bestAngle[0]} (${bestAngle[1].n}건, UV/￥ ${F2(bestAngle[1].uv/Math.max(bestAngle[1].cost,1)*1000)}‰)</div>`;}
   body+=`<h4 style="font-size:13px;color:var(--navy);margin-bottom:8px;font-weight:700">📅 협업 타임라인</h4><div class="tbox" style="max-height:300px"><table class="modal-tl"><thead><tr><th>게시일</th><th>브랜드</th><th>주력상품</th><th>앵글</th><th>총비용</th><th>노출</th><th>외부UV</th><th>CPUV</th><th>구분</th></tr></thead><tbody>`;
   body+=timeline.map(r=>{
     const link=String(r.노트링크||'').trim();
