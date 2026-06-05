@@ -656,7 +656,7 @@
     <div class="kpis" id="kpis"></div>
     <div class="grid">
       <div class="panel"><h3>月度广告费 vs 广告GMV <span class="hint-inline">월별 광고비 vs 광고매출 추정</span></h3><div class="note"><b class="cn">柱=广告费 · 线=广告GMV(聚光估算) · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=<b>광고매출 추정 (쥐광 추정치)</b> · 실제 전체매출 아님</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
-      <div class="panel"><h3>月度ROI趋势 <span class="hint-inline">월별 ROI · 广告1元/매출</span></h3><div class="note"><b class="cn"><span style="color:var(--green)">★ CID ROI</span>=核心决策基准 · ≥1.5加投 / 1.0~1.5维持 / &lt;1.0立即检查</b><br><span class="ko">★ CID ROI=의사결정 기준 · 손익분기 1.0</span><br><span style="font-size:10.5px;background:rgba(165,42,42,0.08);padding:2px 6px;border-radius:3px;color:var(--gong-red-deep);font-weight:700">📅 归因窗口 30天 · 红猫计划升级 (美妆类目) · 어트리뷰션 30일 (뷰티 카테고리)</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(30,86,49,0.06);border-left:3px solid var(--green);border-radius:4px"></div></div>
+      <div class="panel" style="opacity:0.92"><h3 style="color:var(--ink-soft)">月度ROI趋势 <span class="hint-inline" style="background:var(--rice-deep);color:var(--ink-soft)">参考 (참고용)</span></h3><div class="note"><span style="color:var(--orange);font-weight:700">⚠ GMV 추정치 기반 — 메인 KPI는 CPUV로 보세요</span><br><b class="cn">ROAS=广告GMV(估算)÷广告费 · 实际全店GMV 反映后 升级为主KPI</b><br><span class="ko">실제 SKU별 매출 데이터 추가되면 메인 KPI로 승격 예정</span><br><span style="font-size:10.5px;background:rgba(165,42,42,0.08);padding:2px 6px;border-radius:3px;color:var(--gong-red-deep);font-weight:700">📅 归因窗口 30天 · 红猫计划 · 어트리뷰션 30일</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(184,148,31,0.06);border-left:3px solid var(--ink-soft);border-radius:4px"></div></div>
       <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
       <div class="panel full"><h3>购买漏斗 <span class="hint-inline">구매 여정 · 曝光→进店→淘宝→购买</span></h3><div class="note"><b class="cn">①曝光 → ②进店UV → ③淘宝跳转 → ④购买 · 各阶段间%=转化率</b><br><span class="ko">①→② 약함=소재 교체 / ②→③ 약함=CTA·딥링크 / ③→④ 약함=상세페이지</span></div><div class="cwrap"><canvas id="cFunnel"></canvas></div><div id="funnelInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(184,148,31,0.08);border-left:3px solid var(--orange);border-radius:4px"></div></div>
@@ -1080,16 +1080,22 @@ function kpis(){
     return;
   }
   const sum=k=>m.reduce((a,x)=>a+(x[k]||0),0);
-  const spend=sum('쥐광비'),gmv=sum('전점GMV'),imp=sum('노출'),kol=sum('KOL비');
+  const spend=sum('쥐광비'),gmv=sum('전점GMV'),imp=sum('노출'),kol=sum('KOL비'),uv=sum('진입UV');
   const roi=spend?(gmv/spend):0;
+  // ★ 메인 KPI = CPUV (Cost per UV — 광고비 ÷ 샤오홍슈 진입UV)
+  // GMV가 쥐광 추정치라 ROI 신뢰도 ↓ → CPUV가 실제 매장 유입 비용으로 더 안정적
+  const cpuv = uv>0 ? spend/uv : 0;
   const cur=m[m.length-1]||{},prev=m[m.length-2]||{};
   const curRoi=cur.쥐광비?(cur.전점GMV/cur.쥐광비):0, prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
+  const curCpuv=cur.진입UV>0?cur.쥐광비/cur.진입UV:0, prevCpuv=prev.진입UV>0?prev.쥐광비/prev.진입UV:0;
   // 각 카드: lab/hint/val/sub/mom/delta/core(핵심지표 ★)
-  // ROI 구분: 쥐광 ROI=추정매출(샤오홍슈→Tmall 추정), CID ROI=확정매출(전환광고 결제완료)
+  // CPUV가 메인 KPI · ROI는 참고 자료 (회색 hint)
   let cards=[
+    {lab:'平均 CPUV (主KPI)',hint:'main',val:'¥'+F2(cpuv),sub:'광고비÷진입UV · 매장 유입 1명당 비용',mom:momPct(curCpuv,prevCpuv),delta:_pct(curCpuv,prevCpuv),core:true,invertDelta:true},
     {lab:'누적 광고비',hint:'쥐광',val:WON(spend),sub:'전체 광고 집행액',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
-    {lab:'광고 GMV (추정)',hint:'쥐광 推算',val:WON(gmv),sub:'쥐광 추정 광고매출 · 실제 전체매출 아님',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV),core:true},
-    {lab:'쥐광 ROI',hint:'추정',val:F2(roi),sub:'샤오홍슈→Tmall 추정매출÷광고비',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
+    {lab:'누적 진입UV',hint:'샤오홍슈',val:FMT(uv),sub:'스토어 방문 사용자 수',mom:momPct(cur.진입UV,prev.진입UV),delta:_pct(cur.진입UV,prev.진입UV)},
+    {lab:'광고 GMV (추정)',hint:'쥐광 推算',val:WON(gmv),sub:'쥐광 추정 광고매출 · 실제 전체매출 아님',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV)},
+    {lab:'쥐광 ROI',hint:'参考',val:F2(roi),sub:'추정매출÷광고비 · GMV 추정치 기반 참고용',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
     {lab:'누적 노출',hint:'쥐광',val:FMT(imp),sub:'광고가 보여진 횟수',mom:momPct(cur.노출,prev.노출),delta:_pct(cur.노출,prev.노출)},
     {lab:'누적 KOL 비용',hint:'达人',val:WON(kol),sub:'인플루언서 협업비',mom:momPct(cur.KOL비,prev.KOL비),delta:_pct(cur.KOL비,prev.KOL비)}
   ];
@@ -1097,15 +1103,20 @@ function kpis(){
     const cs=sum('CID비'),cg=sum('CID성사GMV');
     const curCidRoi=cur.CID비?(cur.CID성사GMV/cur.CID비):0, prevCidRoi=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
     cards.push({lab:'CID 누적비',hint:'전환광고',val:WON(cs),sub:'타깃 구매자 광고비',mom:momPct(cur.CID비,prev.CID비),delta:_pct(cur.CID비,prev.CID비)});
-    cards.push({lab:'CID ROI',hint:'확정',val:F2(cs?cg/cs:0),sub:'전환광고 실제 발생 매출 효율',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi),core:true});
+    cards.push({lab:'CID ROI',hint:'参考',val:F2(cs?cg/cs:0),sub:'전환광고 매출÷광고비 · 30日归因 · 참고용',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi)});
   }
   // 최고 변동률(▲ 가장 큰) 카드에 👑 표시
   let bestIdx=-1,bestDelta=0;
   cards.forEach((c,i)=>{if(c.delta!=null&&c.delta>bestDelta){bestDelta=c.delta;bestIdx=i;}});
   document.getElementById('kpis').innerHTML=cards.map((c,i)=>{
     const cls='kpi'+(i===bestIdx&&bestDelta>5?' best':'')+(c.core?' core':'');
-    const hintColor=c.hint==='추정'?'color:var(--orange)':c.hint==='확정'?'color:var(--green);font-weight:700':'';
-    return `<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint" style="${hintColor}">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div>${c.mom||''}</div>`;
+    const hintColor=c.hint==='main'?'color:var(--gong-red);font-weight:800':c.hint==='参考'?'color:var(--grey);font-weight:500':c.hint==='추정'?'color:var(--orange)':c.hint==='확정'?'color:var(--green);font-weight:700':'';
+    // CPUV는 낮을수록 좋음 — momPct invertDelta 시 색상 반전
+    let mom=c.mom;
+    if(c.invertDelta&&mom){
+      mom = mom.replace('up','__INV__').replace('down','up').replace('__INV__','down');
+    }
+    return `<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint" style="${hintColor}">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div>${mom||''}</div>`;
   }).join('');
 }
 // MoM 변동률(%) 계산 — best 카드 판정용
@@ -2077,17 +2088,22 @@ function getMediaMonthly(brand){
     const gmvArr=rows.map(r=>+r.GMV||0);
     const roasArr=rows.map(r=>+r['ROAS(%)']||0);
     const ctrArr=rows.map(r=>+r['CTR(%)']||0);
+    const uvArr=rows.map(r=>+r['외부UV/구매']||0); // 진입UV/구매건수
     const sumSpend=tot('광고비'), sumGmv=tot('GMV'), sumImp=tot('노출'), sumInt=tot('인터랙션'), sumUV=tot('외부UV/구매');
     const roas=sumSpend?(sumGmv/sumSpend*100):0;
     const ctr=sumImp?(sumInt/sumImp*100):0;
     const cpm=sumImp?(sumSpend/sumImp*1000):0;
+    // CPUV = 광고비 / 진입UV (매체별)
+    const cpuvArr=spendArr.map((s,i)=>uvArr[i]>0?s/uvArr[i]:0);
+    const cpuv=sumUV>0?sumSpend/sumUV:0;
     // 5월 vs 4월 변동
     const curRoas=roasArr[4]||0, prevRoas=roasArr[3]||0;
     const curSpend=spendArr[4]||0, prevSpend=spendArr[3]||0;
     const curGmv=gmvArr[4]||0, prevGmv=gmvArr[3]||0;
-    return {매체:ch, spendArr, gmvArr, roasArr, ctrArr,
-      sumSpend, sumGmv, sumImp, sumInt, sumUV, roas, ctr, cpm,
-      curRoas, prevRoas, curSpend, prevSpend, curGmv, prevGmv};
+    const curCpuv=cpuvArr[4]||0, prevCpuv=cpuvArr[3]||0;
+    return {매체:ch, spendArr, gmvArr, roasArr, ctrArr, uvArr, cpuvArr,
+      sumSpend, sumGmv, sumImp, sumInt, sumUV, roas, ctr, cpm, cpuv,
+      curRoas, prevRoas, curSpend, prevSpend, curGmv, prevGmv, curCpuv, prevCpuv};
   });
 }
 
@@ -2147,12 +2163,20 @@ function renderMonthlyVerdict(){
     if(j.sig==='warn') return `${cn} 检查 (${ko} 점검)`;
     return null;
   }).filter(Boolean);
+  // 메인 KPI = CPUV (광고비÷진입UV) — 매장 유입 1명당 비용
+  const cur5UV = arr.reduce((a,x)=>a+(x.uvArr?(x.uvArr[4]||0):0),0);
+  const prev4UV = arr.reduce((a,x)=>a+(x.uvArr?(x.uvArr[3]||0):0),0);
+  const cur5Cpuv = cur5UV>0 ? cur5Spend/cur5UV : 0;
+  const prev4Cpuv = prev4UV>0 ? prev4Spend/prev4UV : 0;
+  const cpuvDelta = cur5Cpuv - prev4Cpuv;
+  // CPUV는 낮을수록 좋음 → 색상 반전
+  const arrowC = cpuvDelta<-0.05?`<span class="delta-up">▼${Math.abs(cpuvDelta).toFixed(2)} 改善</span>`:cpuvDelta>0.05?`<span class="delta-down">▲${cpuvDelta.toFixed(2)} 恶化</span>`:`<span class="delta-flat">±0</span>`;
   box.innerHTML = `
     <div class="v-top">
-      <span><span class="v-label">📊 5月综合ROAS (5월 종합 ROAS)</span> <span class="v-val">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
+      <span><span class="v-label" style="color:var(--gong-red);font-weight:800">★ 5月 平均CPUV (主KPI · 메인)</span> <span class="v-val" style="color:var(--gong-red-deep)">¥${cur5Cpuv.toFixed(2)}</span> ${arrowC}</span>
       <span><span class="v-label">广告费 (광고비)</span> <span class="v-val" style="font-size:20px">${WON(cur5Spend)}</span> ${arrowS}</span>
-      <span><span class="v-label">广告GMV 추정 (聚光估算 광고매출)</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
-      <span><span class="v-label">1~5月累计ROAS (1~5월 누적)</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${totRoas.toFixed(0)}%</span></span>
+      <span><span class="v-label" style="color:var(--ink-soft)">5月 ROAS (참고)</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
+      <span><span class="v-label" style="color:var(--ink-soft)">광고GMV 추정 (참고)</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${WON(cur5Gmv)}</span></span>
     </div>
     <div class="v-action">
       <b>📌 行动建议 (한 줄 액션):</b> ${acts.length?acts.join(' · '):'趋势稳定 — 维持现状 (추세 안정 — 현 운영 유지)'}
@@ -2175,17 +2199,20 @@ function renderMediaCards(){
     const cur=m.curRoas, prev=m.prevRoas;
     const roasDelta=cur-prev;
     const arrowR = roasDelta>1?`<span class="delta-up m-pdelta">▲+${roasDelta.toFixed(0)}%p</span>`:roasDelta<-1?`<span class="delta-down m-pdelta">▼${Math.abs(roasDelta).toFixed(0)}%p</span>`:`<span class="delta-flat m-pdelta">±0</span>`;
+    // CPUV delta (낮을수록 좋음 → 색상 반전)
+    const cpuvDelta = m.curCpuv - m.prevCpuv;
+    const arrowCp = cpuvDelta<-0.05?`<span class="delta-up m-pdelta">▼${Math.abs(cpuvDelta).toFixed(2)}</span>`:cpuvDelta>0.05?`<span class="delta-down m-pdelta">▲${cpuvDelta.toFixed(2)}</span>`:`<span class="delta-flat m-pdelta">±0</span>`;
     const ch=m.매체;
     const isKol = ch.includes('KOL');
     const isSns = ch.includes('SNS');
-    // 매체별 차별 KPI — 中文 우선 + 한국어 병기
-    let primaryKey='5月 ROAS (5월 ROAS)', primaryVal=cur.toFixed(0)+'%', primaryDelta=arrowR;
-    let sparkArr=m.roasArr, sparkLabel='1~5月 ROAS 趋势 (ROAS 추이)';
+    // 매체별 차별 KPI — 中文 우선 + 한국어 병기 · 메인 = CPUV
+    let primaryKey='5月 CPUV (메인 · 매장 유입 1명당)', primaryVal='¥'+m.curCpuv.toFixed(2), primaryDelta=arrowCp;
+    let sparkArr=m.cpuvArr, sparkLabel='1~5月 CPUV 趋势 (낮을수록 효율 ↑)';
     let meta=[
       ['广告费 1~5月 (광고비)', WON(m.sumSpend)],
-      ['广告GMV 1~5月 (광고매출 추정)', WON(m.sumGmv)],
-      ['平均CTR (평균 CTR)', m.ctr.toFixed(2)+'%'],
-      ['平均CPM (평균 CPM)', '¥'+m.cpm.toFixed(0)]
+      ['进店UV 1~5月 (진입UV)', FMT(m.sumUV)],
+      ['5月 ROAS (참고)', cur.toFixed(0)+'%'],
+      ['平均CTR (평균 CTR)', m.ctr.toFixed(2)+'%']
     ];
     if(isKol){
       primaryKey='1~5月 GMV (1~5월 GMV)'; primaryVal=WON(m.sumGmv); primaryDelta='';
