@@ -2907,6 +2907,23 @@ render();
 const SHEET_ID = '1Ijm-z7fkbcWxTb5bc1UDZ4bCrsio1awazUv1D1lEmqI';
 const FETCH_SHEETS = ['일별raw통합', 'KOL_WM', 'KOL_CG'];
 function setSyncStatus(text, color){const el=document.getElementById('syncStatus');if(!el)return;el.textContent=text;if(color==='live'){el.style.background='rgba(30,86,49,0.14)';el.style.color='#1E5631';el.style.borderColor='rgba(30,86,49,0.3)';}else if(color==='err'){el.style.background='rgba(200,16,46,0.12)';el.style.color='#5C0F0F';el.style.borderColor='rgba(200,16,46,0.3)';}else{el.style.background='rgba(184,148,31,0.15)';el.style.color='#B8941F';el.style.borderColor='rgba(184,148,31,0.3)';}}
+// byday 정규화 실패 시 화면에 진단 박스 표시 (사용자가 시트 헤더 어떤지 바로 보고 알려줄 수 있게)
+function showByDayDiag(sampleKeys, sampleBrand, rawCount, fallbackCount){
+  let box=document.getElementById('bydayDiagBox');
+  if(!box){
+    box=document.createElement('div'); box.id='bydayDiagBox';
+    box.style.cssText='margin:12px 0;padding:14px 18px;background:rgba(217,119,6,0.08);border:1px solid #D97706;border-left:4px solid #D97706;border-radius:8px;font-size:12.5px;line-height:1.7;color:var(--ink)';
+    const wrap=document.querySelector('.wrap'); const after=document.querySelector('.gfilters');
+    if(after&&after.parentNode) after.parentNode.insertBefore(box,after.nextSibling);
+    else if(wrap) wrap.insertBefore(box,wrap.firstChild);
+  }
+  box.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:#B45309;margin-bottom:6px">⚠ 일별raw통합 시트 진단 — 정규화 실패</div>
+    <div><b>시트 응답:</b> ${rawCount}행 · <b>브랜드 매칭 후:</b> ${fallbackCount}행 (0이면 내장 데이터 사용 중)</div>
+    <div style="margin-top:6px"><b>시트 첫 행의 컬럼 키들:</b><br><code style="background:#fff;padding:3px 8px;border-radius:4px;display:inline-block;margin-top:4px;font-size:11.5px;color:#1E40AF">${sampleKeys.join(' | ')||'(없음 — 시트 빈 응답)'}</code></div>
+    <div style="margin-top:6px"><b>첫 행 '브랜드' 값:</b> <code style="background:#fff;padding:2px 6px;border-radius:3px;color:#7A1F1F">${sampleBrand}</code></div>
+    <div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">→ 시트 헤더에 <code>브랜드</code> 컬럼이 있고 값이 <code>WAKEMAKE</code>/<code>COLORGRAM</code>이어야 인식됩니다. 헤더가 다르면 위 키들 캡처해서 알려주세요.</div>`;
+}
 async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;const resp=await fetch(url,{cache:'no-store'});if(!resp.ok)throw new Error(`${name}: HTTP ${resp.status}`);return Papa.parse(await resp.text(),{header:true,dynamicTyping:true,skipEmptyLines:true}).data;}
 // 한국어/중국어 컬럼 fallback — 시트에 새 컬럼이 한·중 중 어떤 이름으로 들어와도 인식
 function pickNum(r, keys){for(const k of keys){const v=r[k]; if(v!=null&&v!==''&&!isNaN(+v))return +v;} return 0;}
@@ -2993,13 +3010,24 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
   // byday 정규화 — 한·중 컬럼명 fallback. 정규화 후 0건이면 원본을 fallback으로 사용 (sync 중단 X)
   let byday = normalizeByday(bydayRaw);
   if(byday.length===0){
-    // 원본 그대로 사용 — WAKEMAKE/COLORGRAM 브랜드만 필터
+    // (1) 원본 그대로 — 표준 브랜드 컬럼명 매칭
     byday = bydayRaw.filter(r=>r && (r.브랜드==='WAKEMAKE'||r.브랜드==='COLORGRAM'||r['品牌']==='WAKEMAKE'||r['品牌']==='COLORGRAM'));
-    console.warn('[sync] normalizeByday 0건 — 원본 fallback 사용', {bydayRaw:bydayRaw.length, fallback:byday.length, sampleKeys: Object.keys(bydayRaw[0]||{})});
+    // (2) 그래도 0건이면 — 모든 값을 훑어 'WAKEMAKE'/'COLORGRAM'이 있는 행 추출 (가장 관대)
     if(byday.length===0){
-      console.warn('[sync] 원본 fallback도 0건 — 시트 헤더가 예상과 다름. 내장 데이터 유지');
-      // sync 중단하지 않고 KOL은 계속 진행 (byday만 빈 채로)
+      byday = bydayRaw.filter(r=>{
+        if(!r||typeof r!=='object') return false;
+        return Object.values(r).some(v=>{
+          const s=String(v||'').toUpperCase().trim();
+          return s==='WAKEMAKE'||s==='COLORGRAM'||s==='WM'||s==='CG'||s.includes('웨이크')||s.includes('컬러그');
+        });
+      });
     }
+    // 진단 UI — 시트 헤더 키들을 화면에 표시 (콘솔 안 켜도 사용자가 바로 보고 알려줄 수 있게)
+    const sampleKeys = Object.keys(bydayRaw[0]||{});
+    const sampleRow = bydayRaw[0]||{};
+    const sampleBrand = sampleRow.브랜드||sampleRow['品牌']||sampleRow.brand||sampleRow.Brand||sampleRow.BRAND||'(브랜드 키 없음)';
+    showByDayDiag(sampleKeys, sampleBrand, bydayRaw.length, byday.length);
+    console.warn('[sync] normalizeByday 0건 — 원본 fallback', {bydayRaw:bydayRaw.length, fallback:byday.length, sampleKeys, sampleRow});
   }
   const wm=dedupeByLatest(wmRaw); const cg=dedupeByLatest(cgRaw);
   const _autoN=deriveWmAngleFromNoteType(wm); window._wmAutoAngleN=_autoN;
