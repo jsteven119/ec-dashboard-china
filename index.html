@@ -655,7 +655,7 @@
     <div id="alerts" class="alerts"></div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
-      <div class="panel"><h3>月度广告费 vs GMV <span class="hint-inline">월별 광고비 vs 매출</span></h3><div class="note"><b class="cn">柱=广告费 · 线=GMV · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=매출 · 동조상승=정상 / 막대↑선↓=비효율</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
+      <div class="panel"><h3>月度广告费 vs 广告GMV <span class="hint-inline">월별 광고비 vs 광고매출 추정</span></h3><div class="note"><b class="cn">柱=广告费 · 线=广告GMV(聚光估算) · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=<b>광고매출 추정 (쥐광 추정치)</b> · 실제 전체매출 아님</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
       <div class="panel"><h3>月度ROI趋势 <span class="hint-inline">월별 ROI · 广告1元/매출</span></h3><div class="note"><b class="cn"><span style="color:var(--green)">★ CID ROI</span>=核心决策基准 · ≥1.5加投 / 1.0~1.5维持 / &lt;1.0立即检查</b><br><span class="ko">★ CID ROI=의사결정 기준 · 손익분기 1.0</span><br><span style="font-size:10.5px;background:rgba(165,42,42,0.08);padding:2px 6px;border-radius:3px;color:var(--gong-red-deep);font-weight:700">📅 归因窗口 30天 · 红猫计划升级 (美妆类目) · 어트리뷰션 30일 (뷰티 카테고리)</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(30,86,49,0.06);border-left:3px solid var(--green);border-radius:4px"></div></div>
       <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
@@ -720,15 +720,16 @@
           </div>
           <div class="cwrap huge"><canvas id="cScatter"></canvas></div>
         </div>
-        <div class="panel full">
-          <h3>🔬 ER vs 인터랙션 — 매출 연관성 비교 <span class="hint-inline">어떤 지표를 KPI로 쓸까</span></h3>
-          <div class="note">
-            <b>왜 비교?</b> 인터랙션(절대 합)은 노출 큰 메가 KOL일수록 자동으로 큼 → 효율 왜곡. ER(=인터랙션/조회수 %)은 콘텐츠 자체 매력도라 노출 크기 무관.
-            <br><b>매출 proxy:</b> 외부행동UV (샤오홍슈 → Tmall 이동수) — 실제 매출의 직접 선행 지표
-            <br>→ <b>Pearson 상관계수 |r|</b> 가 큰 지표가 매출과 더 강한 연관성. <b style="color:var(--green)">|r| ≥ 0.5</b> 강한 양의 상관 · <b style="color:var(--orange)">0.3~0.5</b> 중간 · <b style="color:var(--accent)">＜0.3</b> 약함
+        <!-- ⏸ ER vs 인터랙션 매출 연관성 분석 — 실제 GMV 데이터 미반영으로 일시 비활성화
+             현재 시트의 GMV는 쥐광(샤오홍슈 피드광고) 추정치 = 광고매출에 가까움
+             실제 Tmall SKU별 전체 매출 데이터 추가 후 재활성화 예정 -->
+        <div class="panel full" style="background:rgba(184,148,31,0.05);border:1px dashed var(--line-ink)">
+          <h3 style="color:var(--ink-soft)">⏸ ER vs 인터랙션 매출 연관성 분석 <span class="hint-inline">데이터 보강 후 활성화</span></h3>
+          <div style="font-size:12.5px;color:var(--ink-soft);line-height:1.7;padding:8px 4px">
+            <b>현재 비활성화 사유:</b> 시트의 GMV는 <b>쥐광에 의한 추정치 (광고매출 추정)</b>로, 매체 직접 기여 부분만 반영됩니다. 실제 매출과의 상관관계 분석에는 부적합.
+            <br><b>활성화 조건:</b> Tmall SKU별 실제 전체 매출(쥐광 외 자연 유입 + KOL 직접 매출 포함) 데이터 추가 후 재가동 예정.
+            <br><span style="font-size:11px;color:var(--grey)">→ 그동안은 CPUV·ER 절대값과 외부행동UV로 효율 판단</span>
           </div>
-          <div id="corrAnalysis" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px"></div>
-          <div id="corrVerdict" style="margin-top:14px;padding:14px 18px;background:linear-gradient(135deg,rgba(212,175,55,0.10) 0%,var(--card) 60%);border-left:4px solid var(--gong-red);border-radius:6px;font-size:13px;line-height:1.7;color:var(--ink)"></div>
         </div>
         <div class="panel"><h3>主力商品 平均CPUV <span class="hint-inline">주력상품별 매장유입 효율</span></h3><div class="note"><b class="cn">CPUV↓优 · 平均-30%=优先加投 / 平均+30%=检讨或淘汰</b><br><span class="ko">평균 대비 -30% 광고 집중 / +30% 점검·제외</span></div><div class="cwrap"><canvas id="cCType"></canvas></div><div id="cTypeInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(30,86,49,0.05);border-left:3px solid var(--green);border-radius:4px"></div></div>
         <div class="panel"><h3>粉丝量段 平均CPUV <span class="hint-inline">팔로워 구간별 효율</span></h3><div class="note"><b class="cn">中腰部 CPUV &lt; 头部 = 中腰部优势 (重新分配预算)</b><br><span class="ko">미들＜메가 통설 검증 / 통설 깨지면 메가 단가 정당화</span></div><div class="cwrap"><canvas id="cTier"></canvas></div><div id="cTierInterp" style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.55;padding:6px 10px;background:rgba(107,140,153,0.08);border-left:3px solid var(--sky);border-radius:4px"></div></div>
@@ -1087,7 +1088,7 @@ function kpis(){
   // ROI 구분: 쥐광 ROI=추정매출(샤오홍슈→Tmall 추정), CID ROI=확정매출(전환광고 결제완료)
   let cards=[
     {lab:'누적 광고비',hint:'쥐광',val:WON(spend),sub:'전체 광고 집행액',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
-    {lab:'누적 매출(GMV)',hint:'전점',val:WON(gmv),sub:'스토어 총거래액',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV),core:true},
+    {lab:'광고 GMV (추정)',hint:'쥐광 推算',val:WON(gmv),sub:'쥐광 추정 광고매출 · 실제 전체매출 아님',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV),core:true},
     {lab:'쥐광 ROI',hint:'추정',val:F2(roi),sub:'샤오홍슈→Tmall 추정매출÷광고비',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
     {lab:'누적 노출',hint:'쥐광',val:FMT(imp),sub:'광고가 보여진 횟수',mom:momPct(cur.노출,prev.노출),delta:_pct(cur.노출,prev.노출)},
     {lab:'누적 KOL 비용',hint:'达人',val:WON(kol),sub:'인플루언서 협업비',mom:momPct(cur.KOL비,prev.KOL비),delta:_pct(cur.KOL비,prev.KOL비)}
@@ -1664,7 +1665,7 @@ function renderTable(){
 function renderKol(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
   safe(kolKpis,'kolKpis');
-  safe(renderCorrAnalysis,'renderCorrAnalysis');
+  // safe(renderCorrAnalysis,'renderCorrAnalysis'); // ⏸ 실제 GMV 데이터 추가 후 재활성화
   safe(chScatter,'chScatter');
   safe(chCType,'chCType');
   safe(chTier,'chTier');
@@ -2150,7 +2151,7 @@ function renderMonthlyVerdict(){
     <div class="v-top">
       <span><span class="v-label">📊 5月综合ROAS (5월 종합 ROAS)</span> <span class="v-val">${cur5Roas.toFixed(0)}%</span> ${arrowR}</span>
       <span><span class="v-label">广告费 (광고비)</span> <span class="v-val" style="font-size:20px">${WON(cur5Spend)}</span> ${arrowS}</span>
-      <span><span class="v-label">GMV (매출)</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
+      <span><span class="v-label">广告GMV 추정 (聚光估算 광고매출)</span> <span class="v-val" style="font-size:20px">${WON(cur5Gmv)}</span></span>
       <span><span class="v-label">1~5月累计ROAS (1~5월 누적)</span> <span class="v-val" style="font-size:18px;color:var(--ink-soft)">${totRoas.toFixed(0)}%</span></span>
     </div>
     <div class="v-action">
@@ -2182,7 +2183,7 @@ function renderMediaCards(){
     let sparkArr=m.roasArr, sparkLabel='1~5月 ROAS 趋势 (ROAS 추이)';
     let meta=[
       ['广告费 1~5月 (광고비)', WON(m.sumSpend)],
-      ['GMV 1~5月 (매출)', WON(m.sumGmv)],
+      ['广告GMV 1~5月 (광고매출 추정)', WON(m.sumGmv)],
       ['平均CTR (평균 CTR)', m.ctr.toFixed(2)+'%'],
       ['平均CPM (평균 CPM)', '¥'+m.cpm.toFixed(0)]
     ];
