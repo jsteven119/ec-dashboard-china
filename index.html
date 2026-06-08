@@ -553,6 +553,20 @@
   .cal-event.big{background:var(--red-grad);color:#FFFDF5;box-shadow:inset 0 0 0 1px var(--gold)}
   .cal-event.mid{background:var(--gold-grad);color:#5C0F0F}
   .cal-event.small{background:var(--rice-deep);color:var(--ink-soft);border:1px solid var(--line)}
+  /* 브랜드별 핵심 발견 카드 (KOL 인사이트 탭) */
+  .finding{display:flex;gap:14px;align-items:flex-start;padding:12px 16px;background:#fff;border:1px solid var(--line);border-left:4px solid;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .finding.pos{border-left-color:#2E8B57;background:linear-gradient(90deg,#F0FBF6 0%,#fff 30%)}
+  .finding.neg{border-left-color:#C00000;background:linear-gradient(90deg,#FDF1F1 0%,#fff 30%)}
+  .finding.mid{border-left-color:#5B9BD5;background:linear-gradient(90deg,#F0F7FC 0%,#fff 30%)}
+  .finding-icon{font-size:22px;flex-shrink:0;line-height:1;padding-top:2px}
+  .finding-body{flex:1;min-width:0}
+  .finding-title{font-size:13.5px;font-weight:700;color:var(--gong-red-deep);margin-bottom:4px;line-height:1.4}
+  .finding-data{font-size:12.5px;color:var(--ink);margin-bottom:6px;line-height:1.5}
+  .finding-action{font-size:12px;color:var(--ink-soft);line-height:1.5}
+  .actbtn{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px;margin-right:4px}
+  .actbtn.pos{background:#E0F2EF;color:#1E7F66}
+  .actbtn.neg{background:#FCE5E5;color:#9a3030}
+  .actbtn.mid{background:#E0F2FE;color:#0369A1}
 </style>
 </head>
 <body>
@@ -782,6 +796,11 @@
           </div>
           <div class="cwrap huge"><canvas id="cQuadrant"></canvas></div>
           <div id="quadrantInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.07);border-left:3px solid var(--gold);border-radius:4px"></div>
+        </div>
+        <div class="panel full">
+          <h3>🎯 브랜드별 핵심 발견 <span class="badge" id="findingsBrandBadge"></span></h3>
+          <div class="note">실측 데이터 기반 Top 신호 자동 추출 · 브랜드 토글 시 자동 갱신<br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> WM은 앵글 효율 중심 · CG는 노트형식·번들·SKU 조합 중심 (브랜드 본질에 맞춤)</div>
+          <div id="brandFindings"></div>
         </div>
         <div class="panel full">
           <h3>💡 다음 분기 액션 아이템</h3>
@@ -2570,12 +2589,186 @@ function renderAngleInsight(){
   }
   notice.innerHTML=noticeHtml;
   chQuadrant(b,ok);
+  try{renderBrandFindings(b);}catch(e){console.error('brandFindings err:',e);}
   renderAngleActions(b,ok);
   renderAngleProductHeatmap(b);
   renderAngleStrategy(b,ok);
   try{renderQuadrantInterp(b,ok);}catch(e){console.error('quadInterp err:',e);}
   try{renderMatrixInterp(b);}catch(e){console.error('matrixInterp err:',e);}
 }
+
+// ===== 브랜드별 핵심 발견 (실측 데이터 자동 추출) =====
+// WM: 앵글 효율 중심 (베이스 메이크업 = 콘텐츠 앵글이 매출 직결)
+// CG: 노트형식·단일/번들·SKU 조합 중심 (입술 색조 = 시연 포맷·SKU 매칭이 더 중요)
+function _aggBy(rows, col, minN){
+  const g={};
+  rows.forEach(r=>{
+    const k=String(r[col]||'').trim();
+    if(!k||k==='미입력'||k==='0'||k==='-')return;
+    if(!g[k])g[k]={n:0,cpuvSum:0,cpuvN:0,costSum:0,intSum:0,impSum:0,uvSum:0,hot:0};
+    g[k].n++;
+    const cpuv=+r.종합CPUV||0;
+    if(cpuv>0){g[k].cpuvSum+=cpuv;g[k].cpuvN++;}
+    g[k].costSum+=+r.총비용||0;
+    g[k].intSum+=+r.인터랙션||0;
+    g[k].impSum+=+r.노출량||0;
+    g[k].uvSum+=+r.외부행동UV||0;
+    if(r.인기콘텐츠&&String(r.인기콘텐츠).trim()&&String(r.인기콘텐츠).trim()!=='0')g[k].hot++;
+  });
+  return Object.entries(g).filter(([_,v])=>v.n>=minN).map(([k,v])=>({
+    key:k, n:v.n,
+    avgCpuv: v.cpuvN?(v.cpuvSum/v.cpuvN):0,
+    avgCost: v.costSum/v.n,
+    engRate: v.impSum?(v.intSum/v.impSum*100):0,
+    hotRate: v.hot/v.n*100,
+    totalCost: v.costSum
+  }));
+}
+function _fmtN(n){return Math.round(n).toLocaleString('ko-KR');}
+function _fmtCpuv(n){return (n||0).toFixed(2);}
+
+function renderBrandFindings(b){
+  const box=document.getElementById('brandFindings'); if(!box) return;
+  // BOTH는 WM/CG 각자 카드 보여주기 (단순화: WM 기준)
+  const targetB=b==='BOTH'?'WAKEMAKE':b;
+  document.getElementById('findingsBrandBadge').textContent=targetB==='TOTAL'?'WM + CG 통합':targetB;
+  const rows=(KOL.kol[targetB]||[]).filter(r=>r.데이터상태!=='이전작업');
+  if(!rows.length){box.innerHTML='<div style="color:var(--ink-soft);padding:18px;text-align:center">데이터 없음</div>';return;}
+
+  const cards=[];
+  if(targetB==='WAKEMAKE'){
+    // === WAKEMAKE: 앵글 효율 중심 ===
+    const byAngle=_aggBy(rows,'콘텐츠앵글',2).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    const bySp=_aggBy(rows,'주력상품',2).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    if(byAngle.length>=2){
+      const top=byAngle[0];
+      cards.push({
+        cls:'pos', icon:'🥇',
+        title:`효율 1위 앵글: <b>${top.key}</b>`,
+        body:`n=${top.n} · CPUV <b>${_fmtCpuv(top.avgCpuv)}</b> · 평균비용 ￥${_fmtN(top.avgCost)}`,
+        action:`<span class="actbtn pos">다음 분기 +${Math.max(3,Math.round(top.n*1.5))}건 권장</span> · 동일 앵글 KOL 풀 확장`
+      });
+      const worst=byAngle[byAngle.length-1];
+      if(worst.avgCpuv > top.avgCpuv*2){
+        cards.push({
+          cls:'neg', icon:'⚠️',
+          title:`효율 워스트 앵글: <b>${worst.key}</b>`,
+          body:`n=${worst.n} · CPUV <b>${_fmtCpuv(worst.avgCpuv)}</b> · 1위 대비 ${(worst.avgCpuv/Math.max(top.avgCpuv,0.01)).toFixed(1)}배 비효율`,
+          action:`<span class="actbtn neg">집행량 -50%</span> 또는 단가 압축 (마이크로 KOL 전환)`
+        });
+      }
+    }
+    // 가성비 1위 (CPUV 낮으면서 평균 비용도 낮은 앵글)
+    if(byAngle.length>=3){
+      const cheap=[...byAngle].sort((a,b)=>(a.avgCost*a.avgCpuv)-(b.avgCost*b.avgCpuv))[0];
+      cards.push({
+        cls:'mid', icon:'💰',
+        title:`가성비 1위 앵글: <b>${cheap.key}</b>`,
+        body:`n=${cheap.n} · 평균비용 ￥${_fmtN(cheap.avgCost)} · CPUV ${_fmtCpuv(cheap.avgCpuv)}`,
+        action:`미들·마이크로 KOL 풀로 콘텐츠 수 확장 — 같은 단가로 ${Math.round(cheap.n*1.8)}건까지 가능`
+      });
+    }
+    // 볼륨 1위 vs 효율 평균
+    const biggest=[...byAngle].sort((a,b)=>b.n-a.n)[0];
+    if(biggest&&biggest.n>=10&&byAngle.length>=3){
+      const meanCpuv=byAngle.reduce((a,x)=>a+x.avgCpuv,0)/byAngle.length;
+      const isOk=biggest.avgCpuv<meanCpuv;
+      cards.push({
+        cls:isOk?'pos':'mid', icon:'📊',
+        title:`볼륨 1위 앵글: <b>${biggest.key}</b>`,
+        body:`n=${biggest.n} · CPUV ${_fmtCpuv(biggest.avgCpuv)} · 평균 ${_fmtCpuv(meanCpuv)}`,
+        action:isOk?'효율 평균 이상 ✅ 현 비중 유지':'<b>효율 평균 미만</b> → 같은 앵글에 단가 낮은 KOL 도입 권장'
+      });
+    }
+    // 주력상품 비교 (코팅밤 vs 아이팔레트 등)
+    if(bySp.length>=2){
+      const a=bySp[0], b=bySp[bySp.length-1];
+      cards.push({
+        cls:'mid', icon:'🛍',
+        title:`주력상품 효율 비교`,
+        body:`<b>${a.key}</b> (n=${a.n}, CPUV ${_fmtCpuv(a.avgCpuv)}) vs <b>${b.key}</b> (n=${b.n}, CPUV ${_fmtCpuv(b.avgCpuv)})`,
+        action:a.avgCpuv<b.avgCpuv?`${a.key} 위주 콘텐츠가 효율 우위 — 비중 ${Math.round(a.n/(a.n+b.n)*100)}% 유지/확대`:'각 상품별 앵글 다각화 필요'
+      });
+    }
+  } else if(targetB==='COLORGRAM'){
+    // === COLORGRAM: 노트형식·단일/번들·SKU 조합 중심 ===
+    const byForm=_aggBy(rows,'노트형식',5).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    const byCombo=_aggBy(rows,'상품_조합',3).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    const byNote=_aggBy(rows,'노트유형',4).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    const byAngle=_aggBy(rows,'콘텐츠앵글',2).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    const bySp=_aggBy(rows,'주력상품',2).sort((a,b)=>a.avgCpuv-b.avgCpuv);
+    // 노트형식 (가장 큰 발견: 图文 vs 视频)
+    if(byForm.length>=2){
+      const win=byForm[0], lose=byForm[byForm.length-1];
+      const ratio=lose.avgCpuv/Math.max(win.avgCpuv,0.01);
+      cards.push({
+        cls:'pos', icon:'📷',
+        title:`노트형식 효율: <b>${win.key}</b> >> <b>${lose.key}</b>`,
+        body:`<b>${win.key}</b> n=${win.n}, CPUV ${_fmtCpuv(win.avgCpuv)} · <b>${lose.key}</b> n=${lose.n}, CPUV ${_fmtCpuv(lose.avgCpuv)} · <b>${ratio.toFixed(1)}배 차이</b>`,
+        action:ratio>=2?`<span class="actbtn pos">${win.key} 비중 30%↑ 권장</span> · ${lose.key}은 단가 압축 또는 임팩트 큰 케이스만 선별`:'비중 균형 검토'
+      });
+    }
+    // 단일 vs 번들
+    if(byCombo.length>=2){
+      const single=byCombo.find(c=>c.key==='단일')||byCombo[0];
+      const bundles=byCombo.filter(c=>c.key.includes('번들'));
+      const worstBundle=bundles.length?bundles.sort((a,b)=>b.avgCpuv-a.avgCpuv)[0]:null;
+      if(single&&worstBundle){
+        const ratio=worstBundle.avgCpuv/Math.max(single.avgCpuv,0.01);
+        cards.push({
+          cls:ratio>=2?'neg':'mid', icon:'📦',
+          title:`단일 SKU >> 번들 효율 함정`,
+          body:`<b>단일</b> n=${single.n}, CPUV ${_fmtCpuv(single.avgCpuv)} · <b>${worstBundle.key}</b> n=${worstBundle.n}, CPUV ${_fmtCpuv(worstBundle.avgCpuv)} (${ratio.toFixed(1)}배 비효율)`,
+          action:ratio>=2?`<span class="actbtn neg">번들 3종↑ 줄이기</span> · 번들은 1-2종까지만, 평균비용 싸 보여도 CPUV 환산하면 손해`:'번들 구성 SKU 수 점검'
+        });
+      }
+    }
+    // SKU 조합 효율 TOP
+    if(bySp.length>=2){
+      const top=bySp[0];
+      cards.push({
+        cls:'pos', icon:'🥇',
+        title:`효율 1위 SKU 조합: <b>${top.key}</b>`,
+        body:`n=${top.n} · CPUV <b>${_fmtCpuv(top.avgCpuv)}</b> · 평균비용 ￥${_fmtN(top.avgCost)}`,
+        action:`<span class="actbtn pos">다음 분기 +${Math.max(3,Math.round(top.n*1.5))}건 권장</span>`
+      });
+    }
+    // 노트유형 (있는 만큼만)
+    if(byNote.length>=2){
+      const win=byNote[0], lose=byNote[byNote.length-1];
+      if(lose.avgCpuv>20){
+        cards.push({
+          cls:'neg', icon:'⚠️',
+          title:`노트유형 비효율: <b>${lose.key}</b>`,
+          body:`n=${lose.n} · CPUV <b>${_fmtCpuv(lose.avgCpuv)}</b> · 효율 1위(${win.key}, CPUV ${_fmtCpuv(win.avgCpuv)}) 대비 매장 진입 약함`,
+          action:lose.key.includes('试色')?`<span class="actbtn neg">CTA 점검</span> · 试色 단독 → 妆容植入+试色 결합 권장`:`<span class="actbtn neg">앵글 자체 폐기 검토</span>`
+        });
+      }
+    }
+    // 앵글 효율 1위 (콘텐츠앵글 컬럼 기반)
+    if(byAngle.length>=2){
+      const top=byAngle[0];
+      cards.push({
+        cls:'pos', icon:'🎯',
+        title:`효율 1위 앵글: <b>${top.key}</b>`,
+        body:`n=${top.n} · CPUV <b>${_fmtCpuv(top.avgCpuv)}</b>`,
+        action:`동일 앵글 + 효율 우위 SKU 조합으로 시드 확장`
+      });
+    }
+  }
+  if(!cards.length){box.innerHTML='<div style="color:var(--ink-soft);padding:18px;text-align:center">콘텐츠 수 임계(2~5건) 미달 — 시드 더 누적 후 분석 가능</div>';return;}
+  box.innerHTML=cards.map(c=>`
+    <div class="finding ${c.cls}">
+      <div class="finding-icon">${c.icon}</div>
+      <div class="finding-body">
+        <div class="finding-title">${c.title}</div>
+        <div class="finding-data">${c.body}</div>
+        <div class="finding-action">${c.action}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 
 // ===== 4사분면 동적 해석 =====
 function renderQuadrantInterp(b,hasAngle){
