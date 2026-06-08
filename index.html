@@ -2599,7 +2599,7 @@ function renderQuadrantInterp(b,hasAngle){
 // ===== 앵글 × 주력상품 매트릭스 동적 해석 =====
 function renderMatrixInterp(b){
   const el=document.getElementById('matrixInterp'); if(!el) return;
-  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태==='최신'&&r.총비용>0);
+  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
   const grid={};
   rows.forEach(r=>{
     const ag=(r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력')?r.콘텐츠앵글:'(앵글 미입력)';
@@ -2758,7 +2758,7 @@ function renderAngleActions(b,hasAngle){
 
 function renderAngleProductHeatmap(b){
   const box=document.getElementById('angleProductHeatmap'); if(!box) return;
-  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태==='최신'&&r.총비용>0);
+  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
   // 그룹: 앵글 × 주력상품 → 평균 CPUV
   const grid={};
   rows.forEach(r=>{
