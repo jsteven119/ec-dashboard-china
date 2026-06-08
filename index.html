@@ -1169,8 +1169,8 @@ function chDaily(){destroy('cDaily');
   }
   if(forecastInfo){
     const fc=forecastInfo;
-    datasets.push({label:`5월 forecast (${WON(fc.projGmv)})`,data:fc.gmvLine,borderColor:COL.orange,backgroundColor:COL.orange,borderDash:[6,4],pointRadius:0,tension:0});
-    document.getElementById('forecastBadge').textContent=`5월 예상 GMV ${WON(fc.projGmv)} (${fc.projDelta>=0?'+':''}${fc.projDelta.toFixed(0)}% vs 4월)`;
+    datasets.push({label:`${fc.curMonth}월 forecast (${WON(fc.projGmv)})`,data:fc.gmvLine,borderColor:COL.orange,backgroundColor:COL.orange,borderDash:[6,4],pointRadius:0,tension:0});
+    document.getElementById('forecastBadge').textContent=`${fc.curMonth}월 예상 GMV ${WON(fc.projGmv)} (${fc.projDelta>=0?'+':''}${fc.projDelta.toFixed(0)}% vs ${fc.prevMonth}월)`;
     document.getElementById('forecastBadge').style.background=fc.projDelta>=0?'rgba(30,86,49,0.14)':'rgba(200,16,46,0.12)';
     document.getElementById('forecastBadge').style.color=fc.projDelta>=0?COL.green:COL.redDeep;
   } else {document.getElementById('forecastBadge').textContent='';document.getElementById('forecastBadge').style.background='';}
@@ -2392,38 +2392,42 @@ function renderAlerts(){
   }).join('');
 }
 
-// --- MTD Forecast (현재 월 = 5월) ---
+// --- MTD Forecast (데이터의 마지막 월을 자동 감지) ---
 function calcForecast(b,allDates,map){
-  // 5월 데이터만 필터
-  const mayDates=allDates.filter(d=>d.startsWith('2026-05'));
-  if(mayDates.length<3) return null;
-  const mayLast=mayDates[mayDates.length-1];
-  const lastDay=parseInt(mayLast.slice(8),10);
-  const daysInMonth=31; // 5월
-  // 7일 이동 평균 (마지막 7일 GMV)
-  const recent7=mayDates.slice(-7).map(d=>map[d]?map[d]['샤오홍싱_전점GMV']||0:0);
-  const dailyAvg=recent7.reduce((a,v)=>a+v,0)/recent7.length;
+  if(!allDates.length) return null;
+  // 현재 MTD = allDates의 마지막 월
+  const lastDate=allDates[allDates.length-1];
+  const curMonthPrefix=lastDate.slice(0,7); // 'YYYY-MM'
+  const yr=+curMonthPrefix.slice(0,4), mo=+curMonthPrefix.slice(5,7);
+  const curMonthDates=allDates.filter(d=>d.startsWith(curMonthPrefix));
+  if(curMonthDates.length<3) return null;
+  const curLast=curMonthDates[curMonthDates.length-1];
+  const lastDay=+curLast.slice(8);
+  // 정확한 월 마지막 일자 (28/29/30/31)
+  const daysInMonth=new Date(yr,mo,0).getDate();
+  // 7일 이동 평균 (마지막 7일 GMV) — 0값 제외해서 더 보수적으로 (광고만 집행 & 매출 후행인 날 제외)
+  const recent7=curMonthDates.slice(-7).map(d=>map[d]?map[d]['샤오홍싱_전점GMV']||0:0);
+  const nonZero=recent7.filter(v=>v>0);
+  const dailyAvg=nonZero.length?(nonZero.reduce((a,v)=>a+v,0)/nonZero.length):0;
   // MTD 누적 + 남은 일수 × 평균
-  const mtdGmv=mayDates.reduce((a,d)=>a+(map[d]?map[d]['샤오홍싱_전점GMV']||0:0),0);
+  const mtdGmv=curMonthDates.reduce((a,d)=>a+(map[d]?map[d]['샤오홍싱_전점GMV']||0:0),0);
   const projGmv=mtdGmv+(daysInMonth-lastDay)*dailyAvg;
-  // 4월 대비
-  let aprGmv;
+  // 전월(mo-1) 대비
+  let prevGmv;
   if(b==='TOTAL'){
-    aprGmv=(DATA.monthly.WAKEMAKE.find(m=>m.월===4)?.전점GMV||0)+(DATA.monthly.COLORGRAM.find(m=>m.월===4)?.전점GMV||0);
+    prevGmv=(DATA.monthly.WAKEMAKE.find(m=>m.월===mo-1)?.전점GMV||0)+(DATA.monthly.COLORGRAM.find(m=>m.월===mo-1)?.전점GMV||0);
   } else {
-    const aprMonthly=DATA.monthly[b].find(m=>m.월===4); aprGmv=aprMonthly?aprMonthly.전점GMV:0;
+    const prevMonthly=DATA.monthly[b].find(m=>m.월===mo-1); prevGmv=prevMonthly?prevMonthly.전점GMV:0;
   }
-  const projDelta=aprGmv?((projGmv-aprGmv)/aprGmv*100):0;
-  // forecast 라인: 전체 길이 = allDates.length, 마지막 5월 일자부터 projGmv까지 일 평균으로 직선
+  const projDelta=prevGmv?((projGmv-prevGmv)/prevGmv*100):0;
+  // forecast 라인: 마지막 일자부터 끝까지 dailyAvg로 직선
   const gmvLine=new Array(allDates.length).fill(null);
-  const lastIdx=allDates.indexOf(mayLast);
+  const lastIdx=allDates.indexOf(curLast);
   if(lastIdx>=0){
-    gmvLine[lastIdx]=map[mayLast]?map[mayLast]['샤오홍싱_전점GMV']||0:0;
-    // 남은 일수에 대해 평균값으로 채움
+    gmvLine[lastIdx]=map[curLast]?map[curLast]['샤오홍싱_전점GMV']||0:0;
     for(let i=lastIdx+1;i<allDates.length;i++){gmvLine[i]=dailyAvg;}
-    // allDates에 이후 일자가 없으면 라인 안 그려짐 - 강제로 추가 안 함
   }
-  return {projGmv,projDelta,gmvLine,mtdGmv,dailyAvg};
+  return {projGmv,projDelta,gmvLine,mtdGmv,dailyAvg,curMonth:mo,prevMonth:mo-1};
 }
 
 // --- 깔때기 차트 (CTR → 진입UV → 외부행동 → GMV) ---
@@ -2516,13 +2520,19 @@ function autoInsightOv(b){
       else if(delta<=-10) lines.push(`⚠ 브랜드 검색지수 <b>${delta.toFixed(0)}%</b> — 인지/관심 단계 약화, 콘텐츠 시드 증량 필요`);
     }
   }
-  // 5. 618 캠페인 효과
-  const may=m.find(x=>x.월===5);
-  if(may&&may.쥐광비>0){
-    const apr=m.find(x=>x.월===4);
-    if(apr&&apr.쥐광비>0){
-      const spendUp=((may.쥐광비-apr.쥐광비)/apr.쥐광비*100);
-      if(spendUp>=20) lines.push(`🚀 5월 쥐광 비용 <b>+${spendUp.toFixed(0)}%</b> vs 4월 — 618 예열 본격화 (MTD 데이터 후행 효과는 ~5/28까지 평가 보류)`);
+  // 5. 618 캠페인 효과 — 데이터의 마지막 월 vs 전월 비교
+  const lastM=m[m.length-1];
+  const prevM=m[m.length-2];
+  if(lastM&&lastM.쥐광비>0&&prevM&&prevM.쥐광비>0){
+    const spendUp=((lastM.쥐광비-prevM.쥐광비)/prevM.쥐광비*100);
+    if(spendUp>=20){
+      // 5월=618 예열 / 6월=618 본행사 / 7월=正常化 / 10월=쌍11 예열 / 11월=쌍11 / 12월=쌍12 (간단 라벨)
+      const campTag = lastM.월===5 ? '618 예열 본격화'
+                    : lastM.월===6 ? '618 본행사 진입'
+                    : lastM.월===11 ? '쌍11 본행사'
+                    : lastM.월===10 ? '쌍11 예열'
+                    : `${lastM.월}월 캠페인 증액`;
+      lines.push(`🚀 ${lastM.월}월 쥐광 비용 <b>+${spendUp.toFixed(0)}%</b> vs ${prevM.월}월 — ${campTag} (MTD 데이터는 전환 후행 효과로 평가 보류 ~7일)`);
     }
   }
   return lines.map(l=>'• '+l).join('<br>');
@@ -2951,7 +2961,25 @@ function showByDayDiag(sampleKeys, sampleBrand, rawCount, fallbackCount){
     <div style="margin-top:6px"><b>첫 행 '브랜드' 값:</b> <code style="background:#fff;padding:2px 6px;border-radius:3px;color:#7A1F1F">${sampleBrand}</code></div>
     <div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">→ 시트 헤더에 <code>브랜드</code> 컬럼이 있고 값이 <code>WAKEMAKE</code>/<code>COLORGRAM</code>이어야 인식됩니다. 헤더가 다르면 위 키들 캡처해서 알려주세요.</div>`;
 }
-async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;const resp=await fetch(url,{cache:'no-store'});if(!resp.ok)throw new Error(`${name}: HTTP ${resp.status}`);return Papa.parse(await resp.text(),{header:true,dynamicTyping:true,skipEmptyLines:true}).data;}
+// 이중언어 헤더(`中文 한국어` 또는 `中文 한국어 / 추정치`)를 한국어 단일 키로 정규화.
+// 정책 (메모리: korean-translation-required):
+//   - 첫 한글 위치 찾기 → 한글 직전의 ASCII 식별자 prefix(예: `KOL_`)도 포함해 시작점 결정
+//   - 뒤따르는 ` /` 어노테이션(`/ 추정치`, `/ 预估值`)은 제거
+//   - 한국어 단일 헤더(예: `브랜드`)는 그대로 유지 (idempotent)
+function normalizeHeader(h){
+  if(!h||typeof h!=='string')return h;
+  const m=h.match(/[가-힣]/);
+  if(!m)return h.trim();
+  let start=m.index;
+  while(start>0 && /[A-Za-z0-9_]/.test(h[start-1])) start--;
+  const seg=h.slice(start);
+  const slashIdx=seg.indexOf(' /');
+  return (slashIdx>=0?seg.slice(0,slashIdx):seg).trim();
+}
+async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;const resp=await fetch(url,{cache:'no-store'});if(!resp.ok)throw new Error(`${name}: HTTP ${resp.status}`);
+  const parsed=Papa.parse(await resp.text(),{header:true,dynamicTyping:true,skipEmptyLines:true}).data;
+  return parsed.map(row=>{const out={};Object.keys(row).forEach(k=>{const nk=normalizeHeader(k);if(nk)out[nk]=row[k];});return out;});
+}
 // 한국어/중국어 컬럼 fallback — 시트에 새 컬럼이 한·중 중 어떤 이름으로 들어와도 인식
 function pickNum(r, keys){for(const k of keys){const v=r[k]; if(v!=null&&v!==''&&!isNaN(+v))return +v;} return 0;}
 function pickStr(r, keys){for(const k of keys){const v=r[k]; if(v!=null&&v!=='')return String(v);} return '';}
