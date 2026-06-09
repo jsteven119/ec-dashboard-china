@@ -628,7 +628,7 @@
       <span class="gicon">📅</span><label>기간</label>
       <input type="date" id="globalDateFrom" value="2026-01-01">
       <span class="g-sep">~</span>
-      <input type="date" id="globalDateTo" value="2026-05-27">
+      <input type="date" id="globalDateTo">
     </div>
     <div class="gfilter">
       <span class="gicon">¥</span><label>CNY→KRW</label>
@@ -993,13 +993,16 @@ function getCampaignsInRange(dates){
 }
 let brand='TOTAL', tab='overview';
 // 글로벌 필터 상태 — date range 기반
-let globalDateFrom='2026-01-01', globalDateTo='2026-05-27';
+// 기간 끝 = 오늘 날짜로 초기화 (sync 후 데이터 마지막 날짜로 자동 보정)
+function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+let globalDateFrom='2026-01-01', globalDateTo=_todayStr();
+let _userDateOverride=false; // 사용자가 picker 수동 변경 시 true → sync에서 덮어쓰지 않음
 let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=190; // 1 CNY ≈ 190 KRW · RETAIL=Tmall(天猫) 판매 플랫폼
-// 활성 월 배열 (date range 내 포함된 월들)
+// 활성 월 배열 (date range 내 포함된 월들) — from·to 같은 해 가정
 function getActiveMonths(){
   const from=+globalDateFrom.slice(5,7), to=+globalDateTo.slice(5,7);
   const out=[]; for(let m=Math.max(1,from);m<=Math.min(12,to);m++)out.push(m);
-  return out.length?out:[1,2,3,4,5];
+  return out.length?out:[1,2,3,4,5,6];
 }
 let charts={};
 Chart.defaults.font.family="'Malgun Gothic','맑은 고딕',sans-serif"; Chart.defaults.font.size=11;
@@ -1854,6 +1857,7 @@ document.getElementById('globalPromo').addEventListener('change',e=>{
       globalDateTo=`2026-${c.end}`;
       document.getElementById('globalDateFrom').value=globalDateFrom;
       document.getElementById('globalDateTo').value=globalDateTo;
+      _userDateOverride=true; // 캠페인 선택 = 사용자 의도적 변경
     }
   }
   render();
@@ -1862,11 +1866,13 @@ document.getElementById('globalDateFrom').addEventListener('change',e=>{
   globalDateFrom=e.target.value;
   // 수동 변경 시 프로모션 해제
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
+  _userDateOverride=true;
   render();
 });
 document.getElementById('globalDateTo').addEventListener('change',e=>{
   globalDateTo=e.target.value;
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
+  _userDateOverride=true;
   render();
 });
 document.getElementById('globalFx').addEventListener('change',e=>{
@@ -3148,6 +3154,11 @@ KOL.kol.TOTAL = [...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])].filter(r=
 
 rebuildKolAggregates();
 
+// 초기 로드 — date picker 값을 globalDateTo(=오늘)로 채움
+(function _initDateTo(){
+  const el=document.getElementById('globalDateTo'); if(el && !el.value) el.value=globalDateTo;
+})();
+
 render();
 
 const SHEET_ID = '1Ijm-z7fkbcWxTb5bc1UDZ4bCrsio1awazUv1D1lEmqI';
@@ -3351,6 +3362,17 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
   const wmL=[...byday].filter(r=>r.브랜드==='WAKEMAKE').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   const cgL=[...byday].filter(r=>r.브랜드==='COLORGRAM').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   DATA.last={WAKEMAKE:wmL?.날짜||DATA.last.WAKEMAKE,COLORGRAM:cgL?.날짜||DATA.last.COLORGRAM};
+  // 기간 필터 끝을 데이터의 최신 날짜로 자동 보정 (사용자가 수동 변경 안 했을 때만)
+  if(!_userDateOverride){
+    const lastDates=[DATA.last.WAKEMAKE,DATA.last.COLORGRAM].filter(Boolean).sort();
+    if(lastDates.length){
+      const latest=lastDates[lastDates.length-1];
+      if(latest!==globalDateTo){
+        globalDateTo=latest;
+        const el=document.getElementById('globalDateTo'); if(el) el.value=globalDateTo;
+      }
+    }
+  }
   DATA.monthly.WAKEMAKE=recomputeMonthly(byday,'WAKEMAKE'); DATA.monthly.COLORGRAM=recomputeMonthly(byday,'COLORGRAM');
   KOL.kol.WAKEMAKE=wm; KOL.kol.COLORGRAM=cg; KOL.kol.TOTAL=[...wm,...cg].filter(r=>r.데이터상태!=='이전작업');
   KOL.monthly_channel={WAKEMAKE:recomputeMonthlyChannel(byday,'WAKEMAKE'),COLORGRAM:recomputeMonthlyChannel(byday,'COLORGRAM'),TOTAL:recomputeMonthlyChannel(byday,'TOTAL')};
