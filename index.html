@@ -686,6 +686,7 @@
     <div class="subtabs" id="kolSubtabs">
       <button data-s="insight" class="on">🎯 앵글 인사이트</button>
       <button data-s="perf">성과</button>
+      <button data-s="koc">👥 KOC 분석</button>
     </div>
 
     <!-- ===== KOL · 성과 서브탭 ===== -->
@@ -816,6 +817,32 @@
         <div class="panel full">
           <h3>📋 종합 앵글 방향성 제안</h3>
           <div class="insight" id="angleStrategy"></div>
+        </div>
+      </div>
+
+      <!-- ===== KOL · KOC 분석 서브탭 ===== -->
+      <div id="kol_koc" class="hide">
+        <div class="panel full" style="background:linear-gradient(135deg,rgba(212,175,55,0.10) 0%,var(--card) 60%)">
+          <h3>👥 KOC vs KOL 효율 비교</h3>
+          <div class="note">KOC (Key Opinion Consumer · 마이크로/미들 = 팔로워 &lt;5만) vs KOL (미들+/메가 = 5만+) — 팔로워 규모에 따른 효율·화제성·가성비 차이.<br>
+          <span style="color:var(--gong-red-deep);font-weight:700">→ 가설:</span> KOC는 단가가 낮고 진정성·전환력 우위 · KOL은 도달·인지 우위. 데이터로 검증.</div>
+          <div class="kpis" id="kocVsKolKpis"></div>
+        </div>
+        <div class="grid">
+          <div class="panel full">
+            <h3>📊 팔로워 구간별 효율 분포</h3>
+            <div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율(높을수록 화제성) · KOC 구간이 CPUV 낮으면 가성비 우위</div>
+            <div class="cwrap"><canvas id="cKocTier"></canvas></div>
+          </div>
+          <div class="panel full">
+            <h3>🎯 KOC 가성비 TOP 10 (개별 소재)</h3>
+            <div class="note">팔로워 &lt;5만 KOC 중 CPUV 낮은 순 Top 10 · 클릭 = 샤오홍슈 노트 새 탭으로 열림</div>
+            <div class="tbox" style="max-height:520px"><table id="kocTopTable"><thead></thead><tbody></tbody></table></div>
+          </div>
+          <div class="panel full">
+            <h3>💡 KOC 활용 전략 제안</h3>
+            <div class="insight" id="kocStrategy"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1044,9 +1071,27 @@ function deriveWmAngleFromNoteType(rows){
   });
   return n;
 }
+// 글로벌 date range를 KOL 게시일에 적용 (게시일 없는 행은 미게시 → 분석 대상 제외)
+function filterKolByDate(rows){
+  if(!rows||!rows.length) return rows||[];
+  const f=globalDateFrom||'', t=globalDateTo||'';
+  if(!f&&!t) return rows;
+  return rows.filter(r=>{
+    const d=String(r.게시일||'').trim().slice(0,10);
+    if(!d) return false;
+    if(f&&d<f) return false;
+    if(t&&d>t) return false;
+    return true;
+  });
+}
+// KOL.kol[brand]의 date-filtered view 캐시 (sync/필터 변경 시 rebuild)
+function _kolView(b){ return filterKolByDate(KOL.kol[b]||[]); }
 function rebuildKolAggregates(){
   if(typeof recomputeAgg!=='function')return;
-  const all=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
+  // KOL 집계는 모두 date-filtered 데이터 기준
+  const wmF=filterKolByDate(KOL.kol.WAKEMAKE||[]);
+  const cgF=filterKolByDate(KOL.kol.COLORGRAM||[]);
+  const all=[...wmF,...cgF];
   ['WAKEMAKE','COLORGRAM','TOTAL'].forEach(b=>{
     KOL.sp[b]=recomputeAgg(all,b,'주력상품');
     KOL.bundle[b]=recomputeAgg(all,b,'상품_조합');
@@ -1439,7 +1484,7 @@ function renderOverviewInterp(){
 
 // ===== KOL =====
 function kolKpis(){
-  const all=KOL.kol[brand];
+  const all=_kolView(brand);
   const rows=all.filter(r=>r.데이터상태!=='이전작업');
   const legacy=all.length-rows.length;
   const n=rows.length;
@@ -1485,7 +1530,7 @@ function getScatterY(r){
 }
 function chScatter(){destroy('cScatter');
   // X=CPUV(낮을수록 효율), Y=선택 지표(높을수록 화제), 점크기=광고비(총비용)
-  let rows=KOL.kol[brand].filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0&&r.인터랙션>=0&&r.종합CPUV>0);
+  let rows=_kolView(brand).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0&&r.인터랙션>=0&&r.종합CPUV>0);
   // 광고비 필터 — 평균 이상 / 상위 20% / 인기콘텐츠만
   let filterMsg='';
   if(scatterSpendFilter==='above'){
@@ -1514,12 +1559,12 @@ function chScatter(){destroy('cScatter');
   const sizeOf=cost=>Math.max(3,Math.min(30,Math.sqrt(cost||0)*0.05));
   const ds=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([prod,arr],i)=>{
     const col=PRODUCT_COLORS[prod]||palette[i%palette.length];
-    return {label:`${prod} (${arr.length})`,data:arr.map(r=>({x:r.종합CPUV,y:getScatterY(r),r:sizeOf(r.총비용),_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_views:r.조회수,_int:r.인터랙션,_er:r.ER,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:r.인기콘텐츠})),backgroundColor:col+'AA',borderColor:col,borderWidth:1,pointStyle:'circle'};
+    return {label:`${prod} (${arr.length})`,data:arr.map(r=>({x:r.종합CPUV,y:getScatterY(r),r:sizeOf(r.총비용),_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_views:r.조회수,_int:r.인터랙션,_er:r.ER,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:r.인기콘텐츠,_link:r.노트링크,_date:r.게시일})),backgroundColor:col+'AA',borderColor:col,borderWidth:1,pointStyle:'circle'};
   });
   const hot=rows.filter(r=>r.인기콘텐츠);
   if(hot.length){
     // 인기콘텐츠 overlay — 빨간 테두리 시각화 전용. tooltip은 일반 데이터셋이 처리 (중복 방지)
-    ds.push({label:`인기콘텐츠(爆文) ${hot.length}건 · 朱红 테두리`,_isHotOverlay:true,data:hot.map(r=>({x:r.종합CPUV,y:getScatterY(r),r:sizeOf(r.총비용)+2,_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_views:r.조회수,_int:r.인터랙션,_er:r.ER,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:true})),backgroundColor:'rgba(0,0,0,0)',borderColor:COL.red,borderWidth:2.5});
+    ds.push({label:`인기콘텐츠(爆文) ${hot.length}건 · 朱红 테두리`,_isHotOverlay:true,data:hot.map(r=>({x:r.종합CPUV,y:getScatterY(r),r:sizeOf(r.총비용)+2,_n:(r.인플루언서_한글||r.인플루언서),_o:r.인플루언서,_t:r.주력상품,_b:r.상품_조합,_a:r.콘텐츠앵글,_imp:r.노출량,_views:r.조회수,_int:r.인터랙션,_er:r.ER,_uv:r.외부행동UV,_cpuv:r.종합CPUV,_cost:r.총비용,_hot:true,_link:r.노트링크,_date:r.게시일})),backgroundColor:'rgba(0,0,0,0)',borderColor:COL.red,borderWidth:2.5});
   }
   // CPUV 중앙값 + 선택 Y 중앙값 가이드라인 (4사분면 구분)
   const cpuvList=rows.map(r=>r.종합CPUV).sort((a,b)=>a-b);
@@ -1609,7 +1654,7 @@ function chScatter(){destroy('cScatter');
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:14,padding:8,font:{size:11}}},tooltip:{
       mode:'nearest',intersect:true,
       filter:(item)=>!(item.dataset&&item.dataset._isHotOverlay),
-      callbacks:{label:c=>{const d=c.raw;return [`${d._n} ${d._o&&d._o!==d._n?'('+d._o+')':''}`,`${d._t||'-'} · ${d._b||'-'}${d._a&&d._a!=='미입력'?' · 앵글: '+d._a:''}${d._hot?' · 🔥인기':''}`,`CPUV ${F2(d.x)} · 인터랙션 ${FMT(d._int)} · ER ${(d._er||0).toFixed(2)}%`,`노출 ${FMT(d._imp)} · 조회 ${FMT(d._views)} · 외부UV ${FMT(d._uv)} · 광고비 ￥${FMT(d._cost)}`];}}}},scales:{
+      callbacks:{label:c=>{const d=c.raw;const lines=[`${d._n} ${d._o&&d._o!==d._n?'('+d._o+')':''}`,`${d._t||'-'} · ${d._b||'-'}${d._a&&d._a!=='미입력'?' · 앵글: '+d._a:''}${d._hot?' · 🔥인기':''}`,`CPUV ${F2(d.x)} · 인터랙션 ${FMT(d._int)} · ER ${(d._er||0).toFixed(2)}%`,`노출 ${FMT(d._imp)} · 조회 ${FMT(d._views)} · 외부UV ${FMT(d._uv)} · 광고비 ￥${FMT(d._cost)}`];if(d._date)lines.push(`게시일: ${d._date}`);if(d._link&&String(d._link).startsWith('http'))lines.push('🔗 클릭 = 샤오홍슈 노트 / Shift+클릭 = 인플루언서 상세');return lines;}}}},scales:{
       x:{type:'logarithmic',min:xMin,max:xMax*1.2,title:{display:true,text:'CPUV (낮을수록 매장 방문 효율 ↑) · 로그 스케일'},ticks:{callback:v=>F2(v)}},
       y:{type:'logarithmic',min:yMin,max:yMax*1.2,title:{display:true,text:yAxisTitle+' · 로그 스케일'},ticks:{callback:yTickFmt}}
     }},plugins:[quadrantPlugin]});}
@@ -1630,8 +1675,8 @@ function chCType(){destroy('cCType');const ct=KOL.sp[brand].filter(c=>c.콘텐�
 function chTier(){destroy('cTier');const tf=KOL.tier[brand].filter(c=>c.팔로워구간!=='미상');
   charts.cTier=new Chart(document.getElementById('cTier'),{type:'bar',data:{labels:tf.map(c=>c.팔로워구간),datasets:[{label:'평균 CPUV',data:tf.map(c=>c.평균CPUV),backgroundColor:COL.purple,borderRadius:5,yAxisID:'y'},{type:'line',label:'평균 총비용(￥)',data:tf.map(c=>c.평균_총비용),borderColor:COL.orange,backgroundColor:COL.orange,tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'CPUV'}},y1:{position:'right',title:{display:true,text:'평균 비용'},ticks:{callback:v=>FMT(v)},grid:{drawOnChartArea:false}}}}});}
 function insightKol(){
-  
-  const rows=KOL.kol[brand];
+
+  const rows=_kolView(brand);
   const hot=rows.filter(r=>r.인기콘텐츠);
   const gen=rows.filter(r=>!r.인기콘텐츠);
   const avg=(arr,k)=>arr.reduce((a,r)=>a+(r[k]||0),0)/Math.max(arr.length,1);
@@ -1678,11 +1723,14 @@ function sortRows(rs){
   return rs.sort(m[fSort]);
 }
 function renderTable(){
-  const all=[...KOL.kol.WAKEMAKE,...KOL.kol.COLORGRAM];
+  // 옵션 채우기는 전체 데이터 기준 (필터 변경 시 옵션이 줄어들면 UX 나쁨)
+  const allFull=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
+  // 테이블 row는 date-filtered 데이터 기준
+  const all=[..._kolView('WAKEMAKE'),..._kolView('COLORGRAM')];
   // populate type filter once
   const sel=document.getElementById('fType');
-  if(sel.options.length<=1){const types=Array.from(new Set(all.map(r=>r.주력상품))).sort();types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});}
-  const selA=document.getElementById('fAngle');if(selA&&selA.options.length<=1){const angles=Array.from(new Set(all.map(r=>r.콘텐츠앵글).filter(Boolean))).sort();angles.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;selA.appendChild(o);});}
+  if(sel.options.length<=1){const types=Array.from(new Set(allFull.map(r=>r.주력상품))).sort();types.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});}
+  const selA=document.getElementById('fAngle');if(selA&&selA.options.length<=1){const angles=Array.from(new Set(allFull.map(r=>r.콘텐츠앵글).filter(Boolean))).sort();angles.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;selA.appendChild(o);});}
   const rows=sortRows(all.filter(rowMatch));
   document.querySelector('#kolTable thead').innerHTML='<tr>'+TCOLS.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>';
   document.querySelector('#kolTable tbody').innerHTML=rows.slice(0,200).map((r,i)=>'<tr'+(i===0?' style="background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 65%)"':'')+'>'+TCOLS.map((c,ci)=>{
@@ -1723,7 +1771,7 @@ function pearson(xs, ys){
 function renderCorrAnalysis(){
   const box=document.getElementById('corrAnalysis'); const verdict=document.getElementById('corrVerdict');
   if(!box||!verdict) return;
-  const rows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.조회수>0&&r.외부행동UV>=0&&r.인터랙션>=0);
+  const rows=_kolView(brand).filter(r=>r.데이터상태!=='이전작업'&&r.조회수>0&&r.외부행동UV>=0&&r.인터랙션>=0);
   if(rows.length<5){
     box.innerHTML='<div style="grid-column:1/-1;color:var(--ink-soft);padding:14px;text-align:center">샘플 부족 (조회수≥1 데이터 5건 이상 필요 · 현재 '+rows.length+'건)</div>';
     verdict.innerHTML='—';
@@ -1860,6 +1908,7 @@ document.getElementById('globalPromo').addEventListener('change',e=>{
       _userDateOverride=true; // 캠페인 선택 = 사용자 의도적 변경
     }
   }
+  rebuildKolAggregates();
   render();
 });
 document.getElementById('globalDateFrom').addEventListener('change',e=>{
@@ -1867,12 +1916,14 @@ document.getElementById('globalDateFrom').addEventListener('change',e=>{
   // 수동 변경 시 프로모션 해제
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
   _userDateOverride=true;
+  rebuildKolAggregates(); // KOL 집계는 게시일 기반 → 날짜 필터 변경 시 재계산 필요
   render();
 });
 document.getElementById('globalDateTo').addEventListener('change',e=>{
   globalDateTo=e.target.value;
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
   _userDateOverride=true;
+  rebuildKolAggregates();
   render();
 });
 document.getElementById('globalFx').addEventListener('change',e=>{
@@ -2567,7 +2618,7 @@ function autoInsightOv(b){
 let kolSub='insight'; // 'insight' | 'perf' — 인사이트 최상단 디폴트
 
 function hasAngleData(b){
-  const rows=KOL.kol[b]||[]; const filled=rows.filter(r=>r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력').length;
+  const rows=_kolView(b); const filled=rows.filter(r=>r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력').length;
   return filled>=3;
 }
 
@@ -2638,7 +2689,7 @@ function renderBrandFindings(b){
   // BOTH는 WM/CG 각자 카드 보여주기 (단순화: WM 기준)
   const targetB=b==='BOTH'?'WAKEMAKE':b;
   document.getElementById('findingsBrandBadge').textContent=targetB==='TOTAL'?'WM + CG 통합':targetB;
-  const rows=(KOL.kol[targetB]||[]).filter(r=>r.데이터상태!=='이전작업');
+  const rows=_kolView(targetB).filter(r=>r.데이터상태!=='이전작업');
   if(!rows.length){box.innerHTML='<div style="color:var(--ink-soft);padding:18px;text-align:center">데이터 없음</div>';return;}
 
   const cards=[];
@@ -2798,7 +2849,7 @@ function renderQuadrantInterp(b,hasAngle){
 // ===== 앵글 × 주력상품 매트릭스 동적 해석 =====
 function renderMatrixInterp(b){
   const el=document.getElementById('matrixInterp'); if(!el) return;
-  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
+  const rows=_kolView(b).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
   const grid={};
   rows.forEach(r=>{
     const ag=(r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력')?r.콘텐츠앵글:'(앵글 미입력)';
@@ -2973,7 +3024,7 @@ function renderAngleActions(b,hasAngle){
 
 function renderAngleProductHeatmap(b){
   const box=document.getElementById('angleProductHeatmap'); if(!box) return;
-  const rows=(KOL.kol[b]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
+  const rows=_kolView(b).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
   // 그룹: 앵글 × 주력상품 → 평균 CPUV
   const grid={};
   rows.forEach(r=>{
@@ -3021,7 +3072,7 @@ function renderAngleStrategy(b,hasAngle){
   const box=document.getElementById('angleStrategy'); if(!box) return;
   const ag=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력'&&a.콘텐츠수>=2);
   const lines=[];
-  lines.push(`<b>${b}</b> · ${(KOL.kol[b]||[]).length}건 KOL 소재 기준 종합 제안.`);
+  lines.push(`<b>${b}</b> · ${_kolView(b).length}건 KOL 소재 기준 종합 제안 (기간 필터 적용).`);
   if(!hasAngle){
     lines.push(`<br>⚠ 콘텐츠앵글 컬럼이 시트에 없어 정밀 분석 불가. <b>대체 분석</b>으로 주력상품 기준 추천만 제공합니다.`);
     const sp=(KOL.sp[b]||[]).filter(c=>c.콘텐츠수>=2);
@@ -3046,7 +3097,7 @@ function renderAngleStrategy(b,hasAngle){
     lines.push(`<br>🌱 <b>시드 테스트 후보</b>: ${list} — 콘텐츠 1~2건으로 데이터 부족, 다음 캠페인 시 각 3~5건 보강 권장`);
   }
   // 미입력 비율 경고
-  const all=KOL.kol[b]||[]; const missing=all.filter(r=>!r.콘텐츠앵글||r.콘텐츠앵글==='미입력').length;
+  const all=_kolView(b); const missing=all.filter(r=>!r.콘텐츠앵글||r.콘텐츠앵글==='미입력').length;
   if(missing/Math.max(all.length,1)>=0.2) lines.push(`<br>⚠ <b>앵글 미입력 ${missing}건 (${Math.round(missing/all.length*100)}%)</b> — 운영팀 입력 보강 시 정밀도 향상`);
   // 4사분면 요약
   const cpuvMed=median(ag.map(a=>a.평균CPUV)); const hotMed=median(ag.map(a=>a.인기콘텐츠비율));
@@ -3100,6 +3151,88 @@ document.getElementById('infModalClose').addEventListener('click',closeInfModal)
 document.getElementById('infModal').addEventListener('click',e=>{if(e.target.id==='infModal')closeInfModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInfModal();});
 
+// ==================== KOL · KOC 분석 (서브탭 신설) ====================
+// KOC = Key Opinion Consumer (마이크로/미들, 팔로워 <5만), KOL = 5만+
+function _isKoc(tier){const t=String(tier||'');return t.includes('마이크로')||(t.includes('미들')&&!t.includes('미들+'));}
+function renderKocAnalysis(){
+  const b=brand==='BOTH'?'WAKEMAKE':brand;
+  const rows=_kolView(b).filter(r=>r.데이터상태!=='이전작업');
+  const kocs=rows.filter(r=>_isKoc(r.팔로워구간));
+  const kols=rows.filter(r=>!_isKoc(r.팔로워구간));
+  // === KPI 비교 카드 ===
+  const _stat=(arr)=>{
+    if(!arr.length) return {n:0,cost:0,cpuv:0,hot:0,uv:0,er:0};
+    const cpuvs=arr.map(r=>+r.종합CPUV||0).filter(v=>v>0);
+    const sumCost=arr.reduce((a,r)=>a+(+r.총비용||0),0);
+    const sumImp=arr.reduce((a,r)=>a+(+r.노출량||0),0);
+    const sumInt=arr.reduce((a,r)=>a+(+r.인터랙션||0),0);
+    const sumUv=arr.reduce((a,r)=>a+(+r.외부행동UV||0),0);
+    const hot=arr.filter(r=>_isHotRow(r)).length;
+    return {n:arr.length,cost:sumCost,avgCost:sumCost/arr.length,cpuv:cpuvs.length?cpuvs.reduce((a,v)=>a+v,0)/cpuvs.length:0,hot:hot/arr.length*100,uv:sumUv/arr.length,er:sumImp?(sumInt/sumImp*100):0};
+  };
+  const sK=_stat(kocs), sL=_stat(kols);
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const cards=[
+    {lab:'KOC 소재 수',val:sK.n+'건',sm:`마이크로+미들 (팔로워 <5만) / ${rows.length}건 중`},
+    {lab:'KOL 소재 수',val:sL.n+'건',sm:`미들++메가 (팔로워 ≥5만)`},
+    {lab:'KOC 평균 단가',val:'￥'+fmt(sK.avgCost||0),sm:`KOL 평균 ￥${fmt(sL.avgCost||0)} 대비 ${sL.avgCost?((sK.avgCost/sL.avgCost*100).toFixed(0)):'-'}%`},
+    {lab:'KOC 평균 CPUV',val:(sK.cpuv||0).toFixed(2),sm:`KOL ${(sL.cpuv||0).toFixed(2)} · ${sL.cpuv?(sK.cpuv<sL.cpuv?'✅ 효율 우위':'⚠ KOL이 효율 우위'):'-'}`},
+    {lab:'KOC 인기콘텐츠율',val:(sK.hot||0).toFixed(1)+'%',sm:`KOL ${(sL.hot||0).toFixed(1)}%`},
+    {lab:'KOC 평균 외부UV',val:fmt(sK.uv||0),sm:`KOL ${fmt(sL.uv||0)} · 매장 방문 효율`}
+  ];
+  document.getElementById('kocVsKolKpis').innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c.lab}</div><div class="val">${c.val}</div><div class="sm">${c.sm}</div></div>`).join('');
+  // === 팔로워 구간별 차트 ===
+  destroy('cKocTier');
+  const tierGroups={};
+  rows.forEach(r=>{const t=String(r.팔로워구간||'미상');if(t==='미상')return;if(!tierGroups[t])tierGroups[t]={n:0,cpuvSum:0,cpuvN:0,hot:0,cost:0};const g=tierGroups[t];g.n++;const c=+r.종합CPUV||0;if(c>0){g.cpuvSum+=c;g.cpuvN++;}if(_isHotRow(r))g.hot++;g.cost+=+r.총비용||0;});
+  const tierOrder=['마이크로(<2만)','미들(2만~5만)','미들+(5만~10만)','메가(10만+)'];
+  const tierData=tierOrder.filter(t=>tierGroups[t]).map(t=>{const g=tierGroups[t];return{tier:t,n:g.n,cpuv:g.cpuvN?g.cpuvSum/g.cpuvN:0,hot:g.hot/g.n*100,avgCost:g.cost/g.n};});
+  if(tierData.length){
+    charts.cKocTier=new Chart(document.getElementById('cKocTier'),{type:'bar',data:{labels:tierData.map(d=>`${d.tier} (${d.n}건)`),datasets:[
+      {label:'평균 CPUV (↓ 효율 좋음)',data:tierData.map(d=>d.cpuv),backgroundColor:'#4A6670',yAxisID:'y',order:2,borderRadius:5},
+      {type:'line',label:'인기콘텐츠 비율(%) (↑ 화제성)',data:tierData.map(d=>d.hot),borderColor:COL.red,backgroundColor:COL.red,tension:.3,pointRadius:5,yAxisID:'y1',order:1}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'평균 CPUV'}},y1:{position:'right',title:{display:true,text:'인기콘텐츠 비율(%)'},ticks:{callback:v=>v+'%'},grid:{drawOnChartArea:false},min:0,max:Math.max(60,Math.ceil(Math.max(...tierData.map(d=>d.hot)))*1.2)}}}});
+  } else {
+    const cv=document.getElementById('cKocTier'); if(cv){const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle=COL.grey;ctx.font="13px sans-serif";ctx.fillText('팔로워구간 데이터 부족',20,40);}
+  }
+  // === KOC 가성비 TOP 10 (개별 소재) ===
+  const tbl=document.getElementById('kocTopTable');
+  const topKoc=[...kocs].filter(r=>(+r.종합CPUV||0)>0&&(+r.총비용||0)>0).sort((a,b)=>(+a.종합CPUV)-(+b.종합CPUV)).slice(0,10);
+  if(!topKoc.length){tbl.innerHTML='<thead></thead><tbody><tr><td style="padding:20px;color:var(--grey)">KOC 효율 측정 가능한 소재 없음 (CPUV>0 필요)</td></tr></tbody>';}
+  else {
+    const headers=['#','인플루언서','팔로워구간','주력상품','앵글','게시일','광고비','CPUV','인기','노트'];
+    tbl.innerHTML=`<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${topKoc.map((r,i)=>{
+      const link=String(r.노트링크||'').trim();
+      const linkCell=link.startsWith('http')?`<a href="${link}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;border-bottom:1px dashed var(--blue)">🔗 노트 보기</a>`:'-';
+      return `<tr style="${i===0?'background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 70%)':''}"><td>${i+1}</td><td>${r.인플루언서_한글||r.인플루언서||'-'}</td><td>${r.팔로워구간||'-'}</td><td>${r.주력상품||'-'}</td><td>${r.콘텐츠앵글||'-'}</td><td>${r.게시일||'-'}</td><td>￥${fmt(+r.총비용||0)}</td><td><b>${(+r.종합CPUV).toFixed(2)}</b></td><td>${_isHotRow(r)?'<span class="pill hot">爆文</span>':'<span class="pill gen">일반</span>'}</td><td>${linkCell}</td></tr>`;
+    }).join('')}</tbody>`;
+  }
+  // === 전략 텍스트 ===
+  const lines=[];
+  lines.push(`<b>${b}</b> · 기간 필터 적용 (${rows.length}건 소재 / KOC ${kocs.length}건, KOL ${kols.length}건).`);
+  if(sK.n&&sL.n){
+    const costRatio=sL.avgCost?(sK.avgCost/sL.avgCost*100):0;
+    const cpuvDiff=sK.cpuv&&sL.cpuv?((sK.cpuv-sL.cpuv)/sL.cpuv*100):0;
+    if(costRatio<70)lines.push(`<br>💰 <b>KOC 단가 우위</b>: KOL 대비 평균 ${costRatio.toFixed(0)}% — 동일 예산으로 ${(100/Math.max(costRatio,1)).toFixed(1)}배 더 많은 소재 가능`);
+    if(sK.cpuv<sL.cpuv&&sK.cpuv>0){
+      lines.push(`<br>✅ <b>KOC 효율 우위</b>: CPUV ${sK.cpuv.toFixed(2)} vs KOL ${sL.cpuv.toFixed(2)} (${Math.abs(cpuvDiff).toFixed(0)}%↓) → KOC 비중 확대 권장 (예산 70%↑)`);
+    } else if(sK.cpuv>sL.cpuv){
+      lines.push(`<br>⚠ <b>KOL 효율 우위</b>: KOC CPUV ${sK.cpuv.toFixed(2)} > KOL ${sL.cpuv.toFixed(2)} → KOC 시드는 단가 ↓ 풀로 재선정 필요`);
+    }
+    if(sK.hot>sL.hot)lines.push(`<br>🔥 <b>KOC 화제성 우위</b>: 인기콘텐츠 비율 ${sK.hot.toFixed(0)}% vs KOL ${sL.hot.toFixed(0)}%`);
+    else if(sL.hot>sK.hot*1.5)lines.push(`<br>🏆 <b>KOL 화제성 우위</b>: 메가 인플루언서의 도달·인지 강점 유지`);
+  }
+  // 마이크로 vs 미들 비교
+  const micro=tierData.find(d=>d.tier.includes('마이크로'));
+  const mid=tierData.find(d=>d.tier.includes('미들(2'));
+  if(micro&&mid){
+    if(micro.cpuv<mid.cpuv)lines.push(`<br>🥇 <b>마이크로 (<2만) > 미들 (2~5만)</b>: CPUV ${micro.cpuv.toFixed(2)} vs ${mid.cpuv.toFixed(2)} — 더 작은 KOC가 효율 우위. 시드 풀 마이크로 비중 60%↑`);
+    else if(mid.cpuv<micro.cpuv*0.8)lines.push(`<br>🥇 <b>미들 (2~5만) > 마이크로</b>: 미들 KOC가 진정성+도달 균형 우위. 미들 위주 시드`);
+  }
+  lines.push(`<br>📊 <b>다음 분기 권장 액션</b>: 1) KOC 단일 콘텐츠 단가 캡 설정 (현재 평균 ￥${fmt(sK.avgCost||0)}) 2) 위 TOP 10 인플루언서 재협업 검토 3) KOC × 최적 앵글 매칭으로 효율 극대화`);
+  document.getElementById('kocStrategy').innerHTML=lines.join('');
+}
+
 // ==================== KOL 서브탭 이벤트 ====================
 document.getElementById('kolSubtabs').addEventListener('click',e=>{
   if(!e.target.dataset.s)return;
@@ -3107,24 +3240,42 @@ document.getElementById('kolSubtabs').addEventListener('click',e=>{
   [...document.querySelectorAll('#kolSubtabs button')].forEach(b=>b.classList.toggle('on',b.dataset.s===kolSub));
   document.getElementById('kol_perf').classList.toggle('hide',kolSub!=='perf');
   document.getElementById('kol_insight').classList.toggle('hide',kolSub!=='insight');
+  document.getElementById('kol_koc').classList.toggle('hide',kolSub!=='koc');
   if(kolSub==='insight') renderAngleInsight();
+  if(kolSub==='koc') renderKocAnalysis();
 });
 
 // renderKol 보강 — insight 서브탭일 때 angle insight도 렌더
 const _origRenderKol=renderKol;
-renderKol=function(){_origRenderKol();if(kolSub==='insight')renderAngleInsight();};
+renderKol=function(){_origRenderKol();if(kolSub==='insight')renderAngleInsight();if(kolSub==='koc')renderKocAnalysis();};
 
 // renderOverview 보강 — freshness 갱신
 const _origRenderOverview=renderOverview;
 renderOverview=function(){_origRenderOverview();renderFreshness();};
 
-// chScatter 점 클릭 → 인플루언서 모달 (이벤트 위임)
+// chScatter 점 클릭 → 노트링크 새 탭 / Shift+클릭 또는 노트링크 없는 경우 → 인플루언서 모달
 document.addEventListener('click',e=>{
   const canvas=document.getElementById('cScatter');
   if(e.target!==canvas) return;
   if(!charts.cScatter) return;
   const points=charts.cScatter.getElementsAtEventForMode(e,'nearest',{intersect:true},false);
-  if(points.length){const p=points[0];const ds=charts.cScatter.data.datasets[p.datasetIndex];const d=ds.data[p.index];if(d&&d._n)openInfluencerModal(d._n);}
+  if(!points.length) return;
+  const p=points[0];
+  const ds=charts.cScatter.data.datasets[p.datasetIndex];
+  const d=ds.data[p.index];
+  if(!d) return;
+  // Shift+클릭 = 인플루언서 deep-dive 모달 (강제)
+  if(e.shiftKey){
+    if(d._n) openInfluencerModal(d._n);
+    return;
+  }
+  // 기본: 노트링크 새 탭 (샤오홍슈)
+  const link=String(d._link||'').trim();
+  if(link.startsWith('http')){
+    window.open(link,'_blank','noopener,noreferrer');
+  } else if(d._n){
+    openInfluencerModal(d._n); // fallback
+  }
 });
 
 // renderTable 인플루언서 클릭 → 모달
