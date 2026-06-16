@@ -634,7 +634,7 @@
     </div>
     <div class="gfilter">
       <span class="gicon">¥</span><label>CNY→KRW</label>
-      <input type="number" id="globalFx" value="190" step="1" min="0">
+      <input type="number" id="globalFx" value="195" step="1" min="0">
     </div>
   </div>
 
@@ -935,6 +935,9 @@ const KOL={"kol": {"WAKEMAKE": [{"브랜드": "WAKEMAKE", "합작연월": "2025-
 const FMT=n=>(n==null||isNaN(n))?'-':Math.round(n).toLocaleString('ko-KR');
 const WON=n=>'￥'+FMT(n);
 const F2=n=>(n==null||isNaN(n))?'-':(Math.round(n*100)/100).toFixed(2);
+// ROAS/ROI 자연수% 표기 — [[roas-natural-number]] · semantic/metrics.yaml > roas
+// 1.88 → '188%'. raw 비교/계산은 원본 ROI값 그대로 사용 (임계치 비교용)
+const ROAS_PCT=n=>(n==null||isNaN(n))?'-':Math.round(n*100)+'%';
 const SMAP={'wakemake':'브랜드','wakemake气垫':'쿠션','wakemake眼影':'아이섀도우','wakemake粉糖气垫':'코팅밤','爱敬气垫':'경쟁사(애경)','colorgram':'브랜드','colorgram唇釉':'틴트','colorgram糖葫芦唇釉':'탕후루틴트','colorgram蜜糖罐唇釉':'탕후루밀크','colorgram小年糕唇釉':'소년고','colorgram唇泥':'립머드','colorgram橡皮擦唇釉':'지우개틴트','colorgram唇部打底':'립베이스'};
 // 故宫 황실 클래식 차트 팔레트 — 朱红/황금/청자/옥/묵
 const COL={navy:'#7A1F1F',blue:'#4A6670',sky:'#6B8C99',accent:'#C8102E',green:'#1E5631',orange:'#B8941F',purple:'#6B3E5C',grey:'#8B7A65',gold:'#D4AF37',red:'#A52A2A',redDeep:'#5C0F0F',rice:'#F2EAD0',ink:'#2C2317'};
@@ -1026,7 +1029,7 @@ let brand='TOTAL', tab='overview';
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 let globalDateFrom='2026-01-01', globalDateTo=_todayStr();
 let _userDateOverride=false; // 사용자가 picker 수동 변경 시 true → sync에서 덮어쓰지 않음
-let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=190; // 1 CNY ≈ 190 KRW · RETAIL=Tmall(天猫) 판매 플랫폼
+let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=195; // 1 CNY ≈ 195 KRW (semantic/rules.yaml > currency.cny_to_krw) · RETAIL=Tmall(天猫) 판매 플랫폼
 // 활성 월 배열 (date range 내 포함된 월들) — from·to 같은 해 가정
 function getActiveMonths(){
   const from=+globalDateFrom.slice(5,7), to=+globalDateTo.slice(5,7);
@@ -1164,7 +1167,7 @@ function kpis(){
     {lab:'누적 광고비',hint:'쥐광',val:WON(spend),sub:'전체 광고 집행액',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
     {lab:'누적 진입UV',hint:'샤오홍슈',val:FMT(uv),sub:'스토어 방문 사용자 수',mom:momPct(cur.진입UV,prev.진입UV),delta:_pct(cur.진입UV,prev.진입UV)},
     {lab:'광고 GMV (추정)',hint:'쥐광 推算',val:WON(gmv),sub:'쥐광 추정 광고매출 · 실제 전체매출 아님',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV)},
-    {lab:'쥐광 ROI',hint:'参考',val:F2(roi),sub:'추정매출÷광고비 · GMV 추정치 기반 참고용',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
+    {lab:'쥐광 ROI',hint:'参考',val:ROAS_PCT(roi),sub:'추정매출÷광고비 · GMV 추정치 기반 참고용',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
     {lab:'누적 노출',hint:'쥐광',val:FMT(imp),sub:'광고가 보여진 횟수',mom:momPct(cur.노출,prev.노출),delta:_pct(cur.노출,prev.노출)},
     {lab:'누적 KOL 비용',hint:'达人',val:WON(kol),sub:'인플루언서 협업비',mom:momPct(cur.KOL비,prev.KOL비),delta:_pct(cur.KOL비,prev.KOL비)}
   ];
@@ -1172,7 +1175,7 @@ function kpis(){
     const cs=sum('CID비'),cg=sum('CID성사GMV');
     const curCidRoi=cur.CID비?(cur.CID성사GMV/cur.CID비):0, prevCidRoi=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
     cards.push({lab:'CID 누적비',hint:'전환광고',val:WON(cs),sub:'타깃 구매자 광고비',mom:momPct(cur.CID비,prev.CID비),delta:_pct(cur.CID비,prev.CID비)});
-    cards.push({lab:'CID ROI',hint:'参考',val:F2(cs?cg/cs:0),sub:'전환광고 매출÷광고비 · 30日归因 · 참고용',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi)});
+    cards.push({lab:'CID ROI',hint:'参考',val:ROAS_PCT(cs?cg/cs:0),sub:'전환광고 매출÷광고비 · 30日归因 · 참고용',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi)});
   }
   // 최고 변동률(▲ 가장 큰) 카드에 👑 표시
   let bestIdx=-1,bestDelta=0;
@@ -1388,10 +1391,10 @@ function renderOverviewInterp(){
     const prevRoi=prev.쥐광비?(prev.전점GMV/prev.쥐광비):0;
     const curCid=cur.CID비?(cur.CID성사GMV/cur.CID비):0;
     const prevCid=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
-    const roiJudge=v=>v>=1.5?`<b style="color:var(--green)">우수 (≥1.5)</b>`:v>=1.0?`<b style="color:var(--orange)">손익분기 부근</b>`:v>0?`<b style="color:var(--accent)">적자 (＜1.0)</b>`:`<b>—</b>`;
-    let lines=[`<b>${curMon}월 쥐광 ROI</b> ${F2(curRoi)} (${arrow(pct(curRoi,prevRoi))}) — ${roiJudge(curRoi)}`];
+    const roiJudge=v=>v>=1.5?`<b style="color:var(--green)">우수 (≥150%)</b>`:v>=1.0?`<b style="color:var(--orange)">손익분기 부근</b>`:v>0?`<b style="color:var(--accent)">적자 (＜100%)</b>`:`<b>—</b>`;
+    let lines=[`<b>${curMon}월 쥐광 ROI</b> ${ROAS_PCT(curRoi)} (${arrow(pct(curRoi,prevRoi))}) — ${roiJudge(curRoi)}`];
     if(brand==='COLORGRAM'||brand==='TOTAL'){
-      lines.push(`<b>★ CID ROI</b> ${F2(curCid)} (${arrow(pct(curCid,prevCid))}) — ${roiJudge(curCid)} · 비즈니스 의사결정 기준`);
+      lines.push(`<b>★ CID ROI</b> ${ROAS_PCT(curCid)} (${arrow(pct(curCid,prevCid))}) — ${roiJudge(curCid)} · 비즈니스 의사결정 기준`);
     }
     let act='유지 모니터링';
     if(curCid>=1.5||curRoi>=1.5) act='<b style="color:var(--green)">→ 액션:</b> 손익분기 충분 초과 — 예산 10~20% 증액 검토';
@@ -1929,7 +1932,7 @@ document.getElementById('globalDateTo').addEventListener('change',e=>{
   render();
 });
 document.getElementById('globalFx').addEventListener('change',e=>{
-  globalFx=+e.target.value||190;
+  globalFx=+e.target.value||195;
   render();
 });
 document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.t){tab=e.target.dataset.t;[...document.querySelectorAll('#tabs button')].forEach(b=>b.classList.toggle('on',b.dataset.t===tab));document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol');document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');render();}});
@@ -2372,7 +2375,7 @@ function renderCompareKpis(){
     const cards=[
       ['쥐광비',WON(spend),momPct(cur.쥐광비,prev.쥐광비)],
       ['전점GMV',WON(gmv),momPct(cur.전점GMV,prev.전점GMV)],
-      ['ROI',F2(roi),momPct(curRoi,prevRoi)],
+      ['ROI',ROAS_PCT(roi),momPct(curRoi,prevRoi)],
       ['KOL비',WON(kol),momPct(cur.KOL비,prev.KOL비)]
     ];
     return cards.map(c=>`<div class="kpi"><div class="lab">${c[0]}</div><div class="val">${c[1]}</div>${c[2]}</div>`).join('');
@@ -2388,9 +2391,9 @@ function renderCompareKpis(){
   let wmInterp='', cgInterp='';
   if(W&&C){
     const gmvLead = W.gmv>C.gmv ? `<b style="color:#7A1F1F">📕 매출 리딩 (+${WON(W.gmv-C.gmv)})</b>` : `<b>📒 매출 추격 대상</b>`;
-    const roiCmp = W.roi>C.roi ? `<b style="color:var(--green)">📕 ROI 우위 (${F2(W.roi)} vs ${F2(C.roi)})</b>` : `<b style="color:var(--orange)">📒 ROI 우위 (${F2(C.roi)} vs ${F2(W.roi)})</b>`;
-    wmInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(165,42,42,0.06);border-left:3px solid #A52A2A;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(W.spend)} / 매출 ${WON(W.gmv)} / ROI ${F2(W.roi)}<br>→ ${gmvLead} · 1원당 매출 ${F2(W.roi)}원</div>`;
-    cgInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(212,175,55,0.08);border-left:3px solid #D4AF37;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(C.spend)} / 매출 ${WON(C.gmv)} / ROI ${F2(C.roi)}<br>→ ${roiCmp}</div>`;
+    const roiCmp = W.roi>C.roi ? `<b style="color:var(--green)">📕 ROI 우위 (${ROAS_PCT(W.roi)} vs ${ROAS_PCT(C.roi)})</b>` : `<b style="color:var(--orange)">📒 ROI 우위 (${ROAS_PCT(C.roi)} vs ${ROAS_PCT(W.roi)})</b>`;
+    wmInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(165,42,42,0.06);border-left:3px solid #A52A2A;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(W.spend)} / 매출 ${WON(W.gmv)} / ROI ${ROAS_PCT(W.roi)}<br>→ ${gmvLead} · 1원당 매출 ${F2(W.roi)}원</div>`;
+    cgInterp = `<div style="margin-top:8px;font-size:11px;color:var(--ink-soft);line-height:1.5;padding:6px 10px;background:rgba(212,175,55,0.08);border-left:3px solid #D4AF37;border-radius:4px"><b>1~5월 합계:</b> 광고비 ${WON(C.spend)} / 매출 ${WON(C.gmv)} / ROI ${ROAS_PCT(C.roi)}<br>→ ${roiCmp}</div>`;
   }
   document.getElementById('kpis').innerHTML=
     `<div class="kpi" style="grid-column:span 2;background:linear-gradient(135deg,rgba(165,42,42,0.08) 0%,#FFFDF5 70%);border-top-color:#A52A2A"><div class="lab" style="color:#7A1F1F">📕 WAKEMAKE 누적 (1~5월)</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">${make('WAKEMAKE')}</div>${wmInterp}</div>`+
