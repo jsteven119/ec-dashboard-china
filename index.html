@@ -1113,11 +1113,14 @@ function rebuildKolAggregates(){
 function brandMonthly(){
   let data;
   if(brand!=='TOTAL'){
-    data=DATA.monthly[brand].map(x=>({...x}));
+    data=(DATA.monthly[brand]||[]).map(x=>({...x}));
   } else {
-    const wm=DATA.monthly.WAKEMAKE, cg=DATA.monthly.COLORGRAM;
-    data=wm.map((w,i)=>{
-      const c=cg[i]||{};
+    const wm=DATA.monthly.WAKEMAKE||[], cg=DATA.monthly.COLORGRAM||[];
+    if(!wm.length&&!cg.length) return [];
+    // 합산 베이스는 더 긴 쪽 (한쪽이 빈 경우 한쪽 데이터만 반환)
+    const base=wm.length>=cg.length?wm:cg, other=wm.length>=cg.length?cg:wm;
+    data=base.map((w,i)=>{
+      const c=other[i]||{};
       const out={...w};
       Object.keys(w).forEach(k=>{
         if(k==='월') return; // 월 키는 합산 제외 (1+1=2 버그 방지)
@@ -1128,9 +1131,11 @@ function brandMonthly(){
       return out;
     });
   }
-  // date range → 활성 월만 필터
+  // date range → 활성 월만 필터 + 타입 안전(string '1'도 매칭)
   const months=getActiveMonths();
-  return data.filter(x=>months.includes(x.월));
+  const filtered=data.filter(x=>months.includes(Number(x.월)));
+  // 빈 결과 fallback — date range가 데이터 범위 밖이거나 월 타입 불일치 시 전체 반환
+  return filtered.length?filtered:data;
 }
 // byday 헬퍼: brand + date range 필터
 function brandByday(){
@@ -3373,10 +3378,13 @@ function normalizeBrand(v){
 function findKeyBy(sampleRow, ...keywordSets){
   if(!sampleRow) return null;
   const keys=Object.keys(sampleRow);
+  const keysLower=keys.map(k=>k.toLowerCase());
   for(const set of keywordSets){
     const arr=Array.isArray(set)?set:[set];
-    const hit=keys.find(k=>arr.every(kw=>k.includes(kw)));
-    if(hit) return hit;
+    // case-insensitive: 헤더가 BRAND/Brand/brand 어떤 형태라도 매칭
+    const arrLower=arr.map(kw=>kw.toLowerCase());
+    const idx=keysLower.findIndex(k=>arrLower.every(kw=>k.includes(kw)));
+    if(idx>=0) return keys[idx];
   }
   return null;
 }
