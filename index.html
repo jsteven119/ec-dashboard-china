@@ -811,8 +811,8 @@
           <div class="action-grid" id="angleActions"></div>
         </div>
         <div class="panel full">
-          <h3>🗺️ 앵글 × 주력상품 매트릭스</h3>
-          <div class="note">셀=해당 조합의 평균 CPUV(￥) · 색 진할수록 효율 좋음 · 빈 셀=해당 조합 콘텐츠 없음 → 시드 테스트 후보<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션:</span> 가장 진한 셀의 앵글-상품 조합 = 다음 캠페인 메인 포맷 · 빈 셀 중 진한 셀 인접 = 시드 우선순위 (효율 가설 검증)</div>
+          <h3>📊 어떤 상품에 어떤 콘텐츠가 잘 통하는지</h3>
+          <div class="note">셀 = 해당 조합의 평균 CPUV(¥, 매장 방문당 광고비) · <b style="color:#E65100">옅은 노랑 = 효율 ↑(좋음)</b> · <b style="color:#7A1F1F">진한 주황 = 효율 ↓(나쁨)</b> · 빈 셀 = 해당 조합 콘텐츠 아직 없음 → 시드 테스트 후보<br><span style="color:var(--gong-red-deep);font-weight:700">→ 액션:</span> 가장 옅은 셀의 앵글-상품 조합 = 다음 캠페인 메인 포맷 · 빈 셀 중 옅은 셀 인접 = 시드 우선순위 (효율 가설 검증)</div>
           <div style="overflow:auto"><div id="angleProductHeatmap"></div></div>
           <div id="matrixInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.07);border-left:3px solid var(--blue);border-radius:4px"></div>
         </div>
@@ -3053,11 +3053,25 @@ function renderAngleProductHeatmap(b){
   angles.forEach(a=>products.forEach(p=>{const c=grid[a][p];if(c&&c.n>0)vals.push(c.cpuv/c.n);}));
   const min=Math.min(...vals), max=Math.max(...vals);
   const colorScale=(v)=>{
-    if(!v)return ['#F2EAD0','#D4C9A8'];
-    const t=(v-min)/Math.max(max-min,0.01);
-    // 낮을수록 진한 옥색(녹), 높을수록 朱红 (故宫 톤)
-    const r=Math.round(30+t*(165-30)); const g=Math.round(86-t*(86-42)); const bl=Math.round(49-t*(49-42));
-    return [`rgba(${r},${g},${bl},${0.18+0.55*(1-t)})`,'#2C2317'];
+    if(!v)return ['#F2EAD0','#D4C9A8']; // 빈 셀 — 米色 유지
+    const t=(v-min)/Math.max(max-min,0.01); // 0(좋음)~1(나쁨)
+    // 전통 히트맵: 옅은 노랑 #FFF59D → 주황 #FFA726 → 진한 주황 #E65100 (3단계 lerp)
+    // CPUV 낮을수록(t=0) 옅은 노랑 = 효율 좋음, 높을수록(t=1) 진한 주황 = 효율 나쁨
+    let r,g,bl;
+    if(t<0.5){
+      const u=t*2;
+      r=255;
+      g=Math.round(245+u*(167-245));
+      bl=Math.round(157+u*(38-157));
+    } else {
+      const u=(t-0.5)*2;
+      r=Math.round(255+u*(230-255));
+      g=Math.round(167+u*(81-167));
+      bl=Math.round(38+u*(0-38));
+    }
+    // 글자 색: 배경 명도 따라 동적 (옅은 노랑/주황 = 묵흑, 진한 주황 = 米白)
+    const fg=t<0.55?'#2C2317':'#FFFDF5';
+    return [`rgb(${r},${g},${bl})`,fg];
   };
   let html='<table class="heatmap"><thead><tr><th>앵글 \\ 주력상품</th>';
   products.forEach(p=>html+=`<th>${p}</th>`);
