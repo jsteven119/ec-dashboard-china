@@ -1027,7 +1027,17 @@ let brand='TOTAL', tab='overview';
 // 글로벌 필터 상태 — date range 기반
 // 기간 끝 = 오늘 날짜로 초기화 (sync 후 데이터 마지막 날짜로 자동 보정)
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-let globalDateFrom='2026-01-01', globalDateTo=_todayStr();
+// 기간 시작 = KOL 데이터의 가장 오래된 게시일 (없으면 2026-01-01 fallback)
+// → KOC 분석/소재별 성과가 누적 KOL 전체를 대상으로 한 번에 보이도록
+function _earliestPostDate(){
+  try{
+    const all=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
+    const dates=all.map(r=>String(r.게시일||'').slice(0,10))
+      .filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+    return dates[0]||'2026-01-01';
+  }catch(e){return '2026-01-01';}
+}
+let globalDateFrom=_earliestPostDate(), globalDateTo=_todayStr();
 let _userDateOverride=false; // 사용자가 picker 수동 변경 시 true → sync에서 덮어쓰지 않음
 let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=195; // 1 CNY ≈ 195 KRW (semantic/rules.yaml > currency.cny_to_krw) · RETAIL=Tmall(天猫) 판매 플랫폼
 // 활성 월 배열 (date range 내 포함된 월들) — from·to 같은 해 가정
@@ -3329,9 +3339,10 @@ KOL.kol.TOTAL = [...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])].filter(r=
 
 rebuildKolAggregates();
 
-// 초기 로드 — date picker 값을 globalDateTo(=오늘)로 채움
-(function _initDateTo(){
-  const el=document.getElementById('globalDateTo'); if(el && !el.value) el.value=globalDateTo;
+// 초기 로드 — date picker 값을 globalDateFrom(=KOL 가장 오래된 게시일) / globalDateTo(=오늘)로 채움
+(function _initDates(){
+  const elF=document.getElementById('globalDateFrom'); if(elF) elF.value=globalDateFrom;
+  const elT=document.getElementById('globalDateTo'); if(elT && !elT.value) elT.value=globalDateTo;
 })();
 
 render();
