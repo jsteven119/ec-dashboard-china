@@ -641,6 +641,7 @@
   <div class="tabs" id="tabs">
     <button data-t="overview" class="on">개요·일별</button>
     <button data-t="kol">소재별 성과 (KOL)</button>
+    <button data-t="koc">소재별 성과 (KOC)</button>
     <button data-t="monthly">월별 매체 성과</button>
   </div>
 
@@ -685,10 +686,10 @@
 
   <!-- ===== KOL TAB ===== -->
   <div id="tab_kol" class="hide">
+    <div id="kolModeBadge" style="margin-bottom:10px"><span style="background:rgba(212,175,55,0.18);color:#7A1F1F;padding:3px 10px;border-radius:4px;font-size:11.5px;font-weight:700;letter-spacing:.3px;border:1px solid rgba(212,175,55,0.4);font-family:'Noto Serif SC',serif">📱 KOL 모드 — 전체 인플루언서 (KOL + KOC)</span></div>
     <div class="subtabs" id="kolSubtabs">
       <button data-s="insight" class="on">🎯 앵글 인사이트</button>
       <button data-s="perf">성과</button>
-      <button data-s="koc">👥 KOC 분석</button>
     </div>
 
     <!-- ===== KOL · 성과 서브탭 ===== -->
@@ -822,31 +823,6 @@
         </div>
       </div>
 
-      <!-- ===== KOL · KOC 분석 서브탭 ===== -->
-      <div id="kol_koc" class="hide">
-        <div class="panel full" style="background:linear-gradient(135deg,rgba(212,175,55,0.10) 0%,var(--card) 60%)">
-          <h3>👥 KOC vs KOL 효율 비교</h3>
-          <div class="note">KOC (Key Opinion Consumer · 마이크로/미들 = 팔로워 &lt;5만) vs KOL (미들+/메가 = 5만+) — 팔로워 규모에 따른 효율·화제성·가성비 차이.<br>
-          <span style="color:var(--gong-red-deep);font-weight:700">→ 가설:</span> KOC는 단가가 낮고 진정성·전환력 우위 · KOL은 도달·인지 우위. 데이터로 검증.</div>
-          <div class="kpis" id="kocVsKolKpis"></div>
-        </div>
-        <div class="grid">
-          <div class="panel full">
-            <h3>📊 팔로워 구간별 효율 분포</h3>
-            <div class="note">막대=평균 CPUV(낮을수록 효율), 선=인기콘텐츠 비율(높을수록 화제성) · KOC 구간이 CPUV 낮으면 가성비 우위</div>
-            <div class="cwrap"><canvas id="cKocTier"></canvas></div>
-          </div>
-          <div class="panel full">
-            <h3>🎯 KOC 가성비 TOP 10 (개별 소재)</h3>
-            <div class="note">팔로워 &lt;5만 KOC 중 CPUV 낮은 순 Top 10 · 클릭 = 샤오홍슈 노트 새 탭으로 열림</div>
-            <div class="tbox" style="max-height:520px"><table id="kocTopTable"><thead></thead><tbody></tbody></table></div>
-          </div>
-          <div class="panel full">
-            <h3>💡 KOC 활용 전략 제안</h3>
-            <div class="insight" id="kocStrategy"></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1024,6 +1000,8 @@ function getCampaignsInRange(dates){
   return out;
 }
 let brand='TOTAL', tab='overview';
+// 소재 모드: 'all' = KOL 탭(전체 KOL+KOC) / 'koc' = KOC 탭(마이크로+미들만)
+let kolMode='all';
 // 글로벌 필터 상태 — date range 기반
 // 기간 끝 = 오늘 날짜로 초기화 (sync 후 데이터 마지막 날짜로 자동 보정)
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1099,8 +1077,12 @@ function filterKolByDate(rows){
     return true;
   });
 }
-// KOL.kol[brand]의 date-filtered view 캐시 (sync/필터 변경 시 rebuild)
-function _kolView(b){ return filterKolByDate(KOL.kol[b]||[]); }
+// KOL.kol[brand]의 date-filtered view 캐시 + kolMode('koc'면 KOC만 필터)
+function _kolView(b){
+  let rows=KOL.kol[b]||[];
+  if(kolMode==='koc') rows=rows.filter(r=>_isKoc(r.팔로워구간));
+  return filterKolByDate(rows);
+}
 function rebuildKolAggregates(){
   if(typeof recomputeAgg!=='function')return;
   // KOL 집계는 모두 date-filtered 데이터 기준
@@ -1950,14 +1932,34 @@ document.getElementById('globalFx').addEventListener('change',e=>{
   globalFx=+e.target.value||195;
   render();
 });
-document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.t){tab=e.target.dataset.t;[...document.querySelectorAll('#tabs button')].forEach(b=>b.classList.toggle('on',b.dataset.t===tab));document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol');document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');render();}});
+document.getElementById('tabs').addEventListener('click',e=>{
+  if(!e.target.dataset.t)return;
+  tab=e.target.dataset.t;
+  [...document.querySelectorAll('#tabs button')].forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  // KOC 탭과 KOL 탭은 같은 panel 공유 (mode만 다름)
+  document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');
+  document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol'&&tab!=='koc');
+  document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');
+  // mode 자동 설정
+  kolMode = (tab==='koc') ? 'koc' : 'all';
+  // 모드 표시 배지
+  const badge=document.getElementById('kolModeBadge');
+  if(badge) badge.innerHTML = (tab==='koc')
+    ? '<span style="background:linear-gradient(180deg,#A52A2A,#7A1F1F);color:#FFFDF5;padding:3px 10px;border-radius:4px;font-size:11.5px;font-weight:700;letter-spacing:.3px;font-family:\'Noto Serif SC\',serif">👥 KOC 모드 — 마이크로/미들 (팔로워 &lt;5만) 만 표시</span>'
+    : '<span style="background:rgba(212,175,55,0.18);color:#7A1F1F;padding:3px 10px;border-radius:4px;font-size:11.5px;font-weight:700;letter-spacing:.3px;border:1px solid rgba(212,175,55,0.4);font-family:\'Noto Serif SC\',serif">📱 KOL 모드 — 전체 인플루언서 (KOL + KOC)</span>';
+  render();
+});
 ['fType','fAngle','fHot','fSort','fState'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.addEventListener('change',e=>{if(id==='fType')fType=e.target.value;if(id==='fHot')fHot=e.target.value;if(id==='fSort')fSort=e.target.value;if(id==='fState')fState=e.target.value;if(id==='fAngle')fAngle=e.target.value;renderTable();});});
 // 산점도 Y축 셀렉터 + 광고비 필터
 (function(){const el=document.getElementById('scatterY');if(el){el.value=scatterY;el.addEventListener('change',e=>{scatterY=e.target.value;chScatter();});}})();
 (function(){const el=document.getElementById('scatterSpendFilter');if(el){el.value=scatterSpendFilter;el.addEventListener('change',e=>{scatterSpendFilter=e.target.value;chScatter();});}})();
 document.getElementById('fSearch').addEventListener('input',e=>{fSearch=e.target.value;renderTable();});
 
-function render(){if(tab==='overview')renderOverview();else if(tab==='kol')renderKol();else if(tab==='monthly')renderMonthly();}
+function render(){
+  if(tab==='overview') renderOverview();
+  else if(tab==='kol'||tab==='koc') renderKol();
+  else if(tab==='monthly') renderMonthly();
+}
 
 // ===== Monthly tab =====
 let mChannel='ALL', mMetric='광고비';
@@ -3274,14 +3276,12 @@ document.getElementById('kolSubtabs').addEventListener('click',e=>{
   [...document.querySelectorAll('#kolSubtabs button')].forEach(b=>b.classList.toggle('on',b.dataset.s===kolSub));
   document.getElementById('kol_perf').classList.toggle('hide',kolSub!=='perf');
   document.getElementById('kol_insight').classList.toggle('hide',kolSub!=='insight');
-  document.getElementById('kol_koc').classList.toggle('hide',kolSub!=='koc');
   if(kolSub==='insight') renderAngleInsight();
-  if(kolSub==='koc') renderKocAnalysis();
 });
 
 // renderKol 보강 — insight 서브탭일 때 angle insight도 렌더
 const _origRenderKol=renderKol;
-renderKol=function(){_origRenderKol();if(kolSub==='insight')renderAngleInsight();if(kolSub==='koc')renderKocAnalysis();};
+renderKol=function(){_origRenderKol();if(kolSub==='insight')renderAngleInsight();};
 
 // renderOverview 보강 — freshness 갱신
 const _origRenderOverview=renderOverview;
