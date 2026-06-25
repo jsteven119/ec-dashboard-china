@@ -1038,17 +1038,17 @@ let kolMode='all';
 // 글로벌 필터 상태 — date range 기반
 // 기간 끝 = 오늘 날짜로 초기화 (sync 후 데이터 마지막 날짜로 자동 보정)
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-// 기간 시작 = KOL 데이터의 가장 오래된 게시일 (없으면 2026-01-01 fallback)
-// → KOC 분석/소재별 성과가 누적 KOL 전체를 대상으로 한 번에 보이도록
-function _earliestPostDate(){
+// 기간 시작 = 데이터 최신 일자가 속한 월의 1일 (예: 데이터 마지막=2026-05-21 → 2026-05-01)
+// → 항상 가장 최근 월의 1일부터 오늘까지가 디폴트 분석 기간
+function _latestMonthFirst(){
   try{
-    const all=[...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])];
-    const dates=all.map(r=>String(r.게시일||'').slice(0,10))
+    const dates=(DATA.byday||[]).map(r=>String(r.날짜||'').slice(0,10))
       .filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
-    return dates[0]||'2026-01-01';
-  }catch(e){return '2026-01-01';}
+    if(!dates.length) return _todayStr().slice(0,7)+'-01'; // 데이터 없으면 오늘 월의 1일
+    return dates[dates.length-1].slice(0,7)+'-01';
+  }catch(e){return _todayStr().slice(0,7)+'-01';}
 }
-let globalDateFrom=_earliestPostDate(), globalDateTo=_todayStr();
+let globalDateFrom=_latestMonthFirst(), globalDateTo=_todayStr();
 let _userDateOverride=false; // 사용자가 picker 수동 변경 시 true → sync에서 덮어쓰지 않음
 let globalChannel='ALL', globalRetail='Tmall', globalPromo='ALL', globalFx=195; // 1 CNY ≈ 195 KRW (semantic/rules.yaml > currency.cny_to_krw) · RETAIL=Tmall(天猫) 판매 플랫폼
 // 활성 월 배열 (date range 내 포함된 월들) — from·to 같은 해 가정
@@ -3647,7 +3647,9 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
   const wmL=[...byday].filter(r=>r.브랜드==='WAKEMAKE').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   const cgL=[...byday].filter(r=>r.브랜드==='COLORGRAM').filter(r=>r.쥐광_광고비>0||r['샤오홍싱_전점GMV']>0).pop();
   DATA.last={WAKEMAKE:wmL?.날짜||DATA.last.WAKEMAKE,COLORGRAM:cgL?.날짜||DATA.last.COLORGRAM};
-  // 기간 필터 끝을 데이터의 최신 날짜로 자동 보정 (사용자가 수동 변경 안 했을 때만)
+  // 기간 자동 보정 (사용자가 수동 변경 안 했을 때만)
+  // - 끝 = 데이터 최신 날짜
+  // - 시작 = 데이터 최신월의 1일 (사용자 요청: "항상 최신월의 1일")
   if(!_userDateOverride){
     const lastDates=[DATA.last.WAKEMAKE,DATA.last.COLORGRAM].filter(Boolean).sort();
     if(lastDates.length){
@@ -3655,6 +3657,11 @@ async function syncSheets(){setSyncStatus('⏳ 동기화 중…','warn');try{con
       if(latest!==globalDateTo){
         globalDateTo=latest;
         const el=document.getElementById('globalDateTo'); if(el) el.value=globalDateTo;
+      }
+      const newFrom=latest.slice(0,7)+'-01';
+      if(newFrom!==globalDateFrom){
+        globalDateFrom=newFrom;
+        const elF=document.getElementById('globalDateFrom'); if(elF) elF.value=globalDateFrom;
       }
     }
   }
