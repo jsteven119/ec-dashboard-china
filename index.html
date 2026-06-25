@@ -3586,6 +3586,12 @@ function dedupeByLatest(rows){
     const ER = views>0 ? +(inter/views*100).toFixed(2) : 0;
     return {
       ...r,
+      // 시트 헤더 변형 매핑 (한·중 결합 + 접미사 형태 → 표준 키)
+      // 예: "内容角度 콘텐츠앵글(국)" → 콘텐츠앵글
+      콘텐츠앵글: _resolveKolKey(r,'콘텐츠앵글','内容角度','content angle','콘텐츠앵글(국)','콘텐츠앵글(中)','콘텐츠앵글(中)'),
+      게시일: _resolveKolKey(r,'게시일','发布日期','笔记发布日期','post_date'),
+      // 데이터상태: 시트에 없으면 '최신' 기본. 진행상태에 '暂停/완료'면 '이전작업'으로 분류
+      데이터상태: r.데이터상태 || (((r['진행상태']||'')+'').match(/暂停|이전|完成|done/i)?'이전작업':'최신'),
       총협업횟수:cnt[r.인플루언서]||1,
       조회수: views || r.조회수 || 0,
       인터랙션: inter || r.인터랙션 || 0,
@@ -3600,6 +3606,18 @@ function dedupeByLatest(rows){
       진행상태_표시: localizeProgress(r.진행상태)
     };
   });
+}
+// 시트 헤더 변형(한·중 결합·접미사) → 표준 키 fallback resolver
+function _resolveKolKey(r, stdKey, ...altPatterns){
+  if(r[stdKey]) return r[stdKey];
+  const keys=Object.keys(r);
+  for(const k of keys){
+    if(k===stdKey) continue;
+    if(altPatterns.some(p=>k.includes(p))) {
+      const v=r[k]; if(v!=null&&v!=='') return v;
+    }
+  }
+  return '';
 }
 // 인기콘텐츠(爆文) 인식 — 시트별 표기 방식이 달라서 lenient하게 판단
 // WM: 인기콘텐츠 컬럼에 '爆文' 또는 '1'
