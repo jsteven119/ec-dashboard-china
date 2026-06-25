@@ -154,6 +154,38 @@
   }
   /* ===== KPI 카드 (1줄 강제 · 콤팩트) ===== */
   .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:18px 0}
+  /* ===== 베스트 hero 카드 (어떤 게 좋은지 한눈에) ===== */
+  .best-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:8px 0 22px}
+  .best-card{
+    background:linear-gradient(135deg,#FFFDF5 0%,rgba(212,175,55,0.10) 100%);
+    border:1px solid var(--line);border-top:3px solid var(--gold);
+    border-radius:10px;padding:18px 18px 14px;position:relative;
+    box-shadow:0 2px 6px rgba(184,148,31,0.10);
+    transition:.2s;
+  }
+  .best-card:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(184,148,31,0.18)}
+  .best-card::before{
+    content:'🥇';position:absolute;top:-12px;left:14px;font-size:22px;
+    filter:drop-shadow(0 1px 2px rgba(184,148,31,.4));
+  }
+  .best-card .lbl{
+    font-size:10.5px;color:var(--ink-soft);font-weight:700;
+    font-family:'Noto Serif SC',serif;letter-spacing:.4px;text-transform:uppercase;
+    margin-top:4px;
+  }
+  .best-card .name{
+    font-size:17px;font-weight:900;color:var(--gong-red-deep);margin-top:6px;
+    font-family:'Noto Serif SC',serif;line-height:1.3;
+    word-break:break-word;
+  }
+  .best-card .stat{font-size:12px;color:var(--ink);margin-top:8px;line-height:1.5}
+  .best-card .stat b{color:var(--gong-red-deep);font-weight:700}
+  .best-card .reason{
+    font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.5;
+    padding-top:6px;border-top:1px dashed var(--line-soft);
+  }
+  .best-card.empty{opacity:.5;background:var(--rice-paper)}
+  .best-card.empty .name{color:var(--ink-soft);font-style:italic;font-size:14px}
   @media(max-width:1100px){.kpis{grid-template-columns:repeat(4,1fr)}}
   @media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}}
   .kpi{
@@ -694,6 +726,7 @@
 
     <!-- ===== KOL · 성과 서브탭 ===== -->
     <div id="kol_perf" class="hide">
+      <div id="kolBest" class="best-grid"></div>
       <div class="kpis" id="kolKpis"></div>
       <div class="grid">
         <div class="panel full">
@@ -1747,6 +1780,7 @@ function renderTable(){
 }
 function renderKol(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(renderKolBest,'renderKolBest');
   safe(kolKpis,'kolKpis');
   // safe(renderCorrAnalysis,'renderCorrAnalysis'); // ⏸ 실제 GMV 데이터 추가 후 재활성화
   safe(chScatter,'chScatter');
@@ -1756,6 +1790,68 @@ function renderKol(){
   safe(insightKol,'insightKol');
   safe(renderTable,'renderTable');
   safe(renderKolInterp,'renderKolInterp');
+}
+
+// ===== 베스트 hero 카드 (성과 서브탭 최상단 — 어떤 게 좋은지 한눈에) =====
+function renderKolBest(){
+  const el=document.getElementById('kolBest'); if(!el) return;
+  const rows=_kolView(brand).filter(r=>r.데이터상태!=='이전작업'&&(+r.종합CPUV)>0&&(+r.총비용)>0);
+  if(!rows.length){el.innerHTML='<div class="best-card empty"><div class="lbl">데이터 없음</div><div class="name">기간/필터 조건에 맞는 소재가 없습니다</div></div>';return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const modeLbl = kolMode==='koc' ? 'KOC' : '인플루언서';
+  // 1. 베스트 인플루언서 (CPUV 최저 · 총비용>=평균의 30% 필터로 너무 작은 캠페인 제외)
+  const avgCost=rows.reduce((a,r)=>a+(+r.총비용||0),0)/rows.length;
+  const validInf=rows.filter(r=>(+r.총비용)>=avgCost*0.3);
+  const bestInf=(validInf.length?validInf:rows).reduce((a,b)=>(+a.종합CPUV<+b.종합CPUV?a:b));
+  // 2. 베스트 주력상품 (콘텐츠수>=3, 평균 CPUV 최저)
+  const byProd={};
+  rows.forEach(r=>{const k=r.주력상품||'미입력';if(!byProd[k])byProd[k]={n:0,sum:0,hot:0};byProd[k].n++;byProd[k].sum+=+r.종합CPUV;if(_isHotRow(r))byProd[k].hot++;});
+  const prodList=Object.entries(byProd).filter(([k,v])=>v.n>=3&&k!=='미입력').map(([k,v])=>({name:k,cpuv:v.sum/v.n,n:v.n,hotRatio:v.hot/v.n*100})).sort((a,b)=>a.cpuv-b.cpuv);
+  const bestProd=prodList[0];
+  // 3. 베스트 콘텐츠 앵글 (콘텐츠수>=2, 평균 CPUV 최저)
+  const byAng={};
+  rows.forEach(r=>{const k=r.콘텐츠앵글||'미입력';if(k==='미입력')return;if(!byAng[k])byAng[k]={n:0,sum:0,hot:0};byAng[k].n++;byAng[k].sum+=+r.종합CPUV;if(_isHotRow(r))byAng[k].hot++;});
+  const angList=Object.entries(byAng).filter(([k,v])=>v.n>=2).map(([k,v])=>({name:k,cpuv:v.sum/v.n,n:v.n,hotRatio:v.hot/v.n*100})).sort((a,b)=>a.cpuv-b.cpuv);
+  const bestAng=angList[0];
+  // 4. 베스트 팔로워 구간 (콘텐츠수>=2, 평균 CPUV 최저)
+  const byTier={};
+  rows.forEach(r=>{const k=r.팔로워구간||'미상';if(k==='미상')return;if(!byTier[k])byTier[k]={n:0,sum:0};byTier[k].n++;byTier[k].sum+=+r.종합CPUV;});
+  const tierList=Object.entries(byTier).filter(([k,v])=>v.n>=2).map(([k,v])=>({name:k,cpuv:v.sum/v.n,n:v.n})).sort((a,b)=>a.cpuv-b.cpuv);
+  const bestTier=tierList[0];
+  // HTML 생성
+  const card=(lbl,name,statLines,reason,emptyMsg)=>{
+    if(!name) return `<div class="best-card empty"><div class="lbl">${lbl}</div><div class="name">${emptyMsg||'데이터 부족'}</div></div>`;
+    return `<div class="best-card"><div class="lbl">${lbl}</div><div class="name">${name}</div><div class="stat">${statLines}</div>${reason?`<div class="reason">${reason}</div>`:''}</div>`;
+  };
+  el.innerHTML=[
+    card(
+      `베스트 ${modeLbl}`,
+      bestInf.인플루언서_한글||bestInf.인플루언서||'-',
+      `CPUV <b>${(+bestInf.종합CPUV).toFixed(2)}</b> · 인터랙션 <b>${fmt(+bestInf.인터랙션||0)}</b><br>광고비 ¥${fmt(+bestInf.총비용||0)} · ${bestInf.팔로워구간||'-'}`,
+      `${bestInf.주력상품||'-'}${bestInf.콘텐츠앵글&&bestInf.콘텐츠앵글!=='미입력'?' · '+bestInf.콘텐츠앵글:''}${_isHotRow(bestInf)?' · 🔥인기':''}`
+    ),
+    card(
+      '베스트 주력상품',
+      bestProd?bestProd.name:null,
+      bestProd?`평균 CPUV <b>${bestProd.cpuv.toFixed(2)}</b> · ${bestProd.n}건 소재<br>인기콘텐츠 비율 <b>${bestProd.hotRatio.toFixed(0)}%</b>`:'',
+      bestProd?`매장 방문 효율이 가장 좋은 상품 — 다음 캠페인 메인 포맷`:'',
+      '상품별 3건 이상 데이터 필요'
+    ),
+    card(
+      '베스트 콘텐츠 앵글',
+      bestAng?bestAng.name:null,
+      bestAng?`평균 CPUV <b>${bestAng.cpuv.toFixed(2)}</b> · ${bestAng.n}건 소재<br>인기콘텐츠 비율 <b>${bestAng.hotRatio.toFixed(0)}%</b>`:'',
+      bestAng?`이 앵글로 더 많은 소재 시드 권장`:'',
+      '앵글별 2건 이상 데이터 필요'
+    ),
+    card(
+      '베스트 팔로워 구간',
+      bestTier?bestTier.name:null,
+      bestTier?`평균 CPUV <b>${bestTier.cpuv.toFixed(2)}</b> · ${bestTier.n}건 소재`:'',
+      bestTier?`이 규모 인플루언서가 가성비 우위`:'',
+      '구간별 2건 이상 데이터 필요'
+    )
+  ].join('');
 }
 
 // ===== Pearson 상관계수 =====
