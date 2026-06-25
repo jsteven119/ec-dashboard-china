@@ -2080,6 +2080,8 @@ document.getElementById('tabs').addEventListener('click',e=>{
 document.getElementById('fSearch').addEventListener('input',e=>{fSearch=e.target.value;renderTable();});
 
 function render(){
+  // 매 render마다 picker 빈 값/비표준 형식 안전망 (사용자가 picker 비우거나 잘못된 상태 진입 시 자동 복귀)
+  if(typeof _ensureDates==='function') _ensureDates();
   if(tab==='overview') renderOverview();
   else if(tab==='kol'||tab==='koc') renderKol();
   else if(tab==='monthly') renderMonthly();
@@ -3460,11 +3462,21 @@ KOL.kol.TOTAL = [...(KOL.kol.WAKEMAKE||[]),...(KOL.kol.COLORGRAM||[])].filter(r=
 
 rebuildKolAggregates();
 
-// 초기 로드 — date picker 값을 globalDateFrom(=KOL 가장 오래된 게시일) / globalDateTo(=오늘)로 채움
-(function _initDates(){
+// 초기 로드 — date picker 값을 globalDateFrom(=최신월 1일) / globalDateTo(=오늘)로 강제 채움
+// 안전망: 변수 자체가 빈 값/비표준 형식이면 즉시 fallback 적용 (사용자 보고: picker가 '연도-월-일' 빈 상태)
+function _ensureDates(){
+  const RX=/^\d{4}-\d{2}-\d{2}$/;
+  if(!globalDateFrom || !RX.test(globalDateFrom)){
+    globalDateFrom=_latestMonthFirst();
+    if(!RX.test(globalDateFrom)) globalDateFrom=_todayStr().slice(0,7)+'-01';
+  }
+  if(!globalDateTo || !RX.test(globalDateTo)){
+    globalDateTo=_todayStr();
+  }
   const elF=document.getElementById('globalDateFrom'); if(elF) elF.value=globalDateFrom;
-  const elT=document.getElementById('globalDateTo'); if(elT && !elT.value) elT.value=globalDateTo;
-})();
+  const elT=document.getElementById('globalDateTo'); if(elT) elT.value=globalDateTo;
+}
+_ensureDates();
 
 render();
 
