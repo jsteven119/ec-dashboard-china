@@ -1567,6 +1567,7 @@ function getScatterY(r){
 function chScatter(){destroy('cScatter');
   // X=CPUV(낮을수록 효율), Y=선택 지표(높을수록 화제), 점크기=광고비(총비용)
   let rows=_kolView(brand).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0&&r.인터랙션>=0&&r.종합CPUV>0);
+  if(!rows.length){_showCanvasEmpty('cScatter','데이터 추가 필요','현재 기간에 측정 가능한 소재가 없습니다\n기간을 더 과거로 변경하거나 시트의 종합CPUV/총비용 값을 채워주세요');return;}
   // 광고비 필터 — 평균 이상 / 상위 20% / 인기콘텐츠만
   let filterMsg='';
   if(scatterSpendFilter==='above'){
@@ -1695,8 +1696,8 @@ function chScatter(){destroy('cScatter');
       y:{type:'logarithmic',min:yMin,max:yMax*1.2,title:{display:true,text:yAxisTitle+' · 로그 스케일'},ticks:{callback:yTickFmt}}
     }},plugins:[quadrantPlugin]});}
 
-function chAngle(){destroy('cAngle');const ag=KOL.angle[brand].filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력').sort((a,b)=>a.평균CPUV-b.평균CPUV);
-  if(!ag.length){const cv=document.getElementById('cAngle');if(cv){const ctx=cv.getContext('2d');ctx.fillStyle=COL.grey;ctx.font="13px 'Noto Sans SC',sans-serif";ctx.fillText('이 브랜드는 노트유형(앵글) 데이터가 부족합니다 (CG는 운영팀 입력 누락)',20,40);}return;}
+function chAngle(){destroy('cAngle');const ag=(KOL.angle[brand]||[]).filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력').sort((a,b)=>a.평균CPUV-b.평균CPUV);
+  if(!ag.length){_showCanvasEmpty('cAngle','데이터 추가 필요','앵글당 2건 이상 + 종합CPUV가 0이 아닌 소재가 필요합니다\n기간 확장 또는 시트 콘텐츠앵글·종합CPUV 컬럼 보완');return;}
   charts.cAngle=new Chart(document.getElementById('cAngle'),{type:'bar',data:{labels:ag.map(a=>`${a.콘텐츠앵글} (${a.콘텐츠수})`),
     datasets:[
       {label:'평균 CPUV',data:ag.map(a=>a.평균CPUV),backgroundColor:COL.blue,yAxisID:'y',borderRadius:5,order:2},
@@ -1706,9 +1707,11 @@ function chAngle(){destroy('cAngle');const ag=KOL.angle[brand].filter(a=>a.콘�
       scales:{y:{title:{display:true,text:'평균 CPUV (낮을수록 우수)'}},y1:{position:'right',title:{display:true,text:'인기콘텐츠 비율(%)'},ticks:{callback:v=>v+'%'},grid:{drawOnChartArea:false},max:60}}}});
 }
 
-function chCType(){destroy('cCType');const ct=KOL.sp[brand].filter(c=>c.콘텐츠수>=3).sort((a,b)=>a.평균CPUV-b.평균CPUV);
+function chCType(){destroy('cCType');const ct=(KOL.sp[brand]||[]).filter(c=>c.콘텐츠수>=3).sort((a,b)=>a.평균CPUV-b.평균CPUV);
+  if(!ct.length){_showCanvasEmpty('cCType','데이터 추가 필요','주력상품당 3건 이상 소재가 필요합니다\n기간을 더 과거로 확장하면 누적 데이터 분석 가능');return;}
   charts.cCType=new Chart(document.getElementById('cCType'),{type:'bar',data:{labels:ct.map(c=>c.주력상품),datasets:[{label:'평균 CPUV',data:ct.map(c=>c.평균CPUV),backgroundColor:COL.sky,borderRadius:5},{label:'콘텐츠수',data:ct.map(c=>c.콘텐츠수),backgroundColor:COL.navy,yAxisID:'y1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{title:{display:true,text:'평균 CPUV'}},y1:{position:'top',display:false}}}});}
-function chTier(){destroy('cTier');const tf=KOL.tier[brand].filter(c=>c.팔로워구간!=='미상');
+function chTier(){destroy('cTier');const tf=(KOL.tier[brand]||[]).filter(c=>c.팔로워구간!=='미상');
+  if(!tf.length){_showCanvasEmpty('cTier','데이터 추가 필요','팔로워 구간별 데이터가 부족합니다\n기간을 확장하거나 시트의 팔로워구간 컬럼을 채워주세요');return;}
   charts.cTier=new Chart(document.getElementById('cTier'),{type:'bar',data:{labels:tf.map(c=>c.팔로워구간),datasets:[{label:'평균 CPUV',data:tf.map(c=>c.평균CPUV),backgroundColor:COL.purple,borderRadius:5,yAxisID:'y'},{type:'line',label:'평균 총비용(￥)',data:tf.map(c=>c.평균_총비용),borderColor:COL.orange,backgroundColor:COL.orange,tension:.3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'CPUV'}},y1:{position:'right',title:{display:true,text:'평균 비용'},ticks:{callback:v=>FMT(v)},grid:{drawOnChartArea:false}}}}});}
 function insightKol(){
 
@@ -1769,6 +1772,16 @@ function renderTable(){
   const selA=document.getElementById('fAngle');if(selA&&selA.options.length<=1){const angles=Array.from(new Set(allFull.map(r=>r.콘텐츠앵글).filter(Boolean))).sort();angles.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;selA.appendChild(o);});}
   const rows=sortRows(all.filter(rowMatch));
   document.querySelector('#kolTable thead').innerHTML='<tr>'+TCOLS.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>';
+  if(!rows.length){
+    // 헤더는 그대로 + 빈 row 자리에 안내 메시지
+    document.querySelector('#kolTable tbody').innerHTML=`<tr><td colspan="${TCOLS.length}" style="padding:36px 24px;text-align:center;background:linear-gradient(135deg,rgba(212,175,55,0.06) 0%,var(--card) 70%)">
+      <div style="font-size:28px;margin-bottom:10px">📭</div>
+      <b style="color:var(--accent);font-size:14px;font-family:'Noto Serif SC',serif">데이터 추가 필요</b>
+      <div style="margin-top:8px;font-size:12px;color:var(--ink-soft);line-height:1.6">현재 기간/필터에 맞는 소재가 없습니다.<br>기간을 더 과거(예: 2025-09-01)로 변경하거나 시트에 최신 KOL/KOC 데이터를 추가해주세요.</div>
+    </td></tr>`;
+    document.getElementById('rowcountK').textContent='0건';
+    return;
+  }
   document.querySelector('#kolTable tbody').innerHTML=rows.slice(0,200).map((r,i)=>'<tr'+(i===0?' style="background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 65%)"':'')+'>'+TCOLS.map((c,ci)=>{
     let v=r[c[0]];
     if(c[0]==='인기콘텐츠')return `<td>${v?'<span class="pill hot">인기</span>':'<span class="pill gen">일반</span>'}</td>`;
@@ -2011,17 +2024,31 @@ document.getElementById('globalPromo').addEventListener('change',e=>{
   render();
 });
 document.getElementById('globalDateFrom').addEventListener('change',e=>{
-  globalDateFrom=e.target.value;
-  // 수동 변경 시 프로모션 해제
+  const v=e.target.value;
+  if(!v){
+    // 사용자가 picker를 비웠을 때 → 디폴트(최신월 1일)로 자동 복귀
+    globalDateFrom=_latestMonthFirst();
+    e.target.value=globalDateFrom;
+    _userDateOverride=false; // 디폴트로 돌아갔으니 sync 보정 다시 활성
+  } else {
+    globalDateFrom=v;
+    _userDateOverride=true;
+  }
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
-  _userDateOverride=true;
-  rebuildKolAggregates(); // KOL 집계는 게시일 기반 → 날짜 필터 변경 시 재계산 필요
+  rebuildKolAggregates();
   render();
 });
 document.getElementById('globalDateTo').addEventListener('change',e=>{
-  globalDateTo=e.target.value;
+  const v=e.target.value;
+  if(!v){
+    globalDateTo=_todayStr();
+    e.target.value=globalDateTo;
+    _userDateOverride=false;
+  } else {
+    globalDateTo=v;
+    _userDateOverride=true;
+  }
   globalPromo='ALL'; document.getElementById('globalPromo').value='ALL';
-  _userDateOverride=true;
   rebuildKolAggregates();
   render();
 });
@@ -2995,21 +3022,13 @@ function chQuadrant(b,hasAngle){
   // 평균CPUV=0인 앵글 제외 (외부행동UV=0인 행만 모인 앵글은 효율 측정 불가)
   const ag=hasAngle?(KOL.angle[b]||[]).filter(a=>a.콘텐츠수>=2&&a.콘텐츠앵글!=='미입력'&&a.평균CPUV>0):[];
   if(!ag.length){
-    const cv=document.getElementById('cQuadrant');
-    if(cv){
-      const ctx=cv.getContext('2d');
-      ctx.clearRect(0,0,cv.width,cv.height);
-      ctx.fillStyle=COL.grey;
-      ctx.font="13px 'Noto Sans SC',sans-serif";
-      // 4사분면 분석 불가 원인 안내 (CG 외부행동UV=0 케이스 등)
-      const totalAg=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력');
-      if(totalAg.length>0){
-        ctx.fillText('⚠ 외부행동UV(매장 진입) 데이터가 모두 0 — 평균 CPUV 계산 불가',20,30);
-        ctx.fillText(`앵글 ${totalAg.length}개는 인식되었으나 효율 측정 불가능한 콘텐츠만 보유`,20,52);
-        ctx.fillText('해결: 시트의 종합CPUV 값이 0이 아닌 행이 앵글당 2건↑ 필요',20,74);
-      } else {
-        ctx.fillText('앵글 데이터 부족 — 콘텐츠앵글 컬럼 추가 후 사용 가능',20,40);
-      }
+    const totalAg=(KOL.angle[b]||[]).filter(a=>a.콘텐츠앵글!=='미입력');
+    if(totalAg.length>0){
+      _showCanvasEmpty('cQuadrant','데이터 추가 필요',
+        `앵글 ${totalAg.length}개 인식 / 효율 측정 가능한 소재 없음\n시트의 종합CPUV·외부행동UV 값이 0이 아닌 행 필요 (앵글당 2건↑)`);
+    } else {
+      _showCanvasEmpty('cQuadrant','데이터 추가 필요',
+        '콘텐츠앵글 데이터가 부족합니다\n시트의 콘텐츠앵글 컬럼을 채워주세요');
     }
     return;
   }
@@ -3144,6 +3163,11 @@ function renderAngleActions(b,hasAngle){
 function renderAngleProductHeatmap(b){
   const box=document.getElementById('angleProductHeatmap'); if(!box) return;
   const rows=_kolView(b).filter(r=>r.데이터상태!=='이전작업'&&r.총비용>0);
+  if(!rows.length){
+    box.innerHTML=_emptyDataNotice('데이터 추가 필요','현재 기간에 측정 가능한 소재가 없습니다.<br>기간을 더 과거(예: 2025-09-01)로 확장하거나 시트에 데이터를 추가해주세요.');
+    const interp=document.getElementById('matrixInterp'); if(interp) interp.innerHTML='';
+    return;
+  }
   // 그룹: 앵글 × 주력상품 → 평균 CPUV
   const grid={};
   rows.forEach(r=>{
@@ -3643,6 +3667,38 @@ function _normDate(s){
   const m=str.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
   if(m) return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
   return str.slice(0,10);
+}
+// 빈 데이터 시 canvas 위에 '📭 데이터 추가 필요' 안내 그리기 (차트 대신 표시)
+function _showCanvasEmpty(canvasId, mainMsg, subMsg){
+  const cv=document.getElementById(canvasId); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  // canvas 실제 크기 (responsive 대비)
+  const w=cv.width||cv.clientWidth||300, h=cv.height||cv.clientHeight||200;
+  ctx.clearRect(0,0,w,h);
+  ctx.save();
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  // 아이콘
+  ctx.font="28px sans-serif";
+  ctx.fillStyle='#B8941F';
+  ctx.fillText('📭', w/2, h/2 - 30);
+  // 메인 메시지
+  ctx.font="bold 14px 'Noto Sans SC',sans-serif";
+  ctx.fillStyle='#A52A2A';
+  ctx.fillText(mainMsg||'데이터 추가 필요', w/2, h/2);
+  // 보조 안내
+  ctx.font="11.5px 'Noto Sans SC',sans-serif";
+  ctx.fillStyle='#8B7A65';
+  const lines=String(subMsg||'기간을 더 과거로 확장하거나 시트에 최신 데이터를 추가해주세요').split('\n');
+  lines.forEach((line,i)=>ctx.fillText(line, w/2, h/2 + 24 + i*16));
+  ctx.restore();
+}
+// 빈 DOM 영역에 카드형 안내 (표/매트릭스 wrapper용)
+function _emptyDataNotice(mainMsg, subMsg){
+  return `<div style="padding:36px 24px;text-align:center;border:1px dashed var(--line);border-radius:8px;background:linear-gradient(135deg,rgba(212,175,55,0.06) 0%,var(--card) 70%);margin:8px 0">
+    <div style="font-size:28px;margin-bottom:10px">📭</div>
+    <b style="color:var(--accent);font-size:14px;font-family:'Noto Serif SC',serif">${mainMsg||'데이터 추가 필요'}</b>
+    <div style="margin-top:8px;font-size:12px;color:var(--ink-soft);line-height:1.6">${subMsg||'현재 기간/필터에 맞는 데이터가 없습니다.<br>기간을 더 과거로 변경하거나 시트에 최신 데이터를 추가해주세요.'}</div>
+  </div>`;
 }
 // 인기콘텐츠(爆文) 인식 — 시트별 표기 방식이 달라서 lenient하게 판단
 // WM: 인기콘텐츠 컬럼에 '爆文' 또는 '1'
