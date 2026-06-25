@@ -3483,7 +3483,22 @@ async function fetchSheet(name){const url=`https://docs.google.com/spreadsheets/
   return parsed.map(row=>{const out={};Object.keys(row).forEach(k=>{const nk=normalizeHeader(k);if(nk)out[nk]=row[k];});return out;});
 }
 // 한국어/중국어 컬럼 fallback — 시트에 새 컬럼이 한·중 중 어떤 이름으로 들어와도 인식
-function pickNum(r, keys){for(const k of keys){const v=r[k]; if(v!=null&&v!==''&&!isNaN(+v))return +v;} return 0;}
+// pickNum — 정확 매칭 우선, 실패 시 case-insensitive 부분 매칭 (시트 결합 헤더 대응)
+// 예: r['종합CPUV'] = undefined일 때 r['综合cpuv 종합CPUV']에서 자동 추출
+function pickNum(r, keys){
+  if(!r) return 0;
+  // 1. 정확 매칭 (성능 최적화)
+  for(const k of keys){const v=r[k]; if(v!=null&&v!==''&&!isNaN(+v))return +v;}
+  // 2. case-insensitive 부분 매칭
+  const rKeys=Object.keys(r);
+  const rKeysLower=rKeys.map(k=>k.toLowerCase());
+  for(const k of keys){
+    const kLower=k.toLowerCase();
+    const idx=rKeysLower.findIndex(rk=>rk.includes(kLower));
+    if(idx>=0){const v=r[rKeys[idx]]; if(v!=null&&v!==''&&!isNaN(+v))return +v;}
+  }
+  return 0;
+}
 function pickStr(r, keys){for(const k of keys){const v=r[k]; if(v!=null&&v!=='')return String(v);} return '';}
 
 // ===== byday(일별raw통합) 정규화 — 시트 컬럼명이 한국어/중국어 어느 쪽이든 인식 =====
