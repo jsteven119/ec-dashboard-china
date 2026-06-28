@@ -3790,5 +3790,94 @@ document.getElementById('btnSync').addEventListener('click',syncSheets);
 setTimeout(syncSheets, 500);
 
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAYOUT SHELL (Design Lead 2026-06-28) — 원본 마크업 무수정.
+     로드 후 기존 노드(#tabs / header / .gfilters / 콘텐츠)를 좌측 레일 셸로
+     런타임 재배치. #tabs 클릭은 컨테이너 위임이라 통째 이동 시 핸들러 유지.
+     JP 대시보드와 동일 디자인(좌측 레일+풀폭+확대), 색은 중국 골드 톤.
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="dsShellStyle">
+  body{ margin:0; }
+  .wrap{ max-width:none !important; padding:0 !important; margin:0 !important; }
+  .ds-shell{ display:flex; align-items:flex-start; }
+  .ds-rail{ --rail-w:214px; width:var(--rail-w); flex:0 0 var(--rail-w);
+    background:var(--rice-paper,#fff); border-right:1px solid var(--line,#e5e7eb);
+    position:sticky; top:0; height:100vh; display:flex; flex-direction:column; overflow:hidden;
+    transition:width .2s, flex-basis .2s; z-index:300; }
+  .ds-rail.is-collapsed{ --rail-w:60px; }
+  .ds-rail__top{ display:flex; align-items:center; gap:8px; padding:13px 16px; height:54px;
+    border-bottom:1px solid var(--line,#eee); white-space:nowrap; flex:0 0 auto; }
+  .ds-rail__logo{ font-size:15px; font-weight:800; letter-spacing:-0.3px; color:var(--ink,#111827); }
+  .ds-rail__toggle{ margin-left:auto; border:none; background:transparent; color:var(--ink-soft,#6B7280); cursor:pointer; font-size:16px; width:28px; height:28px; border-radius:8px; line-height:1; }
+  .ds-rail__toggle:hover{ background:var(--rice-deep,#F3F4F6); color:var(--ink,#111827); }
+  .ds-rail__nav{ flex:1 1 auto; overflow-y:auto; padding:10px 8px; }
+  /* 이동된 #tabs → 세로 네비 (China: .tabs > button, 활성 .on) */
+  .ds-rail .tabs{ display:flex !important; flex-direction:column; gap:2px; background:transparent !important;
+    border:none !important; padding:0 !important; margin:0 !important; border-radius:0 !important; }
+  .ds-rail .tabs button{ display:flex !important; align-items:center; gap:10px; width:100%;
+    justify-content:flex-start; text-align:left; padding:10px 12px !important; margin:0 !important;
+    border:none !important; border-left:3px solid transparent !important; border-radius:9px !important;
+    font-size:13px !important; line-height:1.25 !important; color:var(--ink-soft,#6B7280) !important;
+    background:transparent !important; white-space:nowrap; cursor:pointer; box-shadow:none !important; }
+  .ds-rail .tabs button:hover{ background:var(--rice-deep,#F3F4F6) !important; color:var(--ink,#111827) !important; }
+  .ds-rail .tabs button.on{ background:var(--gold-shadow,rgba(217,119,6,.10)) !important; color:var(--gold-deep,#B45309) !important;
+    font-weight:700; border-left-color:var(--gold,#D97706) !important; }
+  .ds-rail.is-collapsed .ds-rail__logo{ display:none; }
+  .ds-rail.is-collapsed .tabs button{ font-size:0 !important; justify-content:center; padding:11px 0 !important; border-left-width:0 !important; }
+  .ds-main{ flex:1 1 auto; min-width:0; padding:16px 22px 48px; }
+  .ds-main > header{ position:sticky; top:0; z-index:100; background:var(--bg,#F1F1F1); }
+  /* 표도 함께 확대 + 작은 표 가독성 바닥값(넓은 표는 래퍼가 스크롤) */
+  .ds-main table{ font-size:12.5px !important; }
+  /* 콘텐츠 확대 컨트롤 */
+  .ds-zoom{ position:fixed; right:18px; bottom:18px; z-index:500; display:flex; align-items:center; gap:4px;
+    background:var(--rice-paper,#fff); border:1px solid var(--line,#e5e7eb); border-radius:9999px;
+    box-shadow:0 4px 14px rgba(0,0,0,.12); padding:5px 8px; }
+  .ds-zoom button{ border:none; background:var(--rice-deep,#F3F4F6); color:var(--ink,#111827);
+    width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:15px; font-weight:700; line-height:1; }
+  .ds-zoom button:hover{ background:var(--gold-shadow,rgba(217,119,6,.10)); color:var(--gold-deep,#B45309); }
+  .ds-zoom .v{ min-width:50px; text-align:center; font-size:12px; color:var(--ink,#111827); }
+  .ds-zoom .lab{ font-size:10px; color:var(--ink-soft,#6B7280); padding-left:4px; }
+  body{ overflow-x:auto; }
+</style>
+<script id="dsShellScript">
+(function(){
+  function reorg(){
+    if(document.getElementById('dsShell')) return;
+    var wrap = document.querySelector('.wrap');
+    var tabs = document.getElementById('tabs');
+    if(!wrap || !tabs){ console.warn('[shell] 재배치 대상 누락'); return; }
+    var shell = document.createElement('div'); shell.className='ds-shell'; shell.id='dsShell';
+    var rail = document.createElement('aside'); rail.className='ds-rail'; rail.id='dsRail';
+    var main = document.createElement('div'); main.className='ds-main';
+    rail.innerHTML = '<div class="ds-rail__top"><span class="ds-rail__logo">🇨🇳 AD.DASH</span>'
+      + '<button class="ds-rail__toggle" id="dsRailToggle" title="메뉴 접기/펼치기">☰</button></div>';
+    var nav = document.createElement('nav'); nav.className='ds-rail__nav'; rail.appendChild(nav);
+    nav.appendChild(tabs);                                   // #tabs 통째 → 레일 (위임 리스너 유지)
+    while(wrap.firstChild){ main.appendChild(wrap.firstChild); }  // header·필터·콘텐츠 → main
+    document.body.insertBefore(shell, wrap);
+    shell.appendChild(rail); shell.appendChild(main);
+    wrap.style.display = 'none';                             // 빈 wrap 숨김
+    function fireResize(){ try{ window.dispatchEvent(new Event('resize')); }catch(_){} }
+    var tg = document.getElementById('dsRailToggle');
+    if(tg) tg.addEventListener('click', function(){ rail.classList.toggle('is-collapsed'); setTimeout(fireResize, 240); });
+    if(location.hash.indexOf('collapsed') >= 0) rail.classList.add('is-collapsed');
+    // 콘텐츠 확대 — 기준(100%) = 1.18배 (JP와 동일)
+    var BASE = 1.18, zoom = 1.0;
+    var m = location.hash.match(/zoom=(\d+)/); if(m) zoom = Math.min(1.6, Math.max(0.7, parseInt(m[1],10)/100));
+    function applyZoom(){ main.style.zoom = (BASE*zoom).toFixed(3); var vv=document.getElementById('dsZoomVal'); if(vv) vv.textContent=Math.round(zoom*100)+'%'; setTimeout(fireResize, 60); }
+    var zc = document.createElement('div'); zc.className='ds-zoom';
+    zc.innerHTML = '<span class="lab">콘텐츠</span><button id="dsZoomOut" title="축소">−</button>'
+      + '<span class="v" id="dsZoomVal">100%</span><button id="dsZoomIn" title="확대">+</button>';
+    document.body.appendChild(zc);
+    document.getElementById('dsZoomOut').addEventListener('click', function(){ zoom=Math.max(0.7,Math.round((zoom-0.05)*100)/100); applyZoom(); });
+    document.getElementById('dsZoomIn').addEventListener('click', function(){ zoom=Math.min(1.6,Math.round((zoom+0.05)*100)/100); applyZoom(); });
+    applyZoom();
+    console.log('[shell] 중국 좌측 레일 재배치 완료');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', reorg);
+  else reorg();
+})();
+</script>
 </body>
 </html>
