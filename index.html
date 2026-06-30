@@ -3828,8 +3828,7 @@ setTimeout(syncSheets, 500);
   .ds-main{ flex:1 1 auto; min-width:0; padding:16px 22px 48px; }
   /* 헤더는 자체 레드+골드 그라데이션 배경 보유 → sticky만, 배경 override 금지(회색 덮임 버그 수정) */
   .ds-main > header{ position:sticky; top:0; z-index:100; }
-  /* 표도 함께 확대 + 작은 표 가독성 바닥값(넓은 표는 래퍼가 스크롤) */
-  .ds-main table{ font-size:12.5px !important; }
+  /* 표는 native 12px 유지(확대 배율로 함께 커짐) · 넓은 표는 .tbox{overflow:auto}가 스크롤 처리 */
   /* 콘텐츠 확대 컨트롤 */
   .ds-zoom{ position:fixed; right:18px; bottom:18px; z-index:500; display:flex; align-items:center; gap:4px;
     background:var(--rice-paper,#fff); border:1px solid var(--line,#e5e7eb); border-radius:9999px;
@@ -3863,6 +3862,11 @@ setTimeout(syncSheets, 500);
     var tg = document.getElementById('dsRailToggle');
     if(tg) tg.addEventListener('click', function(){ rail.classList.toggle('is-collapsed'); setTimeout(fireResize, 240); });
     if(location.hash.indexOf('collapsed') >= 0) rail.classList.add('is-collapsed');
+    // 탭 딥링크 — #tab=kol/koc/monthly 진입 시 해당 탭 활성 (위임 핸들러로 전환)
+    var tm = location.hash.match(/tab=([a-z0-9_]+)/i);
+    if(tm){ var tb = document.querySelector('#tabs button[data-t="'+tm[1]+'"]'); if(tb) tb.click(); }
+    var sm = location.hash.match(/sub=([a-z0-9_]+)/i);
+    if(sm){ document.querySelectorAll('.subtabs button[data-s="'+sm[1]+'"]').forEach(function(b){ if(b.offsetParent!==null) b.click(); }); }
     // 콘텐츠 확대 — 기준(100%) = 1.18배 (JP와 동일)
     var BASE = 1.18, zoom = 1.0;
     var m = location.hash.match(/zoom=(\d+)/); if(m) zoom = Math.min(1.6, Math.max(0.7, parseInt(m[1],10)/100));
