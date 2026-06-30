@@ -3826,7 +3826,8 @@ setTimeout(syncSheets, 500);
   .ds-rail.is-collapsed .ds-rail__logo{ display:none; }
   .ds-rail.is-collapsed .tabs button{ font-size:0 !important; justify-content:center; padding:11px 0 !important; border-left-width:0 !important; }
   .ds-main{ flex:1 1 auto; min-width:0; padding:16px 22px 48px; }
-  .ds-main > header{ position:sticky; top:0; z-index:100; background:var(--bg,#F1F1F1); }
+  /* 헤더는 자체 레드+골드 그라데이션 배경 보유 → sticky만, 배경 override 금지(회색 덮임 버그 수정) */
+  .ds-main > header{ position:sticky; top:0; z-index:100; }
   /* 표도 함께 확대 + 작은 표 가독성 바닥값(넓은 표는 래퍼가 스크롤) */
   .ds-main table{ font-size:12.5px !important; }
   /* 콘텐츠 확대 컨트롤 */
