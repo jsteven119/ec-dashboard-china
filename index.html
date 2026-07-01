@@ -2596,7 +2596,14 @@ function renderTmallInflow(){
     let msg=`<b>상위 5개 카테고리 총 UV의 <span style="color:var(--gong-red)">${nonSearchPct}%</span>가 非搜索 유입</b> (샤오홍슈·라이브·추천·UDRTA 등 · 검색 외 유입).`;
     msg+=`<br>KOL 협업: <b>${withKol.length}개 카테고리</b>에 있음 (총 ${withKol.reduce((s,c)=>s+c._kolLinks.length,0)}건).`;
     if(withoutKol.length) msg+=` <b style="color:var(--accent)">협업 없이 매출 발생</b>: ${withoutKol.map(c=>c.카테고리).join(', ')} — 검색·브랜드파워·타오바오 자연 유입 강함`;
-    msg+=`<br><span style="color:var(--ink-soft);font-size:10.5px">※ 채널별(샤오홍슈/라이브/추천/UDRTA 등) 세부 UV 분해는 티몰 시트에 채널 컬럼 추가 필요. 현재는 <b>搜索 vs 非搜索</b> 이분법만 가능</span>`;
+    // 5분할 준비됨 배지 — 시트 채널 UV 컬럼 추가 시 자동 4~5분할 전환 (2026-07-02 · china-team 리뷰 액션 ②)
+    const chDef=DATA.tmallChannelDef||{};
+    const chCount=Object.keys(chDef).length;
+    if(chCount>0){
+      msg+=`<br><span style="display:inline-block;margin-top:6px;padding:5px 10px;background:linear-gradient(90deg,rgba(212,175,55,0.15) 0%,rgba(30,86,49,0.10) 100%);border-left:3px solid var(--gold);border-radius:3px;font-size:10.5px;color:var(--ink)">📊 <b>5분할 준비됨 · 채널 정의 ${chCount}개 감지</b> — 티몰 시트에 채널별 UV 컬럼(小红书·直播·搜索·再访问·付费推广 5카테고리) 추가 시 자동 stacked bar 전환 · 하단 「Tmall 内部流量渠道定义」 참조 사전 확인</span>`;
+    } else {
+      msg+=`<br><span style="color:var(--ink-soft);font-size:10.5px">※ 채널별(샤오홍슈/라이브/추천/UDRTA 등) 세부 UV 분해는 티몰 시트에 채널 컬럼 추가 필요. 현재는 <b>搜索 vs 非搜索</b> 이분법만 가능</span>`;
+    }
     insight.innerHTML=msg;
   }
 }
@@ -2714,12 +2721,40 @@ function renderTmallROITable(){
   }).join('');
 }
 // ⑥ 채널 정의 참조 사전 (Tmall_Map 광고명 41개 정의)
+// Tmall_Map 광고명(41개) → 5개 채널 카테고리 자동 분류 (2026-07-02 · china-team 리뷰 액션 ②)
+// 이유: 시트에 채널별 UV 컬럼 추가 시 자동 4~5분할 stacked bar로 확장 가능하도록 준비
+function _classifyTmallChannel(adName, desc){
+  const s=(adName+' '+desc).toLowerCase();
+  // 우선순위: 명시적 키워드 → 넓은 키워드
+  if(/udrta|小红|샤오|xhs/i.test(s)) return {cat:'小红书 (샤오홍슈)',key:'xhs',color:'#A52A2A'};
+  if(/直播|라이브|zhibo|live/i.test(s)) return {cat:'直播 (라이브)',key:'live',color:'#B8941F'};
+  if(/搜索|search|검색|关键词|品牌词/i.test(s)) return {cat:'搜索 (검색)',key:'search',color:'#4A6670'};
+  if(/回访|再营销|retarget|추천|推荐|老客|访客/i.test(s)) return {cat:'再访问·추천',key:'retarget',color:'#6B8C99'};
+  if(/88vip|vip|会员|付费|付费推广|万相|钻展|直通车/i.test(s)) return {cat:'付费推广 (유료광고)',key:'paid',color:'#1E5631'};
+  return {cat:'其他 (기타)',key:'other',color:'#8B7A65'};
+}
 function renderTmallChannelDefRef(){
   const el=document.getElementById('tmallChannelDefRef'); if(!el) return;
   const def=DATA.tmallChannelDef||{};
   const keys=Object.keys(def);
   if(!keys.length){el.innerHTML='<div style="color:var(--grey)">Tmall_Map 시트 매핑 사전 대기 중...</div>';return;}
-  el.innerHTML=keys.map(k=>`<div style="padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px"><b style="color:var(--gong-red-deep)">${k}</b><br><span style="color:var(--ink-soft);font-size:10.5px">${def[k]}</span></div>`).join('');
+  // 5개 카테고리로 그룹핑
+  const groups={};
+  keys.forEach(k=>{
+    const cls=_classifyTmallChannel(k,def[k]||'');
+    if(!groups[cls.key])groups[cls.key]={cat:cls.cat,color:cls.color,items:[]};
+    groups[cls.key].items.push({name:k,desc:def[k]});
+  });
+  // 정렬: xhs/live/paid/search/retarget/other 순
+  const order=['xhs','live','paid','search','retarget','other'];
+  const sorted=order.filter(k=>groups[k]).map(k=>groups[k]);
+  el.innerHTML=sorted.map(g=>`
+    <div style="grid-column:1/-1;margin-top:10px;padding:8px 12px;background:${g.color}18;border-left:4px solid ${g.color};border-radius:4px">
+      <b style="color:${g.color};font-size:13px;font-family:'Noto Serif SC',serif">${g.cat}</b>
+      <span style="color:var(--ink-soft);font-size:10.5px;margin-left:8px">${g.items.length}개 광고명</span>
+    </div>
+    ${g.items.map(it=>`<div style="padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px;border-left:3px solid ${g.color}"><b style="color:var(--gong-red-deep);font-size:11px">${it.name}</b><br><span style="color:var(--ink-soft);font-size:10.5px">${it.desc}</span></div>`).join('')}
+  `).join('');
 }
 
 // ============ LIVE 탭 (直播 라이브 광고 회차별 성과) — 2026-07-01 신설 ============
