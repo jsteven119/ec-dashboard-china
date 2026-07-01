@@ -4786,5 +4786,83 @@ setTimeout(syncSheets, 500);
   else reorg();
 })();
 </script>
+<!-- ===== 디자인 테마: NOCTURNE (다크 인디고) — 라이브 고정 적용 ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style id="dsThemeNocturne">
+/* ---- Nocturne 토큰 (다크 인디고) ---- */
+body.th-nocturne{ --bg:#0F1117; --card:#171A22; --rice-paper:#141620; --rice-deep:#1D212B; --ink:#E7E9EE; --ink-soft:#9AA0AD; --grey:#6B7280; --line:#262B36; --line-soft:#20242E; --line-ink:#333A47; --gold:#818CF8; --gold-deep:#A5B4FC; --gold-light:#C7D2FE; --gold-shadow:rgba(129,140,248,.14); --gong-red:#22D3EE; --gong-red-deep:#67E8F9; }
+body.th-nocturne{ background:var(--bg)!important; }
+body.th-nocturne .wrap, body.th-nocturne .ds-main{ background:var(--bg)!important; }
+body.th-nocturne .panel, body.th-nocturne .card, body.th-nocturne .kpi, body.th-nocturne .mcard,
+body.th-nocturne .alert-card, body.th-nocturne .best-card, body.th-nocturne .tbox, body.th-nocturne details.glossary{
+  background:var(--card)!important; border:1px solid var(--line)!important; border-radius:14px!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)!important;
+  transition:box-shadow .18s ease, transform .18s ease;
+}
+body.th-nocturne .panel:hover, body.th-nocturne .kpi:hover, body.th-nocturne .mcard:hover, body.th-nocturne .best-card:hover{
+  transform:translateY(-1px); box-shadow:0 12px 30px rgba(0,0,0,.10)!important;
+}
+/* 폰트 (아이콘 제외 — 컨테이너 지정) */
+body.th-nocturne, body.th-nocturne h1, body.th-nocturne h3, body.th-nocturne .kpi, body.th-nocturne .panel,
+body.th-nocturne .card, body.th-nocturne table, body.th-nocturne button, body.th-nocturne select,
+body.th-nocturne input, body.th-nocturne .note, body.th-nocturne .badge, body.th-nocturne .tag, body.th-nocturne .alert-card{
+  font-family:'Pretendard','Inter',system-ui,-apple-system,'Malgun Gothic',sans-serif !important;
+  letter-spacing:-0.1px;
+}
+body.th-nocturne .kpi .val, body.th-nocturne .val{ font-family:'Inter','Pretendard',sans-serif !important; font-feature-settings:'tnum'; letter-spacing:-0.4px; }
+/* 레일 */
+body.th-nocturne .ds-rail{ background:var(--rice-paper)!important; border-right:1px solid var(--line)!important; }
+body.th-nocturne .ds-rail__logo{ color:var(--ink)!important; }
+body.th-nocturne .ds-rail .tabs button{ color:var(--ink-soft)!important; background:transparent!important; font-family:'Pretendard','Inter',sans-serif!important; }
+body.th-nocturne .ds-rail .tabs button:hover{ background:var(--rice-deep)!important; color:var(--ink)!important; }
+body.th-nocturne .ds-rail .tabs button.on{ background:color-mix(in srgb, var(--gold) 15%, transparent)!important; color:var(--gold-deep)!important; border-left-color:var(--gold)!important; }
+/* 표 */
+body.th-nocturne table th{ background:var(--rice-deep)!important; color:var(--ink-soft)!important; border-bottom:1px solid var(--line)!important; }
+body.th-nocturne table td{ color:var(--ink)!important; border-bottom:1px solid var(--line-soft)!important; }
+body.th-nocturne tbody tr:hover{ background:color-mix(in srgb, var(--gold) 8%, transparent)!important; }
+/* 확대 컨트롤 */
+body.th-nocturne .ds-zoom{ background:var(--card)!important; border-color:var(--line)!important; }
+body.th-nocturne .ds-zoom .v{ color:var(--ink)!important; }
+body.th-nocturne .ds-zoom button{ background:var(--rice-deep)!important; color:var(--ink)!important; }
+/* 헤더 */
+body.th-nocturne header{ border-radius:16px!important; box-shadow:0 6px 24px rgba(0,0,0,.08)!important; overflow:hidden; background:linear-gradient(135deg,#1E2233 0%,#141726 100%)!important; border:1px solid #2A3042!important; }
+body.th-nocturne header::after{ display:none!important; }
+body.th-nocturne header, body.th-nocturne h1, body.th-nocturne header #dataFreshness, body.th-nocturne header div{ color:#E7E9EE!important; text-shadow:none!important; }
+body.th-nocturne header .badge{ background:rgba(129,140,248,.15)!important; color:#C7D2FE!important; border:1px solid rgba(129,140,248,.4)!important; }
+</style>
+<script id="dsThemeNocturneScript">
+(function(){
+  var P={text:'#9AA0AD',grid:'rgba(255,255,255,.07)',font:"'Pretendard','Inter',sans-serif",series:['#818CF8','#22D3EE','#34D399','#FBBF24','#F472B6','#60A5FA']};
+  function recolor(ch){
+    try{
+      (ch.data.datasets||[]).forEach(function(ds,i){
+        var col=P.series[i%P.series.length];
+        var isLine = ds.type==='line' || (ch.config&&ch.config.type==='line');
+        if(isLine){ ds.borderColor=col; if(typeof ds.backgroundColor!=='object'||ds.backgroundColor==null) ds.backgroundColor=col+'22'; ds.pointBackgroundColor=col; ds.pointBorderColor=col; }
+        else if(Array.isArray(ds.backgroundColor)){ ds.backgroundColor=ds.backgroundColor.map(function(_,j){return P.series[j%P.series.length];}); ds.borderColor=col; }
+        else { ds.backgroundColor=col; ds.borderColor=col; }
+      });
+      if(ch.options&&ch.options.scales){ Object.keys(ch.options.scales).forEach(function(k){ var s=ch.options.scales[k]; if(!s)return; s.ticks=s.ticks||{}; s.ticks.color=P.text; s.grid=s.grid||{}; s.grid.color=P.grid; }); }
+      if(ch.options&&ch.options.plugins&&ch.options.plugins.legend){ ch.options.plugins.legend.labels=ch.options.plugins.legend.labels||{}; ch.options.plugins.legend.labels.color=P.text; }
+    }catch(e){}
+  }
+  function hook(){
+    if(!window.Chart) return;
+    try{ Chart.defaults.color=P.text; Chart.defaults.borderColor=P.grid; if(Chart.defaults.font) Chart.defaults.font.family=P.font; }catch(e){}
+    if(!Chart.prototype.__thWrapped){ var o=Chart.prototype.update; Chart.prototype.update=function(){ try{ recolor(this); }catch(e){} return o.apply(this, arguments); }; Chart.prototype.__thWrapped=true; }
+    document.querySelectorAll('canvas').forEach(function(cv){ var ch=Chart.getChart&&Chart.getChart(cv); if(ch){ recolor(ch); try{ch.update('none');}catch(e){} } });
+  }
+  function apply(){
+    document.body.classList.add('th-nocturne');
+    var n=0; hook();
+    var iv=setInterval(function(){ hook(); if(++n>15) clearInterval(iv); }, 900);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+})();
+</script>
 </body>
 </html>
