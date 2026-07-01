@@ -2481,6 +2481,12 @@ function renderMonthly(){
   safe(renderMonthlyTrendInterp,'renderMonthlyTrendInterp');
 }
 
+// ============================================================
+// [SPLIT: js/tmall.js START] — 향후 이 블록을 별도 파일로 이동
+// 계획서: SPLIT_PLAN.md · Phase 2 우선순위 2
+// 의존: STATE.DATA, STATE.brand, STATE.charts, globalFx, getActiveMonths(), _emptyDataNotice, _showCanvasEmpty, WON_BOTH, F2, FMT, COL, Chart
+// ============================================================
+
 // ========== TMALL 탭 ==========
 function renderTmall(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
@@ -2789,6 +2795,16 @@ function renderTmallChannelDefRef(){
   `).join('');
 }
 
+// ============================================================
+// [SPLIT: js/tmall.js END]
+// ============================================================
+
+// ============================================================
+// [SPLIT: js/live.js START] — 향후 이 블록을 별도 파일로 이동
+// 계획서: SPLIT_PLAN.md · Phase 2 우선순위 1 (완전 격리 · 가장 안전)
+// 의존: STATE.DATA, STATE.brand, STATE.tab, STATE.charts, globalFx, globalDateFrom/To, getCampaignsInRange, _emptyDataNotice, _showCanvasEmpty, WON_BOTH, FMT, COL, Chart
+// ============================================================
+
 // ============ LIVE 탭 (直播 라이브 광고 회차별 성과) — 2026-07-01 신설 ============
 // 현재 브랜드 + 기간 필터 반영한 라이브 회차 리스트
 function _liveRows(){
@@ -2962,6 +2978,10 @@ function renderLiveTable(){
     return `<tr><td style="text-align:center">${i===0?'👑 ':''}${r.회차||'-'}</td><td style="text-align:center">${r.방송일||'-'}</td><td>${r.호스트||'-'}</td><td style="text-align:right">${r.시청UV>0?fmt(r.시청UV):'-'}</td><td style="text-align:right">${r.판매상품>0?fmt(r.판매상품):'-'}</td><td style="text-align:right">￥${fmt(r.매출)}<div class="krw-sub" style="text-align:right">₩${fmt(r.매출*fx)}</div></td><td style="text-align:right">${r.객단가>0?'￥'+fmt(r.객단가):'-'}</td><td style="text-align:right">${r.팬유입>0?fmt(r.팬유입):'-'}</td><td style="text-align:right">${r.광고비>0?'￥'+fmt(r.광고비)+`<div class="krw-sub" style="text-align:right">₩${fmt(r.광고비*fx)}</div>`:'-'}</td><td style="text-align:center;color:${roiColor};font-weight:700">${r.광고비>0?roiPct+'%':'-'}</td></tr>`;
   }).join('');
 }
+
+// ============================================================
+// [SPLIT: js/live.js END]
+// ============================================================
 
 // ============ 월별 매체 통합안 — 종합 배너 + 매체 카드 ============
 // SVG 스파크라인 (월별 값 → 인라인 line + 영역)
@@ -4336,6 +4356,9 @@ function processTmallData(dailyRaw, mapRaw, kolAllRows){
   const kolMatched = Object.values(join.TOTAL||{}).reduce((s,e)=>s+e.kolCount,0);
   console.info(`[tmall] daily=${daily.length}건, 카테고리=${catCount}개, KOL 조인=${kolMatched}건, 매핑사전=${Object.keys(codeToLine).length}건`);
 }
+// ============================================================
+// [SPLIT: js/live.js DATA-HELPERS START]
+// ============================================================
 // ===== 라이브 광고(直播) 데이터 정규화 =====
 // 시트 스키마 불명확 → pickLiveField helper로 관대하게 매칭. 시트 헤더 어떤 형태든 자동 인식
 function _pickLiveField(r, keys){
@@ -4382,6 +4405,10 @@ function processLiveData(liveRaw){
   const brands=new Set(live.map(r=>r.브랜드));
   console.info(`[live] ${live.length}회 · 브랜드 ${[...brands].join('/')} · 시트 컬럼 ${Object.keys(liveRaw[0]||{}).slice(0,8).join('|')}`);
 }
+// ============================================================
+// [SPLIT: js/live.js DATA-HELPERS END]
+// ============================================================
+
 // 한국어/중국어 컬럼 fallback — 시트에 새 컬럼이 한·중 중 어떤 이름으로 들어와도 인식
 // pickNum — 정확 매칭 우선, 실패 시 case-insensitive 부분 매칭 (시트 결합 헤더 대응)
 // 예: r['종합CPUV'] = undefined일 때 r['综合cpuv 종합CPUV']에서 자동 추출
