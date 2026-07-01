@@ -156,6 +156,20 @@
   .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:18px 0}
   /* ===== 베스트 hero 카드 (어떤 게 좋은지 한눈에) ===== */
   .best-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:8px 0 22px}
+  /* Tmall Top 3 3원 분해 그리드 (트래픽/전환/객단가) */
+  .tmall-top3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:12px 0}
+  .tmall-top3 .t3-col{padding:12px;background:var(--card);border:1px solid var(--line);border-radius:6px}
+  .tmall-top3 .t3-col h4{margin:0 0 6px 0;font-size:14px;font-weight:800;font-family:'Noto Serif SC',serif}
+  .tmall-top3 .t3-note{font-size:10.5px;color:var(--grey);margin-bottom:10px;font-style:italic}
+  .tmall-top3 .t3-row{margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+  .tmall-top3 .t3-row:last-child{border-bottom:none;margin-bottom:0}
+  .tmall-top3 .t3-rank{display:inline-block;font-weight:800;font-size:11px;color:var(--grey);margin-right:6px}
+  .tmall-top3 .t3-name{display:inline-block;font-weight:700;font-size:12.5px;color:var(--ink)}
+  .tmall-top3 .t3-bar{position:relative;height:22px;background:rgba(139,122,101,0.10);border-radius:3px;margin-top:6px}
+  .tmall-top3 .t3-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;transition:width .3s}
+  .tmall-top3 .t3-val{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:var(--ink);z-index:2;text-shadow:0 0 3px rgba(255,255,255,0.7)}
+  .tmall-top3 .t3-sub{font-size:10px;color:var(--ink-soft);margin-top:4px}
+  .tmall-top3 .t3-hero-note{grid-column:1/-1;padding:10px 14px;background:linear-gradient(90deg,rgba(212,175,55,0.10) 0%,rgba(30,86,49,0.08) 100%);border-left:3px solid var(--gold);border-radius:4px;font-size:12px;color:var(--ink);margin-top:4px}
   .best-card{
     background:linear-gradient(135deg,#FFFDF5 0%,rgba(212,175,55,0.10) 100%);
     border:1px solid var(--line);border-top:3px solid var(--gold);
@@ -882,47 +896,49 @@
     <!-- ① 상단 종합 KPI -->
     <div class="kpis" id="tmallKpis"></div>
 
-    <!-- ② 왜 이렇게 들어오는지 (Traffic Source Attribution) -->
+    <!-- ② 从哪进来 (어디서 들어오는지 · Inflow Type) -->
     <div class="panel full">
-      <h3>🔎 왜 이렇게 들어오는지 <span class="hint-inline">트래픽 급증/급감 원인</span></h3>
-      <div class="note">상위 매출 카테고리의 월별 <b>총 방문자</b>(실선) · <b>검색 유입 방문자</b>(점선) 라인. 격차 = <b>비검색 유입</b>(샤오홍슈·추천·라이브 등) · <b style="color:var(--gong-red)">🔴 마커</b> = KOL/KOC 게시일 (급증 지점과 시점 매칭 확인)</div>
-      <div class="cwrap tall"><canvas id="cTmallTraffic"></canvas></div>
-      <div id="tmallTrafficInsight" class="insight" style="margin-top:10px"></div>
+      <h3>🔎 从哪进来 <span class="ko-sub">(어디서 들어오는지)</span> <span class="hint-inline">유입 유형별 분해</span></h3>
+      <div class="note"><b class="cn">柱=各类目 每月 UV(搜索 vs 非搜索) · 非搜索=小红书+推荐+直播+淘客+UDRTA 등</b><br><span class="ko">막대 = 상위 매출 카테고리의 월별 UV → <b>搜索 (검색 유입)</b> vs <b>非搜索 (샤오홍슈·라이브·추천·UDRTA 등)</b> · 카테고리 아래 KOL/KOC 게시 건수 하이라이트</span></div>
+      <div class="cwrap tall"><canvas id="cTmallInflow"></canvas></div>
+      <div id="tmallInflowInsight" class="insight" style="margin-top:10px"></div>
     </div>
 
-    <!-- ③ 왜 팔리는지 -->
+    <!-- ③ 为什么畅销 (왜 팔리는지 · 3원 Top 3 각 축별) -->
+    <div class="panel full">
+      <h3>💰 为什么畅销 <span class="ko-sub">(왜 팔리는지)</span> — Top 3 <span class="hint-inline">트래픽·전환·객단가 각 축별</span></h3>
+      <div class="note"><b class="cn">流量·转化·客单价 各轴的 Top 3 · 매출 결정 원인이 어느 축인지 카테고리 단위로 즉시 판별</b><br><span class="ko"><b>流量 (트래픽)</b> — 방문자 수 Top 3 · <b>转化 (전환)</b> — 결제 전환율 Top 3 · <b>客单价 (객단가)</b> — UV당 매출 Top 3. 세 축 모두 겹치는 카테고리 = 핵심 성공</span></div>
+      <div id="tmallSalesTop3" class="tmall-top3"></div>
+    </div>
+
+    <!-- ④ 매출 상하위 카드 -->
     <div class="grid">
       <div class="panel full">
-        <h3>💰 왜 팔리는지 — 매출 3원 분해 <span class="hint-inline">트래픽·전환·객단가</span></h3>
-        <div class="note">X=방문자 수(로그) · Y=결제 전환율(%) · 점 크기=결제 완료 금액 · 우상=<b style="color:var(--green)">핵심 성공</b>(고트래픽·고전환) · 우하=<b style="color:var(--accent)">인기 후크 실패</b>(트래픽만) · 좌상=충성 고객(저트래픽·고전환) · 좌하=방치</div>
-        <div class="cwrap tall"><canvas id="cTmallSalesQuadrant"></canvas></div>
-      </div>
-      <div class="panel full">
-        <h3>🥇 매출 상위 상품 — 왜 팔렸나</h3>
-        <div class="note">결제 완료 금액 상위 5개 카테고리 · 각 카드에 판매 원인 라벨(트래픽 견인/전환 견인/객단가 견인) + KOL 협업 건수·광고비·<b>ROI 실측</b> 표시</div>
+        <h3>🥇 畅销 <span class="ko-sub">(매출 상위)</span> — 왜 팔렸나</h3>
+        <div class="note"><b class="cn">销售额 Top 5 · 판매 원인 라벨(流量/转化/客单价 견인) + KOL协作 (KOL 협업 건수·비용·实测ROI)</b></div>
         <div id="tmallBest" class="best-grid"></div>
       </div>
-    </div>
-
-    <!-- ④ 왜 안 팔리는지 -->
-    <div class="grid">
       <div class="panel full">
-        <h3>🚨 왜 안 팔리는지 — 하위 매출 상품</h3>
-        <div class="note">결제 완료 금액 하위 카테고리 · 원인 라벨(트래픽 부족/전환 실패/이탈률 높음/검색 유입만 결제 X)</div>
+        <h3>🚨 滞销 <span class="ko-sub">(매출 하위)</span> — 왜 안 팔리는지</h3>
+        <div class="note"><b class="cn">销售额 Bottom · 원인 라벨(流量不足/转化失败/仅搜索无结算)</b></div>
         <div id="tmallWorst" class="best-grid"></div>
       </div>
-      <div class="panel full">
-        <h3>📉 이탈률 × 매출 상관 <span class="hint-inline">이탈률 높은데 매출 있는지</span></h3>
-        <div class="note">X=상품 상세페이지 이탈률(%) · Y=결제 완료 금액(log) · 좌상=이탈 낮고 매출 큼(좋음) · 우하=이탈 크고 매출 없음(개선 필요)</div>
-        <div class="cwrap"><canvas id="cTmallBounce"></canvas></div>
-      </div>
     </div>
 
-    <!-- ⑤ 상품 투입률 (KOL/KOC 연계) -->
+    <!-- ⑤ 商品投放率 (상품 투입률 · KOL/KOC 연계) -->
     <div class="panel full">
-      <h3>🎯 상품 투입률 — KOL/KOC 광고비 대비 티몰 매출</h3>
-      <div class="note">카테고리별 <b>ROI = 티몰 결제 매출 ÷ KOL 협업 광고비</b>. 정렬: ROI 높은 순 · 협업 있는 카테고리만 표시 · <b style="color:var(--green)">ROI ≥ 500%</b> 매우 좋음 · <b style="color:var(--accent)">ROI &lt; 100%</b> 적자</div>
+      <h3>🎯 商品投放率 <span class="ko-sub">(상품 투입률)</span> — KOL/KOC 광고비 대비 티몰 매출</h3>
+      <div class="note"><b class="cn">类目 ROI = Tmall结算销售额 ÷ KOL协作广告费. 排序: ROI 高→低 · 协作有的类目만 표시</b><br><span class="ko">ROI ≥ 500% <b style="color:var(--green)">매우 좋음</b> · ROI &lt; 100% <b style="color:var(--accent)">적자</b> · 광고비/매출 원화 병기 (환율 1CNY ≈ ₩195)</span></div>
       <div class="tbox" style="max-height:520px"><table id="tmallROITable"><thead></thead><tbody></tbody></table></div>
+    </div>
+
+    <!-- ⑥ 채널 정의 참조 사전 -->
+    <div class="panel full">
+      <details>
+        <summary style="cursor:pointer;font-weight:700;font-size:13px;color:var(--gong-red-deep)">📚 Tmall 内部流量渠道定义 <span class="ko-sub">(내부 유입 채널 정의)</span> — 41개 · 클릭해서 펼치기</summary>
+        <div class="note" style="margin-top:8px"><b class="cn">阿里妈妈广告名 → 中文说明 (韩语备注) · 티몰 시트의 광고명 컬럼 → 채널 정의 매핑</b></div>
+        <div id="tmallChannelDefRef" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-top:10px;font-size:11.5px"></div>
+      </details>
     </div>
   </div>
 
@@ -2401,12 +2417,12 @@ function renderTmall(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
   safe(tmallCoverageBadge,'tmallCoverageBadge');
   safe(tmallKpis,'tmallKpis');
-  safe(chTmallTraffic,'chTmallTraffic');
-  safe(chTmallSalesQuadrant,'chTmallSalesQuadrant');
+  safe(renderTmallInflow,'renderTmallInflow');
+  safe(renderTmallSalesTop3,'renderTmallSalesTop3');
   safe(renderTmallBest,'renderTmallBest');
   safe(renderTmallWorst,'renderTmallWorst');
-  safe(chTmallBounce,'chTmallBounce');
   safe(renderTmallROITable,'renderTmallROITable');
+  safe(renderTmallChannelDefRef,'renderTmallChannelDefRef');
 }
 // 현재 브랜드의 티몰 카테고리 목록 (기간 필터 반영: getActiveMonths)
 function _tmallCategoriesForBrand(){
@@ -2475,138 +2491,135 @@ function tmallKpis(){
   const kolRevRatio = totalPay>0 ? (kolRevenue/totalPay*100) : 0;
   const nonSearchPct = totalVisitor>0 ? ((totalVisitor-totalSearchVisitor)/totalVisitor*100) : 0;
   const fmt = n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
   const cards=[
-    {lab:'총 방문자',hint:'전체',val:fmt(totalVisitor),sub:'브랜드 스토어 총 UV'},
-    {lab:'검색 유입 방문자',hint:'내부검색',val:fmt(totalSearchVisitor),sub:`전체의 ${totalVisitor>0?(totalSearchVisitor/totalVisitor*100).toFixed(0):'-'}%`},
-    {lab:'비검색 유입 비중',hint:'샤오홍슈+기타',val:nonSearchPct.toFixed(1)+'%',sub:'KOL/KOC·추천·라이브 등'},
-    {lab:'결제 완료 금액',hint:'GMV',val:'¥'+fmt(totalPay),sub:'실제 결제 매출',core:true},
-    {lab:'평균 결제 전환율',hint:'방문자÷결제',val:avgCVR.toFixed(2)+'%',sub:'방문자 중 결제 비율'},
-    {lab:'신규 구매자 비중',hint:'획득',val:newRatio.toFixed(1)+'%',sub:'첫 구매 소비자 비율'},
-    {lab:'KOL 협업 상품 매출',hint:'실측 ROI',val:kolRevRatio.toFixed(1)+'%',sub:`전체 매출의 ${kolCats.length}개 카테고리 기여`,core:true}
+    {lab:'总UV<span class="ko-sub">(총 방문자)</span>',hint:'全部',val:fmt(totalVisitor),sub:'브랜드 스토어 총 UV'},
+    {lab:'搜索UV<span class="ko-sub">(검색 유입)</span>',hint:'內搜',val:fmt(totalSearchVisitor),sub:`전체의 ${totalVisitor>0?(totalSearchVisitor/totalVisitor*100).toFixed(0):'-'}%`},
+    {lab:'非搜索UV %<span class="ko-sub">(비검색 유입)</span>',hint:'外部',val:nonSearchPct.toFixed(1)+'%',sub:'KOL·라이브·추천·UDRTA 등'},
+    {lab:'结算金额<span class="ko-sub">(결제 완료 금액)</span>',hint:'GMV',val:'￥'+fmt(totalPay)+`<div class="krw-sub">₩${fmt(totalPay*fx)}</div>`,sub:'实际结算销售额 (실제 결제 매출)',core:true},
+    {lab:'结算转化率<span class="ko-sub">(평균 결제 전환율)</span>',hint:'CVR',val:avgCVR.toFixed(2)+'%',sub:'访客中结算比例 (방문자 중 결제 비율)'},
+    {lab:'新客比例<span class="ko-sub">(신규 구매자 비중)</span>',hint:'获客',val:newRatio.toFixed(1)+'%',sub:'首次结算消费者 (첫 구매 소비자 비율)'},
+    {lab:'KOL协作销售 %<span class="ko-sub">(KOL 협업 상품 매출)</span>',hint:'实测 ★',val:kolRevRatio.toFixed(1)+'%',sub:`전체 매출의 ${kolCats.length}개 카테고리 기여`,core:true}
   ];
   el.innerHTML=cards.map(c=>{
     const cls='kpi'+(c.core?' core':'');
     return `<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div></div>`;
   }).join('');
 }
-// ② 트래픽 라인 + KOL 게시 마커
-function chTmallTraffic(){
-  destroy('cTmallTraffic');
-  if(brand==='COLORGRAM')return;
+// ② 유입 유형별 stacked bar (搜索 vs 非搜索) — 카테고리 × 월
+// 사용자 요청 (2026-07-01): "왜 이렇게 들어오는지"→"어디서 들어오는지" 유형별 분리 · 표+그래프 여백 개선
+function renderTmallInflow(){
+  destroy('cTmallInflow');
+  if(brand==='COLORGRAM'){_showCanvasEmpty('cTmallInflow','COLORGRAM 티몰 데이터 없음','시트 보완 필요');return;}
   const cats=_tmallCategoriesForBrand();
-  if(!cats.length){_showCanvasEmpty('cTmallTraffic','데이터 추가 필요','기간 확장 또는 티몰 시트 최신화');return;}
+  if(!cats.length){_showCanvasEmpty('cTmallInflow','데이터 추가 필요','기간 확장 또는 티몰 시트 최신화');return;}
   const top5 = cats.slice(0,5);
-  const activeMonths = getActiveMonths();
-  const labels = activeMonths.map(m=>m+'월');
-  const palette=[COL.red,COL.gold,COL.blue,COL.green,COL.purple];
-  const datasets=[];
-  top5.forEach((cat,i)=>{
-    const color=palette[i%palette.length];
-    const totalLine = activeMonths.map(m=>{const x=cat._monthly.find(mm=>mm.월===m);return x?x.방문자:0;});
-    const searchLine = activeMonths.map(m=>{const x=cat._monthly.find(mm=>mm.월===m);return x?x.검색유입_방문자:0;});
-    datasets.push({label:`${cat.카테고리} — 총 방문자`,data:totalLine,borderColor:color,backgroundColor:color+'22',tension:.3,pointRadius:3});
-    datasets.push({label:`${cat.카테고리} — 검색 유입`,data:searchLine,borderColor:color,borderDash:[4,3],backgroundColor:'transparent',tension:.3,pointRadius:2});
-  });
-  // KOL 게시 마커 plugin
+  const labels = top5.map(c=>c.카테고리);
+  const searchArr = top5.map(c=>c.검색유입_방문자);
+  const nonSearchArr = top5.map(c=>Math.max(0,c.방문자-c.검색유입_방문자));
+  const kolCntArr = top5.map(c=>c._kolLinks.length);
+  const datasets=[
+    {label:'搜索 (검색 유입)',data:searchArr,backgroundColor:COL.blue+'CC',borderColor:COL.blue,borderWidth:1,stack:'uv'},
+    {label:'非搜索 · 샤오홍슈+라이브+추천+UDRTA 등',data:nonSearchArr,backgroundColor:COL.red+'CC',borderColor:COL.red,borderWidth:1,stack:'uv'}
+  ];
+  // KOL 게시 건수 하단 라벨 plugin
   const kolMarkerPlugin={id:'tmallKolMark',afterDatasetsDraw:c=>{
     try{
       const ctx=c.ctx, a=c.chartArea;
-      const marks={};
-      top5.forEach((cat,i)=>{
-        (cat._kolLinks||[]).forEach(k=>{
-          const d=_normDate(k.게시일); if(!d)return;
-          const mon=+d.slice(5,7);
-          const idx=activeMonths.indexOf(mon); if(idx<0)return;
-          const key=idx+'|'+cat.카테고리;
-          marks[key]=(marks[key]||0)+1;
-        });
-      });
       ctx.save();
-      ctx.font="bold 11px 'Noto Sans SC',sans-serif";
-      ctx.textAlign='center';
-      Object.entries(marks).forEach(([key,cnt])=>{
-        const [idxS,cat]=key.split('|');
-        const idx=+idxS;
-        const x=c.scales.x.getPixelForValue(idx);
-        // 카테고리별 세로 오프셋
-        const catI=top5.findIndex(t=>t.카테고리===cat);
-        const y=a.top + 12 + catI*14;
-        ctx.fillStyle=palette[catI%palette.length];
-        ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='#5C0F0F';ctx.font="9px sans-serif";
-        ctx.fillText(cnt+'', x, y+3);
+      ctx.font="bold 10.5px 'Noto Sans SC',sans-serif";
+      ctx.textAlign='center';ctx.fillStyle='#7A1F1F';
+      kolCntArr.forEach((cnt,i)=>{
+        const x=c.scales.x.getPixelForValue(i);
+        const y=a.bottom+22;
+        if(cnt>0){ctx.fillText(`KOL ${cnt}건`, x, y);}
+        else{ctx.fillStyle='#8B7A65';ctx.fillText('KOL 0건', x, y);ctx.fillStyle='#7A1F1F';}
       });
       ctx.restore();
     }catch(e){}
   }};
-  charts.cTmallTraffic=new Chart(document.getElementById('cTmallTraffic'),{type:'line',data:{labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{ticks:{callback:v=>Math.round(v).toLocaleString('ko-KR')}}}},plugins:[kolMarkerPlugin]});
+  charts.cTmallInflow=new Chart(document.getElementById('cTmallInflow'),{type:'bar',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{bottom:22}},interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{font:{size:11}}},
+        tooltip:{callbacks:{
+          label:c=>{const v=c.parsed.y||0;const cat=top5[c.dataIndex];const total=cat.방문자;const pct=total>0?(v/total*100).toFixed(1):'-';return `${c.dataset.label}: ${Math.round(v).toLocaleString('ko-KR')} (${pct}%)`;},
+          footer:items=>{const i=items[0].dataIndex;const c=top5[i];return `총 방문자 ${Math.round(c.방문자).toLocaleString('ko-KR')} · 매출 ¥${Math.round(c.결제금액).toLocaleString('ko-KR')} · ₩${Math.round(c.결제금액*(globalFx||195)).toLocaleString('ko-KR')}`;}
+        }}
+      },
+      scales:{y:{stacked:true,ticks:{callback:v=>Math.round(v).toLocaleString('ko-KR')}},x:{stacked:true}}
+    },plugins:[kolMarkerPlugin]});
   // 인사이트 텍스트
-  const insight=document.getElementById('tmallTrafficInsight');
+  const insight=document.getElementById('tmallInflowInsight');
   if(insight){
-    const withKol = top5.filter(c=>c._kolLinks.length>0);
-    const withoutKol = top5.filter(c=>c._kolLinks.length===0);
-    let msg = `<b>상위 매출 5개 카테고리</b> 중 <b style="color:var(--gong-red)">${withKol.length}개</b>에 KOL 협업 있음 (총 ${withKol.reduce((s,c)=>s+c._kolLinks.length,0)}건 소재).`;
-    if(withoutKol.length) msg += ` <b style="color:var(--accent)">협업 없이 매출 발생</b>: ${withoutKol.map(c=>c.카테고리).join(', ')} — 검색/타오바오 자연 유입 강한 상품`;
+    const totalV=top5.reduce((s,c)=>s+c.방문자,0);
+    const totalS=top5.reduce((s,c)=>s+c.검색유입_방문자,0);
+    const nonSearchPct=totalV>0?((totalV-totalS)/totalV*100).toFixed(1):'-';
+    const withKol=top5.filter(c=>c._kolLinks.length>0);
+    const withoutKol=top5.filter(c=>c._kolLinks.length===0);
+    let msg=`<b>상위 5개 카테고리 총 UV의 <span style="color:var(--gong-red)">${nonSearchPct}%</span>가 非搜索 유입</b> (샤오홍슈·라이브·추천·UDRTA 등 · 검색 외 유입).`;
+    msg+=`<br>KOL 협업: <b>${withKol.length}개 카테고리</b>에 있음 (총 ${withKol.reduce((s,c)=>s+c._kolLinks.length,0)}건).`;
+    if(withoutKol.length) msg+=` <b style="color:var(--accent)">협업 없이 매출 발생</b>: ${withoutKol.map(c=>c.카테고리).join(', ')} — 검색·브랜드파워·타오바오 자연 유입 강함`;
+    msg+=`<br><span style="color:var(--ink-soft);font-size:10.5px">※ 채널별(샤오홍슈/라이브/추천/UDRTA 등) 세부 UV 분해는 티몰 시트에 채널 컬럼 추가 필요. 현재는 <b>搜索 vs 非搜索</b> 이분법만 가능</span>`;
     insight.innerHTML=msg;
   }
 }
-// ③ 매출 3원 분해 산점도
-function chTmallSalesQuadrant(){
-  destroy('cTmallSalesQuadrant');
-  if(brand==='COLORGRAM')return;
-  const cats=_tmallCategoriesForBrand().filter(c=>c.방문자>0&&c.결제금액>0);
-  if(!cats.length){_showCanvasEmpty('cTmallSalesQuadrant','데이터 추가 필요','기간 확장 또는 시트 보완');return;}
-  const points = cats.map(c=>({x:c.방문자,y:c.평균결제전환율,r:Math.max(4,Math.min(30,Math.sqrt(c.결제금액)/60)),_c:c.카테고리,_v:c.방문자,_cvr:c.평균결제전환율,_pay:c.결제금액,_kol:c._kolLinks.length}));
-  // 중앙값 기준선 4사분면
-  const vSorted=[...points].map(p=>p.x).sort((a,b)=>a-b);
-  const cvrSorted=[...points].map(p=>p.y).sort((a,b)=>a-b);
-  const vMed=vSorted[Math.floor(vSorted.length/2)]||0;
-  const cvrMed=cvrSorted[Math.floor(cvrSorted.length/2)]||0;
-  const quadPlugin={id:'tmQuad',afterDraw:c=>{
-    try{
-      if(!vMed||!cvrMed)return;
-      const a=c.chartArea, ctx=c.ctx;
-      const xMid=c.scales.x.getPixelForValue(vMed);
-      const yMid=c.scales.y.getPixelForValue(cvrMed);
-      ctx.save();
-      ctx.strokeStyle='rgba(184,148,31,0.4)';ctx.setLineDash([4,4]);ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(xMid,a.top);ctx.lineTo(xMid,a.bottom);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(a.left,yMid);ctx.lineTo(a.right,yMid);ctx.stroke();
-      ctx.setLineDash([]);ctx.font="bold 10.5px 'Noto Serif SC',serif";
-      ctx.textAlign='left';ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('👑 충성 고객 (저트래픽·고전환)',a.left+8,a.top+14);
-      ctx.textAlign='right';ctx.fillStyle='rgba(30,86,49,0.85)';ctx.fillText('🏆 핵심 성공 (고트래픽·고전환)',a.right-8,a.top+14);
-      ctx.textAlign='left';ctx.fillStyle='rgba(139,122,101,0.85)';ctx.fillText('방치',a.left+8,a.bottom-8);
-      ctx.textAlign='right';ctx.fillStyle='rgba(200,16,46,0.85)';ctx.fillText('⚠ 인기 후크 실패 (전환 낮음)',a.right-8,a.bottom-8);
-      ctx.restore();
-    }catch(e){}
-  }};
-  charts.cTmallSalesQuadrant=new Chart(document.getElementById('cTmallSalesQuadrant'),{type:'bubble',data:{datasets:[{label:'카테고리',data:points,backgroundColor:COL.red+'AA',borderColor:COL.red,borderWidth:1}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const d=c.raw;return [`${d._c}`,`방문자 ${Math.round(d._v).toLocaleString('ko-KR')} · 전환율 ${d._cvr.toFixed(2)}%`,`결제 금액 ¥${Math.round(d._pay).toLocaleString('ko-KR')}`,`KOL 협업 ${d._kol}건`];}}}},scales:{x:{type:'logarithmic',title:{display:true,text:'방문자 수 (log)'},ticks:{callback:v=>Math.round(v).toLocaleString('ko-KR')}},y:{title:{display:true,text:'결제 전환율 (%)'},ticks:{callback:v=>v.toFixed(2)+'%'}}}},plugins:[quadPlugin]});
+// ③ 매출 3원 Top 3 (트래픽·전환·객단가 각 축별 상위 카테고리 · 산점도 대체)
+// 사용자 요청 (2026-07-01): "3원 분해는 이해가 안 되고 원들이 의미하는바를 모르겠어" → 각 축 Top 3 카테고리 막대로 대체
+function renderTmallSalesTop3(){
+  const el=document.getElementById('tmallSalesTop3'); if(!el) return;
+  if(brand==='COLORGRAM'){el.innerHTML=_emptyDataNotice('COLORGRAM 티몰 데이터 없음','시트 보완 필요');return;}
+  const cats=_tmallCategoriesForBrand().filter(c=>c.방문자>0);
+  if(cats.length<3){el.innerHTML=_emptyDataNotice('데이터 부족','비교 가능한 카테고리 3개 이상 필요');return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  // 트래픽 견인 · 전환 견인 · 객단가 견인 각 축
+  const topV=[...cats].sort((a,b)=>b.방문자-a.방문자).slice(0,3);
+  const topC=[...cats].sort((a,b)=>b.평균결제전환율-a.평균결제전환율).slice(0,3);
+  const topU=[...cats].sort((a,b)=>b.평균UV당가치-a.평균UV당가치).slice(0,3);
+  // 세 축 공통 = 핵심 성공
+  const setV=new Set(topV.map(c=>c.카테고리));
+  const setC=new Set(topC.map(c=>c.카테고리));
+  const setU=new Set(topU.map(c=>c.카테고리));
+  const heroes=[...setV].filter(x=>setC.has(x)&&setU.has(x));
+  const col={V:'#4A6670',C:'#1E5631',U:'#D4AF37'};
+  const rowHtml=(axis,label,unit,list,color,axisKey,valueFn)=>{
+    const bars=list.map((c,i)=>{
+      const v=valueFn(c);
+      const maxVal=Math.max(...list.map(valueFn));
+      const width=maxVal>0?(v/maxVal*100):0;
+      const hero=heroes.includes(c.카테고리)?' 👑':'';
+      return `<div class="t3-row"><div class="t3-rank">#${i+1}${hero}</div><div class="t3-name">${c.카테고리}</div><div class="t3-bar"><div class="t3-fill" style="width:${width.toFixed(1)}%;background:${color}"></div><span class="t3-val">${unit==='￥'?'￥'+fmt(v)+' · ₩'+fmt(v*fx):(unit==='%'?v.toFixed(2)+'%':fmt(v))}</span></div><div class="t3-sub">매출 ￥${fmt(c.결제금액)} <span style="color:var(--grey)">₩${fmt(c.결제금액*fx)}</span></div></div>`;
+    }).join('');
+    return `<div class="t3-col"><h4 style="color:${color}">${label}</h4><div class="t3-note">${axis}</div>${bars}</div>`;
+  };
+  el.innerHTML=`
+    ${rowHtml('访客数量 (방문자 수)','🚦 流量 (트래픽 견인)','',topV,col.V,'V',c=>c.방문자)}
+    ${rowHtml('结算转化率 (결제 전환율 %)','🎯 转化 (전환 견인)','%',topC,col.C,'C',c=>c.평균결제전환율)}
+    ${rowHtml('访客单价 (UV당 결제 매출)','💎 客单价 (객단가 견인)','￥',topU,col.U,'U',c=>c.평균UV당가치)}
+    ${heroes.length?`<div class="t3-hero-note">👑 = <b>세 축 모두 Top 3</b> 진입 = <b style="color:var(--green)">핵심 성공 카테고리</b> (${heroes.join(', ')})</div>`:'<div class="t3-hero-note">👑 세 축 모두 Top 3 카테고리 없음 — 축별 강점 상품 분산됨</div>'}
+  `;
 }
-// 판매 원인 라벨 규칙 (top 카테고리 기준 상대 랭킹)
+// 판매 원인 라벨 규칙 (top 카테고리 기준 상대 랭킹) — 중국어 우선 + (한국어)
 function _saleReason(cat, allCats){
   const vRank = [...allCats].sort((a,b)=>b.방문자-a.방문자).findIndex(c=>c.카테고리===cat.카테고리);
   const cvrRank = [...allCats].sort((a,b)=>b.평균결제전환율-a.평균결제전환율).findIndex(c=>c.카테고리===cat.카테고리);
   const uvRank = [...allCats].sort((a,b)=>b.평균UV당가치-a.평균UV당가치).findIndex(c=>c.카테고리===cat.카테고리);
   const n=allCats.length;
   const reasons=[];
-  if(vRank < n/3) reasons.push('🚦 트래픽 견인');
-  if(cvrRank < n/3) reasons.push('🎯 전환 견인');
-  if(uvRank < n/3) reasons.push('💎 객단가 견인');
-  return reasons.length ? reasons.join(' · ') : '균형형';
+  if(vRank < n/3) reasons.push('🚦 流量 (트래픽 견인)');
+  if(cvrRank < n/3) reasons.push('🎯 转化 (전환 견인)');
+  if(uvRank < n/3) reasons.push('💎 客单价 (객단가 견인)');
+  return reasons.length ? reasons.join(' · ') : '均衡型 (균형형)';
 }
 function _notSellReason(cat, allCats){
   const n=allCats.length;
   const vRank = [...allCats].sort((a,b)=>b.방문자-a.방문자).findIndex(c=>c.카테고리===cat.카테고리);
   const cvrRank = [...allCats].sort((a,b)=>b.평균결제전환율-a.평균결제전환율).findIndex(c=>c.카테고리===cat.카테고리);
-  const bounceRank = [...allCats].sort((a,b)=>b.평균이탈률-a.평균이탈률).findIndex(c=>c.카테고리===cat.카테고리);
   const reasons=[];
-  if(vRank >= n*2/3) reasons.push('❄ 트래픽 부족');
-  if(cvrRank >= n*2/3) reasons.push('⚠ 전환 실패');
-  if(bounceRank < n/3) reasons.push('🚪 이탈률 높음');
-  if(cat.검색유입_방문자>0 && cat.결제구매자===0) reasons.push('🔍 검색 유입만 결제 X');
-  return reasons.length ? reasons.join(' · ') : '데이터 부족';
+  if(vRank >= n*2/3) reasons.push('❄ 流量不足 (트래픽 부족)');
+  if(cvrRank >= n*2/3) reasons.push('⚠ 转化失败 (전환 실패)');
+  if(cat.검색유입_방문자>0 && cat.결제구매자===0) reasons.push('🔍 仅搜索无结算 (검색만 결제 X)');
+  return reasons.length ? reasons.join(' · ') : '数据不足 (데이터 부족)';
 }
 // 매출 상위 hero 카드
 function renderTmallBest(){
@@ -2616,14 +2629,15 @@ function renderTmallBest(){
   if(!cats.length){el.innerHTML=_emptyDataNotice('데이터 추가 필요','기간 확장 또는 시트 최신화');return;}
   const top5=cats.slice(0,5);
   const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
   el.innerHTML=top5.map(c=>{
     const reason=_saleReason(c,cats);
-    const roiText = c._totalCost>0 ? `¥${fmt(c._totalCost)} 투입 → <b>ROI ${Math.round(c.roi*100)}%</b>` : 'KOL 협업 없음';
+    const roiText = c._totalCost>0 ? `￥${fmt(c._totalCost)} <span style="color:var(--grey)">(₩${fmt(c._totalCost*fx)})</span> 투입 → <b>ROI ${Math.round(c.roi*100)}%</b>` : 'KOL协作无 (KOL 협업 없음)';
     return `<div class="best-card">
       <div class="lbl">${reason}</div>
       <div class="name">${c.카테고리}</div>
-      <div class="stat">매출 <b>¥${fmt(c.결제금액)}</b> · 방문자 <b>${fmt(c.방문자)}</b><br>전환율 <b>${c.평균결제전환율.toFixed(2)}%</b> · UV당 ¥${fmt(c.평균UV당가치)}<br>신규 <b>${c.신규구매자비중.toFixed(0)}%</b></div>
-      <div class="reason">KOL 협업 <b>${c._kolLinks.length}건</b> · ${roiText}</div>
+      <div class="stat">销售额 <b>￥${fmt(c.결제금액)}</b><div class="krw-sub">₩${fmt(c.결제금액*fx)}</div>访客 <b>${fmt(c.방문자)}</b> · 转化率 <b>${c.평균결제전환율.toFixed(2)}%</b><br>访客单价 ￥${fmt(c.평균UV당가치)} · 新客 <b>${c.신규구매자비중.toFixed(0)}%</b></div>
+      <div class="reason">KOL协作 <b>${c._kolLinks.length}件</b> · ${roiText}</div>
     </div>`;
   }).join('');
 }
@@ -2635,39 +2649,40 @@ function renderTmallWorst(){
   if(cats.length<3){el.innerHTML=_emptyDataNotice('데이터 부족','비교 가능한 카테고리 3개 이상 필요');return;}
   const worst5=[...cats].sort((a,b)=>a.결제금액-b.결제금액).slice(0,Math.min(5,Math.floor(cats.length/2)));
   const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
   el.innerHTML=worst5.map(c=>{
     const reason=_notSellReason(c,cats);
     return `<div class="best-card" style="border-top-color:var(--accent);background:linear-gradient(135deg,rgba(200,16,46,0.05) 0%,var(--card) 70%)">
       <div class="lbl" style="color:var(--accent)">${reason}</div>
       <div class="name">${c.카테고리}</div>
-      <div class="stat">매출 <b>¥${fmt(c.결제금액)}</b> · 방문자 <b>${fmt(c.방문자)}</b><br>전환율 <b>${c.평균결제전환율.toFixed(2)}%</b> · 이탈률 ${c.평균이탈률.toFixed(0)}%<br>KOL 협업 ${c._kolLinks.length}건</div>
+      <div class="stat">销售额 <b>￥${fmt(c.결제금액)}</b><div class="krw-sub">₩${fmt(c.결제금액*fx)}</div>访客 <b>${fmt(c.방문자)}</b> · 转化率 <b>${c.평균결제전환율.toFixed(2)}%</b><br>KOL协作 ${c._kolLinks.length}件</div>
     </div>`;
   }).join('');
 }
-// ④ 이탈률 × 매출 산점도
-function chTmallBounce(){
-  destroy('cTmallBounce');
-  if(brand==='COLORGRAM')return;
-  const cats=_tmallCategoriesForBrand().filter(c=>c.평균이탈률>0&&c.결제금액>0);
-  if(!cats.length){_showCanvasEmpty('cTmallBounce','데이터 추가 필요','이탈률·매출 있는 카테고리 필요');return;}
-  const points=cats.map(c=>({x:c.평균이탈률,y:c.결제금액,_c:c.카테고리,_v:c.방문자}));
-  charts.cTmallBounce=new Chart(document.getElementById('cTmallBounce'),{type:'scatter',data:{datasets:[{label:'카테고리',data:points,backgroundColor:COL.blue+'AA',borderColor:COL.blue,pointRadius:6}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const d=c.raw;return [`${d._c}`,`이탈률 ${d.x.toFixed(1)}% · 매출 ¥${Math.round(d.y).toLocaleString('ko-KR')}`,`방문자 ${Math.round(d._v).toLocaleString('ko-KR')}`];}}}},scales:{x:{title:{display:true,text:'상품 상세페이지 이탈률(%)'},ticks:{callback:v=>v+'%'}},y:{type:'logarithmic',title:{display:true,text:'결제 완료 금액 (log ¥)'},ticks:{callback:v=>'¥'+Math.round(v).toLocaleString('ko-KR')}}}}});
-}
-// ⑤ 상품 투입률 (ROI) 표
+// [삭제됨 2026-07-01] chTmallBounce — 이탈률 × 매출 상관도. 사용자 요청: "왜 있는지 모르겠고 원이 의미하는바를 모르겠어"
+// ⑤ 商品投放率 (상품 투입률 ROI) 표 — 중국어 우선 + 원화 병기
 function renderTmallROITable(){
   const tbl=document.getElementById('tmallROITable'); if(!tbl) return;
   if(brand==='COLORGRAM'){tbl.querySelector('thead').innerHTML='';tbl.querySelector('tbody').innerHTML=`<tr><td colspan="7">${_emptyDataNotice('COLORGRAM 데이터 없음','시트 보완 필요')}</td></tr>`;return;}
   const cats=_tmallCategoriesForBrand().filter(c=>c._totalCost>0).sort((a,b)=>b.roi-a.roi);
   if(!cats.length){tbl.querySelector('thead').innerHTML='';tbl.querySelector('tbody').innerHTML=`<tr><td>${_emptyDataNotice('KOL 협업 데이터 없음','KOL 소재의 주력상품이 티몰 카테고리와 매칭돼야 합니다')}</td></tr>`;return;}
-  tbl.querySelector('thead').innerHTML=`<tr><th>카테고리</th><th>KOL 협업</th><th>총 광고비</th><th>티몰 결제 매출</th><th>ROI</th><th>방문자</th><th>신규 구매 %</th></tr>`;
+  tbl.querySelector('thead').innerHTML=`<tr><th>类目<div class="ko-sub">(카테고리)</div></th><th>KOL协作<div class="ko-sub">(KOL 협업)</div></th><th>广告费 ￥·₩<div class="ko-sub">(총 광고비)</div></th><th>Tmall销售 ￥·₩<div class="ko-sub">(결제 매출)</div></th><th>ROI</th><th>访客<div class="ko-sub">(방문자)</div></th><th>新客 %<div class="ko-sub">(신규 %)</div></th></tr>`;
   const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
   tbl.querySelector('tbody').innerHTML=cats.map((c,i)=>{
     const roiPct=Math.round(c.roi*100);
     const roiColor = roiPct>=500 ? 'var(--green)' : roiPct<100 ? 'var(--accent)' : 'var(--ink)';
-    const roiLabel = roiPct>=500 ? '🥇 매우 좋음' : roiPct>=200 ? '✅ 양호' : roiPct>=100 ? '⚖ 손익분기' : '⚠ 적자';
-    return `<tr${i===0?' style="background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 65%)"':''}><td>${i===0?'👑 ':''}<b>${c.카테고리}</b></td><td style="text-align:center">${c._kolLinks.length}건</td><td>¥${fmt(c._totalCost)}</td><td>¥${fmt(c.결제금액)}</td><td style="color:${roiColor};font-weight:700">${roiPct}% <span style="font-size:10.5px;font-weight:500">${roiLabel}</span></td><td>${fmt(c.방문자)}</td><td>${c.신규구매자비중.toFixed(0)}%</td></tr>`;
+    const roiLabel = roiPct>=500 ? '🥇 优秀' : roiPct>=200 ? '✅ 良好' : roiPct>=100 ? '⚖ 平衡' : '⚠ 亏损';
+    return `<tr${i===0?' style="background:linear-gradient(90deg,rgba(212,175,55,0.20) 0%,transparent 65%)"':''}><td>${i===0?'👑 ':''}<b>${c.카테고리}</b></td><td style="text-align:center">${c._kolLinks.length}件</td><td style="text-align:right">￥${fmt(c._totalCost)}<div class="krw-sub" style="text-align:right">₩${fmt(c._totalCost*fx)}</div></td><td style="text-align:right">￥${fmt(c.결제금액)}<div class="krw-sub" style="text-align:right">₩${fmt(c.결제금액*fx)}</div></td><td style="color:${roiColor};font-weight:700;text-align:center">${roiPct}% <span style="font-size:10.5px;font-weight:500">${roiLabel}</span></td><td style="text-align:right">${fmt(c.방문자)}</td><td style="text-align:center">${c.신규구매자비중.toFixed(0)}%</td></tr>`;
   }).join('');
+}
+// ⑥ 채널 정의 참조 사전 (Tmall_Map 광고명 41개 정의)
+function renderTmallChannelDefRef(){
+  const el=document.getElementById('tmallChannelDefRef'); if(!el) return;
+  const def=DATA.tmallChannelDef||{};
+  const keys=Object.keys(def);
+  if(!keys.length){el.innerHTML='<div style="color:var(--grey)">Tmall_Map 시트 매핑 사전 대기 중...</div>';return;}
+  el.innerHTML=keys.map(k=>`<div style="padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px"><b style="color:var(--gong-red-deep)">${k}</b><br><span style="color:var(--ink-soft);font-size:10.5px">${def[k]}</span></div>`).join('');
 }
 
 // ============ 월별 매체 통합안 — 종합 배너 + 매체 카드 ============
