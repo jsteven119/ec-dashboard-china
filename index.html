@@ -2869,6 +2869,46 @@ function chLiveTrend(){
   const labels=sorted.map((r,i)=>r.방송일 ? r.방송일.slice(5) : `#${r.회차||i+1}`);
   const revData=sorted.map(r=>r.매출);
   const uvData=sorted.map(r=>r.시청UV);
+  // 캠페인 마커 매칭 (2026-07-02 · china-team 리뷰 액션 ④)
+  // 라이브 회차 밀도가 낮으므로 mmdd 정확 매칭 대신 가장 가까운 회차에 마커. 7일 이상 벌어지면 표시 X
+  const sortedDates=sorted.map(r=>r.방송일||'');
+  const camps=getCampaignsInRange(sortedDates);
+  const _mmddNum=s=>{if(!s)return -1;const m=s.match(/(\d{2})-(\d{2})/);if(!m)return -1;return +m[1]*100+ +m[2];};
+  const campsMapped=camps.map(cp=>{
+    const target=_mmddNum(cp.mmdd);
+    if(target<0)return null;
+    let bestIdx=-1, bestDelta=999;
+    sortedDates.forEach((d,i)=>{
+      const dm=_mmddNum(d.slice(5));
+      if(dm<0)return;
+      const delta=Math.abs(dm-target);
+      if(delta<bestDelta){bestDelta=delta;bestIdx=i;}
+    });
+    // 7일 이내만 유효 매칭
+    return bestIdx>=0 && bestDelta<=7 ? {...cp, liveIdx:bestIdx, deltaDays:bestDelta} : null;
+  }).filter(Boolean);
+  const campMarkPlugin={id:'liveCampMark',afterDraw:c=>{
+    if(!campsMapped.length)return;
+    const a=c.chartArea, ctx=c.ctx;
+    campsMapped.forEach((cp,i)=>{
+      const x=c.scales.x.getPixelForValue(cp.liveIdx);
+      const color=cp.type==='big'?COL.red:(cp.type==='mid'?COL.gold:COL.grey);
+      ctx.save();
+      ctx.strokeStyle=color;
+      ctx.setLineDash(cp.type==='big'?[5,4]:[3,3]);
+      ctx.lineWidth=cp.type==='big'?1.8:1.2;
+      ctx.beginPath();ctx.moveTo(x,a.top);ctx.lineTo(x,a.bottom);ctx.stroke();
+      const label=cp.deltaDays===0 ? cp.ko : `${cp.ko} D${cp.deltaDays>0?'+':'-'}${cp.deltaDays}`;
+      ctx.font="bold 10.5px Inter,system-ui,sans-serif";
+      const w=ctx.measureText(label).width+10;
+      const yOff=a.top+10+((i%3)*16);
+      ctx.fillStyle=cp.type==='big'?'rgba(165,42,42,0.95)':'rgba(212,175,55,0.95)';
+      ctx.fillRect(x+3,yOff-9,w,15);
+      ctx.fillStyle=cp.type==='big'?'#FFFDF5':'#5C0F0F';
+      ctx.fillText(label,x+8,yOff+2);
+      ctx.restore();
+    });
+  }};
   charts.cLiveTrend=new Chart(document.getElementById('cLiveTrend'),{
     data:{labels,datasets:[
       {type:'bar',label:'观看UV (시청 UV)',data:uvData,backgroundColor:COL.sky+'CC',borderColor:COL.sky,borderWidth:1,yAxisID:'y1',order:2},
@@ -2882,15 +2922,14 @@ function chLiveTrend(){
             if(c.dataset.label.includes('销售额')){const fx=(globalFx||195);return `${c.dataset.label}: ￥${Math.round(v).toLocaleString('ko-KR')} · ₩${Math.round(v*fx).toLocaleString('ko-KR')}`;}
             return `${c.dataset.label}: ${Math.round(v).toLocaleString('ko-KR')}`;
           },
-          afterBody:items=>{const i=items[0].dataIndex;const r=sorted[i];return `호스트: ${r.호스트} · 판매 상품 ${r.판매상품||'-'} · 팬 유입 ${r.팬유입||'-'}`;}
+          afterBody:items=>{const i=items[0].dataIndex;const r=sorted[i];const near=campsMapped.find(cp=>cp.liveIdx===i);return `호스트: ${r.호스트} · 판매 상품 ${r.판매상품||'-'} · 팬 유입 ${r.팬유입||'-'}${near?`\n📅 캠페인: ${near.ko} (D${near.deltaDays>0?'+':'-'}${near.deltaDays})`:''}`;}
         }}
       },
       scales:{
         y:{position:'left',title:{display:true,text:'销售额 ￥'},ticks:{callback:v=>'￥'+Math.round(v).toLocaleString('ko-KR')}},
         y1:{position:'right',title:{display:true,text:'观看UV'},grid:{display:false},ticks:{callback:v=>Math.round(v).toLocaleString('ko-KR')}}
       }
-    }
-  });
+    },plugins:[campMarkPlugin]});
 }
 function renderLiveBest(){
   const el=document.getElementById('liveBest'); if(!el) return;
