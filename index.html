@@ -2764,12 +2764,25 @@ function liveKpis(){
   const totalNewFans=rows.reduce((s,r)=>s+r.팬유입,0);
   const roi=totalCost>0?(totalRevenue/totalCost):0;
   const avgCPUV=totalUV>0?(totalCost/totalUV):0;
+  // 사용자 요청 (2026-07-02 · china-team 리뷰): 평균 시청 시간 + 시청→구매 전환율 신규 KPI
+  const watchRows=rows.filter(r=>r.평균시청시간>0);
+  const avgWatch = watchRows.length ? watchRows.reduce((s,r)=>s+r.평균시청시간,0)/watchRows.length : 0;
+  // 시청 시간 단위 자동 감지: >= 60 이면 초 단위로 해석하고 분으로 변환. 아니면 원본이 이미 분(min)
+  const watchDisplay = avgWatch>=60 ? (avgWatch/60).toFixed(1)+' 分' : avgWatch>0?avgWatch.toFixed(1)+' 分':'—';
+  const totalBuyers=rows.reduce((s,r)=>s+(r.결제구매자||0),0);
+  // 시청→구매 전환율: 우선순위 결제구매자 → fallback 판매상품
+  const totalSold=rows.reduce((s,r)=>s+(r.판매상품||0),0);
+  const conversionBase = totalBuyers>0 ? totalBuyers : totalSold;
+  const conversionLabel = totalBuyers>0 ? '결제구매자÷시청UV' : '판매상품수÷시청UV (fallback)';
+  const viewToBuyPct = totalUV>0 && conversionBase>0 ? (conversionBase/totalUV*100) : 0;
   const cards=[
     {lab:'场次数<span class="ko-sub">(총 회차)</span>',hint:'次',val:fmt(rows.length)+' 场',sub:'直播回次数 (라이브 총 회차)',core:true},
     {lab:'总销售额<span class="ko-sub">(총 매출)</span>',hint:'GMV',val:'￥'+fmt(totalRevenue)+`<div class="krw-sub">₩${fmt(totalRevenue*fx)}</div>`,sub:'累计销售额 (누적 매출)',core:true},
     {lab:'观看UV<span class="ko-sub">(시청 UV)</span>',hint:'累计',val:fmt(totalUV),sub:'累计观看人数 (누적 시청자 수)'},
     {lab:'广告费<span class="ko-sub">(광고비)</span>',hint:'投入',val:'￥'+fmt(totalCost)+`<div class="krw-sub">₩${fmt(totalCost*fx)}</div>`,sub:'累计广告投放费 (누적 광고 투입)'},
     {lab:'ROI',hint:'实测',val:totalCost>0?Math.round(roi*100)+'%':'—',sub:'销售额÷广告费 (매출÷광고비)',core:true},
+    {lab:'平均观看时长<span class="ko-sub">(평균 시청 시간)</span>',hint:'停留',val:watchDisplay,sub:'회차 평균 시청 지속 시간 (콘텐츠 흡입력)',core:true},
+    {lab:'观看→购买转化率<span class="ko-sub">(시청→구매 전환)</span>',hint:'CVR',val:viewToBuyPct>0?viewToBuyPct.toFixed(2)+'%':'—',sub:conversionLabel,core:true},
     {lab:'客单价<span class="ko-sub">(객단가)</span>',hint:'均价',val:avgAOV>0?'￥'+fmt(avgAOV)+`<div class="krw-sub">₩${fmt(avgAOV*fx)}</div>`:'—',sub:'평균 객단가 (필터 후)'},
     {lab:'CPUV',hint:'流量成本',val:avgCPUV>0?'￥'+avgCPUV.toFixed(2)+`<div class="krw-sub">₩${fmt(avgCPUV*fx)}</div>`:'—',sub:'광고비÷시청UV (관람 1인당 광고비)'},
     {lab:'涨粉数<span class="ko-sub">(팬 유입)</span>',hint:'新粉',val:fmt(totalNewFans),sub:'라이브 통해 획득한 신규 팬'}
@@ -4246,6 +4259,7 @@ function processLiveData(liveRaw){
       평균시청시간: _parseNum(_pickLiveField(r,['평균시청','平均观看','平均时长','avg_watch','平均停留'])),
       노출상품: _parseNum(_pickLiveField(r,['노출상품','讲解商品','上架商品','SKU','商品数'])),
       판매상품: _parseNum(_pickLiveField(r,['판매상품','成交商品','售出商品','已成交'])),
+      결제구매자: _parseNum(_pickLiveField(r,['결제구매자','成交人数','支付人数','买家数','购买人数','结算人数'])),
       매출: _parseNum(_pickLiveField(r,['매출','销售额','成交金额','GMV','金额','结算','销售'])),
       객단가: _parseNum(_pickLiveField(r,['객단가','客单价','平均价','均价','ARPU'])),
       팬유입: _parseNum(_pickLiveField(r,['팬유입','涨粉','新粉丝','粉丝增长','新增关注'])),
