@@ -243,6 +243,16 @@
     display:block;font-size:11.5px;font-weight:600;color:var(--grey);
     margin-top:2px;letter-spacing:0;line-height:1.2;
   }
+  /* KPI 3그룹핑 헤더 (2026-07-02 · china-team 리뷰 액션 ③) */
+  .kpi-group-header{
+    grid-column:1/-1;display:flex;align-items:center;gap:8px;
+    padding:6px 12px;margin-top:8px;margin-bottom:-4px;
+    background:linear-gradient(90deg,rgba(212,175,55,0.10) 0%,transparent 60%);
+    border-left:4px solid var(--gold);border-radius:3px;
+    font-family:'Noto Serif SC',serif;font-weight:800;font-size:12.5px;color:var(--gong-red-deep);
+  }
+  .kpi-group-header .grp-count{font-size:10.5px;color:var(--grey);font-weight:500}
+  .kpi-group-header:first-of-type{margin-top:0}
   /* 중국어 우선 · 한국어 번역 병기 (중국 대행사 공유용) */
   .kpi .lab .ko-sub, .ko-sub{
     display:inline;font-size:10px;font-weight:500;color:var(--ink-soft);
@@ -1344,38 +1354,60 @@ function kpis(){
   const investRate = pl.gmv>0 ? (spend/pl.gmv*100) : null;
   const ks=_kolKocStats();
   const NA='<span style="color:var(--grey);font-size:14px;font-weight:600">데이터 대기</span>';
-  // 11개 기본지표 · 중국어 우선 + (한국어 병기) — 중국 대행사 공유용 (2026-07-01)
+  // 11개 기본지표 · 중국어 우선 + (한국어 병기) · 3그룹핑 (2026-07-02 · china-team 리뷰 액션 ③)
+  // [A] 플랫폼 결과 (실측 매출) → [B] 광고 효율 (매체 지표) → [C] 콘텐츠 자산 (KOL/KOC)
   let cards=[
-    {lab:'平台GMV<span class="ko-sub">(플랫폼 GMV)</span>',hint:'实测',val: pl.ready?WON_BOTH(pl.gmv):NA, sub:'天猫结算完成金额 (티몰 결제 완료 · 실측)',core:true},
-    {lab:'曝光UV<span class="ko-sub">(노출 UV)</span>',hint:'小红星',val:FMT(uv), sub:'进店UV · 去重访客数 (중복 제외 방문자)',mom:momPct(cur.진입UV,prev.진입UV),delta:_pct(cur.진입UV,prev.진입UV)},
-    {lab:'广告费<span class="ko-sub">(광고비)</span>',hint:'全部',val:WON_BOTH(spend), sub:'广告投放费 (전 매체 광고 집행액)',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
-    {lab:'投入率<span class="ko-sub">(투입률)</span>',hint:'费÷GMV',val: investRate!=null?investRate.toFixed(1)+'%':NA, sub:'广告费÷GMV × 100 (매출 대비 광고비 비중 · ↓优)',core:true,invertDelta:true},
-    {lab:'CPUV',hint:'main',val:'￥'+F2(cpuv)+`<div class="krw-sub">₩${FMT(cpuv*(globalFx||195))}</div>`, sub:'广告费÷进店UV (매장 유입 1명당 광고비 · ↓优)',mom:momPct(curCpuv,prevCpuv),delta:_pct(curCpuv,prevCpuv),core:true,invertDelta:true},
-    {lab:'广告GMV<span class="ko-sub">(광고 GMV)</span>',hint:'估算',val:WON_BOTH(gmvAd), sub:'聚光估算广告销售额 (쥐광 추정치 · 실제 전체매출 X)',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV)},
-    {lab:'ROI',hint:'参考',val:ROAS_PCT(roi), sub:'广告GMV÷广告费 (추정치 기반 · 참고용)',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
-    {lab:'KOL费用<span class="ko-sub">(KOL 비용)</span>',hint:'达人',val:ks.kolCost>0?WON_BOTH(ks.kolCost):NA, sub:'KOL协作费 · 粉丝1万+ (팔로워 1만+ 협업비)'},
-    {lab:'KOL件数<span class="ko-sub">(KOL 건수)</span>',hint:'达人',val:ks.kolCount>0?(FMT(ks.kolCount)+' 件'):NA, sub:'KOL素材总数 (KOL 소재 총 건수)'},
-    {lab:'KOC费用<span class="ko-sub">(KOC 비용)</span>',hint:'素人',val:ks.kocReady?WON_BOTH(ks.kocCost):'<span style="color:var(--grey);font-size:13px">数据待补 (시트 대기)</span>', sub:'KOC协作费 · 粉丝1万- (팔로워 1만- 협업비)'},
-    {lab:'KOC件数<span class="ko-sub">(KOC 건수)</span>',hint:'素人',val:ks.kocReady?(FMT(ks.kocCount)+' 件'):'<span style="color:var(--grey);font-size:13px">数据待补 (시트 대기)</span>', sub:'KOC素材总数 (KOC 소재 총 건수)'}
+    // === [A] 플랫폼 결과 ===
+    {group:'A',lab:'平台GMV<span class="ko-sub">(플랫폼 GMV)</span>',hint:'实测',val: pl.ready?WON_BOTH(pl.gmv):NA, sub:'天猫结算完成金额 (티몰 결제 완료 · 실측)',core:true},
+    {group:'A',lab:'广告GMV<span class="ko-sub">(광고 GMV)</span>',hint:'估算',val:WON_BOTH(gmvAd), sub:'聚光估算广告销售额 (쥐광 추정치 · 실제 전체매출 X)',mom:momPct(cur.전점GMV,prev.전점GMV),delta:_pct(cur.전점GMV,prev.전점GMV)},
+    // === [B] 광고 효율 ===
+    {group:'B',lab:'曝光UV<span class="ko-sub">(노출 UV)</span>',hint:'小红星',val:FMT(uv), sub:'进店UV · 去重访客数 (중복 제외 방문자)',mom:momPct(cur.진입UV,prev.진입UV),delta:_pct(cur.진입UV,prev.진입UV)},
+    {group:'B',lab:'广告费<span class="ko-sub">(광고비)</span>',hint:'全部',val:WON_BOTH(spend), sub:'广告投放费 (전 매체 광고 집행액)',mom:momPct(cur.쥐광비,prev.쥐광비),delta:_pct(cur.쥐광비,prev.쥐광비)},
+    {group:'B',lab:'投入率<span class="ko-sub">(투입률)</span>',hint:'费÷GMV',val: investRate!=null?investRate.toFixed(1)+'%':NA, sub:'广告费÷GMV × 100 (매출 대비 광고비 비중 · ↓优)',core:true,invertDelta:true},
+    {group:'B',lab:'CPUV',hint:'main',val:'￥'+F2(cpuv)+`<div class="krw-sub">₩${FMT(cpuv*(globalFx||195))}</div>`, sub:'广告费÷进店UV (매장 유입 1명당 광고비 · ↓优)',mom:momPct(curCpuv,prevCpuv),delta:_pct(curCpuv,prevCpuv),core:true,invertDelta:true},
+    {group:'B',lab:'ROI',hint:'参考',val:ROAS_PCT(roi), sub:'广告GMV÷广告费 (추정치 기반 · 참고용)',mom:momPct(curRoi,prevRoi),delta:_pct(curRoi,prevRoi)},
+    // === [C] 콘텐츠 자산 ===
+    {group:'C',lab:'KOL费用<span class="ko-sub">(KOL 비용)</span>',hint:'达人',val:ks.kolCost>0?WON_BOTH(ks.kolCost):NA, sub:'KOL协作费 · 粉丝1万+ (팔로워 1만+ 협업비)'},
+    {group:'C',lab:'KOL件数<span class="ko-sub">(KOL 건수)</span>',hint:'达人',val:ks.kolCount>0?(FMT(ks.kolCount)+' 件'):NA, sub:'KOL素材总数 (KOL 소재 총 건수)'},
+    {group:'C',lab:'KOC费用<span class="ko-sub">(KOC 비용)</span>',hint:'素人',val:ks.kocReady?WON_BOTH(ks.kocCost):'<span style="color:var(--grey);font-size:13px">数据待补 (시트 대기)</span>', sub:'KOC协作费 · 粉丝1万- (팔로워 1만- 협업비)'},
+    {group:'C',lab:'KOC件数<span class="ko-sub">(KOC 건수)</span>',hint:'素人',val:ks.kocReady?(FMT(ks.kocCount)+' 件'):'<span style="color:var(--grey);font-size:13px">数据待补 (시트 대기)</span>', sub:'KOC素材总数 (KOC 소재 총 건수)'}
   ];
-  // CG/TOTAL 시 CID ROI 추가 (실측 확정 매출)
+  // CG/TOTAL 시 CID ROI 추가 (플랫폼 결과 A그룹에 포함 · 실측 확정 매출)
   if(brand==='COLORGRAM'||brand==='TOTAL'){
     const cs=sum('CID비'),cg2=sum('CID성사GMV');
     const curCidRoi=cur.CID비?(cur.CID성사GMV/cur.CID비):0, prevCidRoi=prev.CID비?(prev.CID성사GMV/prev.CID비):0;
-    cards.push({lab:'CID ROI',hint:'实测 ★',val:ROAS_PCT(cs?cg2/cs:0), sub:'转化广告实测 (확정매출÷광고비) · 30日归因',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi),core:true});
+    // A그룹 끝에 삽입 (广告GMV 뒤)
+    const insertIdx = cards.findIndex(c=>c.group!=='A');
+    cards.splice(insertIdx, 0, {group:'A',lab:'CID ROI',hint:'实测 ★',val:ROAS_PCT(cs?cg2/cs:0), sub:'转化广告实测 (확정매출÷광고비) · 30日归因',mom:momPct(curCidRoi,prevCidRoi),delta:_pct(curCidRoi,prevCidRoi),core:true});
   }
   // 최고 변동률 카드에 👑
   let bestIdx=-1,bestDelta=0;
   cards.forEach((c,i)=>{if(c.delta!=null&&c.delta>bestDelta){bestDelta=c.delta;bestIdx=i;}});
-  document.getElementById('kpis').innerHTML=cards.map((c,i)=>{
+  // 3그룹핑 라벨 매핑
+  const groupLabels={
+    A:{title:'① 平台结果 <span class="ko-sub">(플랫폼 결과 · 실측 매출)</span>',icon:'📊'},
+    B:{title:'② 广告效率 <span class="ko-sub">(광고 효율 · 매체 지표)</span>',icon:'⚡'},
+    C:{title:'③ 内容资产 <span class="ko-sub">(콘텐츠 자산 · KOL/KOC)</span>',icon:'🎬'}
+  };
+  const groupCounts={A:0,B:0,C:0};
+  cards.forEach(c=>{groupCounts[c.group]=(groupCounts[c.group]||0)+1;});
+  let lastGroup=null;
+  const html=[];
+  cards.forEach((c,i)=>{
+    if(c.group!==lastGroup){
+      const g=groupLabels[c.group];
+      html.push(`<div class="kpi-group-header">${g.icon} ${g.title}<span class="grp-count">${groupCounts[c.group]}개</span></div>`);
+      lastGroup=c.group;
+    }
     const cls='kpi'+(i===bestIdx&&bestDelta>5?' best':'')+(c.core?' core':'');
     const hintColor=c.hint==='main'?'color:var(--gong-red);font-weight:800':c.hint==='参考'?'color:var(--grey);font-weight:500':c.hint==='估算'?'color:var(--orange)':c.hint==='实测'||c.hint==='实测 ★'?'color:var(--green);font-weight:700':'';
     let mom=c.mom;
     if(c.invertDelta&&mom){
       mom = mom.replace('up','__INV__').replace('down','up').replace('__INV__','down');
     }
-    return `<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint" style="${hintColor}">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div>${mom||''}</div>`;
-  }).join('');
+    html.push(`<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint" style="${hintColor}">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div>${mom||''}</div>`);
+  });
+  document.getElementById('kpis').innerHTML=html.join('');
 }
 // MoM 변동률(%) 계산 — best 카드 판정용
 function _pct(cur,prev){if(!prev||prev===0||cur==null||isNaN(cur))return null;return((cur-prev)/Math.abs(prev))*100;}
