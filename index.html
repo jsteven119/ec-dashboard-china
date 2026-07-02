@@ -5335,7 +5335,18 @@ setTimeout(syncSheets, 500);
     font-weight:700; border-left-color:var(--gold,#D97706) !important; }
   .ds-rail.is-collapsed .ds-rail__logo{ display:none; }
   .ds-rail.is-collapsed .tabs button{ font-size:0 !important; justify-content:center; padding:11px 0 !important; border-left-width:0 !important; }
-  .ds-main{ flex:1 1 auto; min-width:0; padding:16px 22px 48px; }
+  .ds-main{ flex:1 1 auto; min-width:0; padding:16px 22px 48px; max-width:1400px; margin:0 auto; }
+  /* 초광각 모니터 가시성 픽스 (2026-07-02 사용자 요구 "가로로 그만 길어지고 세로로") */
+  @media(min-width:1600px){ .ds-main{ max-width:1500px; } }
+  body.th-nocturne .best-grid{ grid-template-columns:repeat(auto-fill,minmax(300px,1fr))!important; max-width:1400px; }
+  body.th-nocturne .grid{ grid-template-columns:1fr 1fr!important; }
+  body.th-nocturne .tmall-top3{ grid-template-columns:repeat(auto-fill,minmax(320px,1fr))!important; }
+  body.th-nocturne .live-tier-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important; max-width:1200px; }
+  body.th-nocturne .cwrap canvas{ max-height:400px!important; }
+  body.th-nocturne .cwrap.tall canvas{ max-height:520px!important; }
+  body.th-nocturne .cwrap.huge canvas{ max-height:640px!important; }
+  /* Tmall top3 3원 분해 · 세로로 쌓기 (사용자 요구) */
+  body.th-nocturne .tmall-top3 .t3-col{ max-width:100%; }
   /* 헤더는 자체 레드+골드 그라데이션 배경 보유 → sticky만, 배경 override 금지(회색 덮임 버그 수정) */
   .ds-main > header{ position:sticky; top:0; z-index:100; }
   /* 표는 native 12px 유지(확대 배율로 함께 커짐) · 넓은 표는 .tbox{overflow:auto}가 스크롤 처리 */
