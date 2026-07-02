@@ -5342,9 +5342,11 @@ setTimeout(syncSheets, 500);
   body.th-nocturne .grid{ grid-template-columns:1fr 1fr!important; }
   body.th-nocturne .tmall-top3{ grid-template-columns:repeat(auto-fill,minmax(320px,1fr))!important; }
   body.th-nocturne .live-tier-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important; max-width:1200px; }
-  body.th-nocturne .cwrap canvas{ max-height:400px!important; }
-  body.th-nocturne .cwrap.tall canvas{ max-height:520px!important; }
-  body.th-nocturne .cwrap.huge canvas{ max-height:640px!important; }
+  /* 차트 aspect ratio 정상화 (2026-07-02: 가로 상한 + 세로 상한 · 중앙 정렬) */
+  body.th-nocturne .cwrap{ max-width:800px; margin-left:auto; margin-right:auto; height:380px!important; }
+  body.th-nocturne .cwrap.tall{ max-width:1000px; height:460px!important; }
+  body.th-nocturne .cwrap.huge{ max-width:1100px; height:540px!important; }
+  body.th-nocturne .cwrap canvas{ max-height:100%!important; max-width:100%!important; }
   /* Tmall top3 3원 분해 · 세로로 쌓기 (사용자 요구) */
   body.th-nocturne .tmall-top3 .t3-col{ max-width:100%; }
   /* 헤더는 자체 레드+골드 그라데이션 배경 보유 → sticky만, 배경 override 금지(회색 덮임 버그 수정) */
