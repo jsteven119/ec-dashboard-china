@@ -686,7 +686,7 @@
   .actbtn.mid{background:#E0F2FE;color:#0369A1}
 </style>
 </head>
-<body>
+<body class="th-nocturne">
 <div class="wrap">
   <header>
     <div style="flex:1;min-width:240px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -786,12 +786,10 @@
       </div>
     </details>
     <div id="alerts" class="alerts"></div>
-    <!-- 📌 전체 대시보드 요약 + 인사이트 (사용자 요구 2026-07-02: 상단으로 이동 + 한줄 요약) -->
+    <!-- 📌 전체 대시보드 요약 (사용자 요구 2026-07-02: 자동 인사이트 완전 제거, 한줄 요약만) -->
     <div class="panel full dashboard-summary">
-      <h3>📌 大盘一览 <span class="ko-sub">(전체 요약)</span> <span class="hint-inline">한 줄 상황 + 핵심 인사이트</span></h3>
+      <h3>📌 大盘一览 <span class="ko-sub">(전체 요약)</span> <span class="hint-inline">한 줄 상황 요약</span></h3>
       <div id="dashboardOneLine"></div>
-      <div class="summary-hd">📊 인사이트</div>
-      <div class="insight" id="insightOv"></div>
     </div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
@@ -1649,7 +1647,8 @@ function renderOverview(){
   safe(renderBenchmark,'renderBenchmark');
   safe(renderOverviewInterp,'renderOverviewInterp');
   safe(renderDashboardOneLine,'renderDashboardOneLine');
-  try{document.getElementById('insightOv').innerHTML=autoInsightOv(brand);}catch(e){console.error('insightOv err:',e);}
+  // 자동 인사이트 완전 제거 (2026-07-02 사용자 요구) — insightOv 노드 없어도 안전
+  const _iov=document.getElementById('insightOv'); if(_iov){try{_iov.innerHTML=autoInsightOv(brand);}catch(e){console.error('insightOv err:',e);}}
 }
 // 전체 대시보드 한 줄 요약 (사용자 요구 2026-07-02)
 // 브랜드·기간·플랫폼 GMV·투입률·CPUV·주요 왕홍 라이브 실적 등 종합
@@ -5041,8 +5040,11 @@ setTimeout(syncSheets, 500);
 <style id="dsThemeNocturne">
 /* ---- Nocturne 토큰 (다크 인디고) ---- */
 body.th-nocturne{ --bg:#0F1117; --card:#171A22; --rice-paper:#141620; --rice-deep:#1D212B; --ink:#E7E9EE; --ink-soft:#9AA0AD; --grey:#6B7280; --line:#262B36; --line-soft:#20242E; --line-ink:#333A47; --gold:#818CF8; --gold-deep:#A5B4FC; --gold-light:#C7D2FE; --gold-shadow:rgba(129,140,248,.14); --gong-red:#22D3EE; --gong-red-deep:#67E8F9; }
-body.th-nocturne{ background:var(--bg)!important; }
-body.th-nocturne .wrap, body.th-nocturne .ds-main{ background:var(--bg)!important; }
+body.th-nocturne{ background:var(--bg)!important; color:var(--ink)!important; }
+body.th-nocturne .wrap, body.th-nocturne .ds-main{ background:var(--bg)!important; color:var(--ink)!important; }
+/* 다크 테마 강제 전역 텍스트 색상 (사용자 "글씨 흰색 아님" 픽스) */
+body.th-nocturne *, body.th-nocturne div, body.th-nocturne span, body.th-nocturne p, body.th-nocturne li, body.th-nocturne td, body.th-nocturne th{ color:var(--ink); }
+body.th-nocturne a{ color:var(--gold-deep)!important }
 body.th-nocturne .panel, body.th-nocturne .card, body.th-nocturne .kpi, body.th-nocturne .mcard,
 body.th-nocturne .alert-card, body.th-nocturne .best-card, body.th-nocturne .tbox, body.th-nocturne details.glossary{
   background:var(--card)!important; border:1px solid var(--line)!important; border-radius:14px!important;
