@@ -259,6 +259,32 @@
     display:block;font-size:11.5px;font-weight:600;color:var(--grey);
     margin-top:2px;letter-spacing:0;line-height:1.2;
   }
+  /* 📌 상단 대시보드 요약 패널 (Nocturne 다크 테마와 호환) — !important 강제 */
+  .panel.dashboard-summary{
+    background:linear-gradient(135deg,rgba(129,140,248,0.10) 0%,rgba(34,211,238,0.06) 100%) !important;
+    border-top:3px solid var(--gong-red-deep) !important;
+    margin-bottom:14px;
+  }
+  .panel.dashboard-summary #dashboardOneLine{
+    padding:12px 16px !important;
+    background:rgba(129,140,248,0.10) !important;
+    border-left:4px solid var(--gold-deep) !important;
+    border-radius:6px !important;
+    margin-bottom:14px !important;
+    font-size:14.5px !important;
+    color:var(--ink) !important;
+    font-weight:600 !important;
+    line-height:1.85 !important;
+  }
+  .panel.dashboard-summary .summary-hd{
+    font-weight:800 !important;
+    color:var(--gong-red-deep) !important;
+    font-size:13px !important;
+    margin-bottom:8px !important;
+    font-family:'Noto Serif SC','Pretendard',serif !important;
+    letter-spacing:0.3px;
+  }
+  body.th-nocturne .panel.dashboard-summary #dashboardOneLine b{color:var(--gold-deep) !important}
   /* KPI 3그룹핑 헤더 (2026-07-02 · china-team 리뷰 액션 ③) */
   .kpi-group-header{
     grid-column:1/-1;display:flex;align-items:center;gap:8px;
@@ -761,10 +787,10 @@
     </details>
     <div id="alerts" class="alerts"></div>
     <!-- 📌 전체 대시보드 요약 + 인사이트 (사용자 요구 2026-07-02: 상단으로 이동 + 한줄 요약) -->
-    <div class="panel full" style="background:linear-gradient(135deg,rgba(165,42,42,0.06) 0%,rgba(212,175,55,0.05) 100%);border-top:3px solid var(--gong-red);margin-bottom:14px">
+    <div class="panel full dashboard-summary">
       <h3>📌 大盘一览 <span class="ko-sub">(전체 요약)</span> <span class="hint-inline">한 줄 상황 + 핵심 인사이트</span></h3>
-      <div id="dashboardOneLine" style="padding:10px 14px;background:rgba(212,175,55,0.10);border-left:4px solid var(--gold);border-radius:4px;margin-bottom:12px;font-size:14px;color:var(--ink);font-weight:600;line-height:1.7"></div>
-      <div style="font-weight:700;color:var(--gong-red-deep);font-size:12.5px;margin-bottom:6px;font-family:'Noto Serif SC',serif">📊 인사이트</div>
+      <div id="dashboardOneLine"></div>
+      <div class="summary-hd">📊 인사이트</div>
       <div class="insight" id="insightOv"></div>
     </div>
     <div class="kpis" id="kpis"></div>
@@ -5053,6 +5079,74 @@ body.th-nocturne header{ border-radius:16px!important; box-shadow:0 6px 24px rgb
 body.th-nocturne header::after{ display:none!important; }
 body.th-nocturne header, body.th-nocturne h1, body.th-nocturne header #dataFreshness, body.th-nocturne header div{ color:#E7E9EE!important; text-shadow:none!important; }
 body.th-nocturne header .badge{ background:rgba(129,140,248,.15)!important; color:#C7D2FE!important; border:1px solid rgba(129,140,248,.4)!important; }
+
+/* ---- 폰트 안 보이는 문제 대량 픽스 (2026-07-02) ---- */
+/* 하드코딩된 어두운 색(#7A1F1F, #5C0F0F, #2C2317 등)이 다크 배경에서 안 보이는 문제 해결 */
+body.th-nocturne .kpi-group-header{
+  background:linear-gradient(90deg,rgba(129,140,248,0.12) 0%,transparent 60%)!important;
+  border-left-color:var(--gold)!important;
+  color:var(--gold-deep)!important;
+}
+body.th-nocturne .kpi-group-header .grp-count{color:var(--ink-soft)!important}
+body.th-nocturne .kpi .lab{color:var(--ink)!important}
+body.th-nocturne .kpi .val{color:var(--ink)!important}
+body.th-nocturne .kpi .sm{color:var(--ink-soft)!important}
+body.th-nocturne .kpi .hint{color:var(--ink-soft)!important}
+body.th-nocturne .ko-sub{color:var(--ink-soft)!important}
+body.th-nocturne .krw-sub{color:var(--ink-soft)!important}
+body.th-nocturne .note{color:var(--ink-soft)!important}
+body.th-nocturne .note b, body.th-nocturne .note strong{color:var(--ink)!important}
+body.th-nocturne .note .cn, body.th-nocturne .note .ko{color:var(--ink-soft)!important}
+body.th-nocturne .hint-inline{background:rgba(129,140,248,0.12)!important;color:var(--gold-deep)!important}
+body.th-nocturne h3{color:var(--ink)!important}
+body.th-nocturne .best-card{background:var(--card)!important;color:var(--ink)!important}
+body.th-nocturne .best-card .lbl{color:var(--gold-deep)!important;background:rgba(129,140,248,0.12)!important}
+body.th-nocturne .best-card .name{color:var(--ink)!important;font-weight:700}
+body.th-nocturne .best-card .stat{color:var(--ink-soft)!important}
+body.th-nocturne .best-card .stat b{color:var(--ink)!important}
+body.th-nocturne .best-card .reason{color:var(--ink-soft)!important}
+body.th-nocturne .best-card.empty{color:var(--ink-soft)!important}
+/* 라이브 등급 카드 */
+body.th-nocturne .live-tier-card{background:var(--card)!important;border-top-color:var(--line)!important}
+body.th-nocturne .live-tier-card.tier-S{border-top-color:#F472B6!important;background:linear-gradient(180deg,rgba(244,114,182,0.12) 0%,var(--card) 40%)!important}
+body.th-nocturne .live-tier-card.tier-A{border-top-color:var(--gold)!important;background:linear-gradient(180deg,rgba(129,140,248,0.12) 0%,var(--card) 40%)!important}
+body.th-nocturne .live-tier-card.tier-B{border-top-color:#22D3EE!important}
+body.th-nocturne .live-tier-card.tier-C{border-top-color:#9AA0AD!important}
+body.th-nocturne .live-tier-card .t-hd{color:var(--gold-deep)!important}
+body.th-nocturne .live-tier-card .t-sub{color:var(--ink-soft)!important}
+body.th-nocturne .live-tier-card .t-roi-big{color:var(--gong-red-deep)!important}
+body.th-nocturne .live-tier-card .t-metric{border-bottom-color:var(--line)!important}
+body.th-nocturne .live-tier-card .t-metric .k{color:var(--ink-soft)!important}
+body.th-nocturne .live-tier-card .t-metric .v{color:var(--ink)!important}
+/* Tmall Top 3 (3원 분해) */
+body.th-nocturne .tmall-top3 .t3-col{background:var(--card)!important;border-color:var(--line)!important}
+body.th-nocturne .tmall-top3 .t3-col h4{color:var(--gold-deep)!important}
+body.th-nocturne .tmall-top3 .t3-note{color:var(--ink-soft)!important}
+body.th-nocturne .tmall-top3 .t3-row{border-bottom-color:var(--line)!important}
+body.th-nocturne .tmall-top3 .t3-rank{color:var(--ink-soft)!important}
+body.th-nocturne .tmall-top3 .t3-name{color:var(--ink)!important}
+body.th-nocturne .tmall-top3 .t3-bar{background:rgba(255,255,255,0.05)!important}
+body.th-nocturne .tmall-top3 .t3-val{color:var(--ink)!important;text-shadow:0 0 3px rgba(0,0,0,0.6)!important}
+body.th-nocturne .tmall-top3 .t3-sub{color:var(--ink-soft)!important}
+body.th-nocturne .tmall-top3 .t3-hero-note{background:linear-gradient(90deg,rgba(129,140,248,0.14) 0%,rgba(34,211,238,0.10) 100%)!important;color:var(--ink)!important;border-left-color:var(--gold)!important}
+/* details/summary */
+body.th-nocturne details summary{color:var(--gold-deep)!important}
+body.th-nocturne details.glossary summary{color:var(--gold-deep)!important}
+body.th-nocturne .glossary-grid > div{color:var(--ink)!important}
+body.th-nocturne .glossary-grid > div span{color:var(--ink-soft)!important}
+/* insight (자동 인사이트) */
+body.th-nocturne .insight{color:var(--ink)!important}
+body.th-nocturne .insight b, body.th-nocturne .insight strong{color:var(--gold-deep)!important}
+body.th-nocturne .insight li{color:var(--ink)!important}
+body.th-nocturne .insight ul{color:var(--ink)!important}
+/* 알림/뱃지 안 하드코딩 어두운 색 대체 */
+body.th-nocturne [style*="color:#5C0F0F"], body.th-nocturne [style*="color:#7A1F1F"], body.th-nocturne [style*="color:#2C2317"], body.th-nocturne [style*="color:var(--redDeep)"], body.th-nocturne [style*="color:var(--ink)"]{color:var(--ink)!important}
+body.th-nocturne [style*="color:var(--gong-red-deep)"]{color:var(--gong-red-deep)!important}
+body.th-nocturne [style*="color:var(--gong-red)"]{color:var(--gold-deep)!important}
+body.th-nocturne [style*="color:var(--grey)"], body.th-nocturne [style*="color:var(--ink-soft)"]{color:var(--ink-soft)!important}
+/* Table sub (ko-sub inside th) */
+body.th-nocturne table th .ko-sub, body.th-nocturne table td .ko-sub{color:var(--ink-soft)!important}
+body.th-nocturne table td b{color:var(--ink)!important}
 </style>
 <script id="dsThemeNocturneScript">
 (function(){
