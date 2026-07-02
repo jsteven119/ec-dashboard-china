@@ -757,6 +757,8 @@
     <button data-t="kol">소재별 성과 (KOL)</button>
     <button data-t="koc">소재별 성과 (KOC)</button>
     <button data-t="tmall">🛍 티몰 매출·유입</button>
+    <button data-t="products">🎁 상품별 판매</button>
+    <button data-t="tmallads">📢 티몰 내부광고</button>
     <button data-t="live">📺 직播 (라이브 광고)</button>
     <button data-t="monthly">월별 매체 성과</button>
   </div>
@@ -1004,6 +1006,72 @@
     </div>
   </div>
 
+  <!-- ===== 🎁 상품별 판매 데이터 TAB (2026-07-02 신설) ===== -->
+  <div id="tab_products" class="hide">
+    <div style="margin-bottom:10px">
+      <span style="background:linear-gradient(135deg,rgba(129,140,248,0.15) 0%,rgba(34,211,238,0.10) 100%);color:var(--gong-red-deep);padding:5px 12px;border-radius:5px;font-size:12px;font-weight:700;letter-spacing:.3px;border:1px solid rgba(129,140,248,0.4);font-family:'Noto Serif SC',serif">🎁 SKU별 판매 상세 · Tmall 상품 단위</span>
+      <span id="productsCoverage" style="margin-left:8px;font-size:11px;color:var(--ink-soft)"></span>
+    </div>
+    <!-- KPI -->
+    <div class="kpis" id="productsKpis"></div>
+    <!-- 인사이트 -->
+    <div class="panel full dashboard-summary">
+      <h3>💡 商品洞察 <span class="ko-sub">(상품 인사이트)</span></h3>
+      <div id="productsInsight"></div>
+    </div>
+    <!-- Top 10 상품 hero -->
+    <div class="panel full">
+      <h3>🥇 매출 Top 10 상품 <span class="hint-inline">판매 결제 금액 순</span></h3>
+      <div class="note"><b class="cn">Tmall_Daily 라인명 기준 상품별 매출 순위 · 방문자·전환율·KOL 협업 여부 표시</b></div>
+      <div id="productsTop" class="best-grid"></div>
+    </div>
+    <!-- 상품별 상세 표 -->
+    <div class="panel full">
+      <h3>📋 全部SKU明细 <span class="ko-sub">(전체 상품 상세)</span></h3>
+      <div class="note"><b class="cn">라인명·카테고리·매출·방문자·전환율·KOL 조인 · 정렬: 매출 desc</b></div>
+      <div class="tbox" style="max-height:520px"><table id="productsTable"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ===== 📢 티몰 내부광고 현황 TAB (2026-07-02 신설 · KOL 연계 분석) ===== -->
+  <div id="tab_tmallads" class="hide">
+    <div style="margin-bottom:10px">
+      <span style="background:linear-gradient(135deg,rgba(34,211,238,0.15) 0%,rgba(129,140,248,0.10) 100%);color:var(--gong-red-deep);padding:5px 12px;border-radius:5px;font-size:12px;font-weight:700;letter-spacing:.3px;border:1px solid rgba(34,211,238,0.4);font-family:'Noto Serif SC',serif">📢 Tmall 内部广告 · KOL 연계 성과</span>
+      <span id="tmallAdsCoverage" style="margin-left:8px;font-size:11px;color:var(--ink-soft)"></span>
+    </div>
+    <!-- KPI: 채널·KOL 조인 · 상관계수 등 -->
+    <div class="kpis" id="tmallAdsKpis"></div>
+    <!-- 인사이트 -->
+    <div class="panel full dashboard-summary">
+      <h3>💡 KOL 연계 인사이트 <span class="ko-sub">(小红书 KOL × 티몰 内部广告 성과)</span></h3>
+      <div id="tmallAdsInsight"></div>
+    </div>
+    <!-- ① 채널 5카테고리 그룹 -->
+    <div class="panel full">
+      <h3>🗂 内部流量 5大类目 <span class="ko-sub">(내부 유입 5개 카테고리)</span></h3>
+      <div class="note"><b class="cn">Tmall_Map 광고명 41개를 5개 카테고리(小红书·直播·搜索·再访问·付费推广)로 자동 분류. 각 카테고리별 정의 개수·주요 광고명 예시</b></div>
+      <div id="tmallAdsCatGrid" class="live-tier-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"></div>
+    </div>
+    <!-- ② KOL 연계 성과 — 협업 있음 vs 없음 카테고리 매출 비교 -->
+    <div class="panel full">
+      <h3>🔗 KOL 협업 유무 × 티몰 매출 <span class="ko-sub">(小红书 KOL vs 자연 유입)</span></h3>
+      <div class="note"><b class="cn">Tmall 카테고리별 KOL 협업 有(주력상품 매칭)/无 그룹 → 평균 방문자·매출·전환율 비교. KOL 연계 매출 기여도 실증</b></div>
+      <div id="tmallAdsKolCmp"></div>
+    </div>
+    <!-- ③ KOL 소재 노출량 vs 티몰 UV 상관 -->
+    <div class="panel full">
+      <h3>📈 KOL 노출량 × 티몰 UV 상관 <span class="ko-sub">(Pearson correlation)</span></h3>
+      <div class="note"><b class="cn">월별 KOL 소재 총 노출량 vs 카테고리 상위 5개의 티몰 방문자 상관 · r&ge;0.5=강한 양의 상관, r&le;-0.3=역효과</b></div>
+      <div id="tmallAdsCorr"></div>
+    </div>
+    <!-- ④ 채널 정의 사전 (기존 renderTmallChannelDefRef를 이 탭으로 이동) -->
+    <div class="panel full">
+      <h3>📚 内部广告名 定义 <span class="ko-sub">(광고명 정의 · 41개)</span></h3>
+      <div class="note"><b class="cn">阿里妈妈 각 광고명의 5카테고리 분류 + 한국어 설명</b></div>
+      <div id="tmallAdsChannelRef" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px;margin-top:10px;font-size:11.5px"></div>
+    </div>
+  </div>
+
   <!-- ===== LIVE TAB (抖音 라이브 · 왕홍 협업 분석) — 2026-07-02 실제 시트 스키마 반영 재작성 ===== -->
   <div id="tab_live" class="hide">
     <div style="margin-bottom:10px" id="liveModeBadge">
@@ -1158,18 +1226,18 @@ const ROAS_PCT=n=>(n==null||isNaN(n))?'-':Math.round(n*100)+'%';
 const SMAP={'wakemake':'브랜드','wakemake气垫':'쿠션','wakemake眼影':'아이섀도우','wakemake粉糖气垫':'코팅밤','爱敬气垫':'경쟁사(애경)','colorgram':'브랜드','colorgram唇釉':'틴트','colorgram糖葫芦唇釉':'탕후루틴트','colorgram蜜糖罐唇釉':'탕후루밀크','colorgram小年糕唇釉':'소년고','colorgram唇泥':'립머드','colorgram橡皮擦唇釉':'지우개틴트','colorgram唇部打底':'립베이스'};
 // 故宫 황실 클래식 차트 팔레트 — 朱红/황금/청자/옥/묵
 const COL={navy:'#7A1F1F',blue:'#4A6670',sky:'#6B8C99',accent:'#C8102E',green:'#1E5631',orange:'#B8941F',purple:'#6B3E5C',grey:'#8B7A65',gold:'#D4AF37',red:'#A52A2A',redDeep:'#5C0F0F',rice:'#F2EAD0',ink:'#2C2317'};
-// Chart.js 글로벌 디폴트 — 종이 위 묵필 톤
+// Chart.js 글로벌 디폴트 — Nocturne 다크 인디고 톤 (2026-07-02 사용자 요구 "차트 글씨 안보여")
 if(typeof Chart!=='undefined'){
   try{
-    Chart.defaults.font.family="'Noto Sans SC','Malgun Gothic',sans-serif";
+    Chart.defaults.font.family="'Pretendard','Inter','Noto Sans SC','Malgun Gothic',sans-serif";
     Chart.defaults.font.size=11.5;
-    Chart.defaults.color='#5C4D3A';
-    Chart.defaults.borderColor='rgba(212,201,168,0.5)';
-    Chart.defaults.plugins.legend.labels.color='#2C2317';
-    Chart.defaults.plugins.tooltip.backgroundColor='rgba(44,35,23,0.94)';
-    Chart.defaults.plugins.tooltip.titleColor='#D4AF37';
-    Chart.defaults.plugins.tooltip.bodyColor='#FFFDF5';
-    Chart.defaults.plugins.tooltip.borderColor='#D4AF37';
+    Chart.defaults.color='#E7E9EE';  // 밝은 회색 (다크 배경 대비)
+    Chart.defaults.borderColor='rgba(255,255,255,0.10)';  // grid 미묘한 흰색
+    Chart.defaults.plugins.legend.labels.color='#E7E9EE';
+    Chart.defaults.plugins.tooltip.backgroundColor='rgba(23,26,34,0.96)';
+    Chart.defaults.plugins.tooltip.titleColor='#A5B4FC';  // 인디고 강조
+    Chart.defaults.plugins.tooltip.bodyColor='#E7E9EE';
+    Chart.defaults.plugins.tooltip.borderColor='#818CF8';
     Chart.defaults.plugins.tooltip.borderWidth=1;
     Chart.defaults.plugins.tooltip.padding=10;
     Chart.defaults.plugins.tooltip.cornerRadius=6;
@@ -1266,7 +1334,8 @@ function getActiveMonths(){
   return out.length?out:[1,2,3,4,5,6];
 }
 let charts={};
-Chart.defaults.font.family="'Malgun Gothic','맑은 고딕',sans-serif"; Chart.defaults.font.size=11;
+Chart.defaults.font.family="'Pretendard','Inter','Malgun Gothic',sans-serif"; Chart.defaults.font.size=11;
+Chart.defaults.color='#E7E9EE'; Chart.defaults.borderColor='rgba(255,255,255,0.10)';
 
 function destroy(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 const ML=m=>m.map(x=>x.월+'월');
@@ -2374,6 +2443,8 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.getElementById('tab_overview').classList.toggle('hide',tab!=='overview');
   document.getElementById('tab_kol').classList.toggle('hide',tab!=='kol'&&tab!=='koc');
   document.getElementById('tab_tmall').classList.toggle('hide',tab!=='tmall');
+  document.getElementById('tab_products').classList.toggle('hide',tab!=='products');
+  document.getElementById('tab_tmallads').classList.toggle('hide',tab!=='tmallads');
   document.getElementById('tab_live').classList.toggle('hide',tab!=='live');
   document.getElementById('tab_monthly').classList.toggle('hide',tab!=='monthly');
   // mode 자동 설정
@@ -2397,6 +2468,8 @@ function render(){
   if(tab==='overview') renderOverview();
   else if(tab==='kol'||tab==='koc') renderKol();
   else if(tab==='tmall') renderTmall();
+  else if(tab==='products') renderProducts();
+  else if(tab==='tmallads') renderTmallAds();
   else if(tab==='live') renderLive();
   else if(tab==='monthly') renderMonthly();
 }
@@ -2903,6 +2976,295 @@ function renderTmallChannelDefRef(){
     </div>
     ${g.items.map(it=>`<div style="padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px;border-left:3px solid ${g.color}"><b style="color:var(--gong-red-deep);font-size:11px">${it.name}</b><br><span style="color:var(--ink-soft);font-size:10.5px">${it.desc}</span></div>`).join('')}
   `).join('');
+}
+
+// ============================================================
+// 🎁 상품별 판매 (Products) 탭 · Tmall_Daily 상품 단위 (2026-07-02 신설)
+// ============================================================
+// 현재 브랜드+기간 필터 반영한 Tmall 상품 raw
+function _productsRows(){
+  const daily=DATA.tmallDaily||[];
+  if(!daily.length) return [];
+  const months=getActiveMonths();
+  return daily.filter(r=>{
+    if(brand!=='TOTAL' && r.브랜드!==brand) return false;
+    if(!months.includes(Number(r.월))) return false;
+    return r.결제금액>0 || r.방문자>0;
+  });
+}
+// KOL 조인: 라인명이 KOL 소재 주력상품에 매칭되면 KOL 협업 있음
+function _productKolMatch(lineName){
+  if(!lineName) return {count:0,cost:0};
+  const rows=KOL.kol[brand]||[];
+  const s=String(lineName).toLowerCase();
+  const matched=rows.filter(r=>{
+    const p=String(r.주력상품||'').toLowerCase();
+    return p && (s.includes(p)||p.includes(s));
+  });
+  return {count:matched.length, cost:matched.reduce((a,r)=>a+(+r.총비용||0),0)};
+}
+function renderProducts(){
+  const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(productsCoverageBadge,'productsCoverageBadge');
+  safe(productsKpis,'productsKpis');
+  safe(productsInsight,'productsInsight');
+  safe(productsTop,'productsTop');
+  safe(productsTable,'productsTable');
+}
+function productsCoverageBadge(){
+  const el=document.getElementById('productsCoverage'); if(!el) return;
+  const rows=_productsRows();
+  if(!rows.length){el.innerHTML='<span style="color:var(--ink-soft)">Tmall 상품 시트 대기</span>';return;}
+  const uniqLines=new Set(rows.map(r=>r.라인명||r.상품명_CN)).size;
+  const uniqCats=new Set(rows.map(r=>r.카테고리)).size;
+  el.innerHTML=`상품 ${uniqLines}종 · 카테고리 ${uniqCats}개 · 브랜드 ${brand==='TOTAL'?'Total':brand}`;
+}
+function productsKpis(){
+  const el=document.getElementById('productsKpis'); if(!el) return;
+  const rows=_productsRows();
+  if(!rows.length){el.innerHTML=`<div style="grid-column:1/-1">${_emptyDataNotice('데이터 없음','기간 확장 또는 시트 최신화')}</div>`;return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  const totalGmv=rows.reduce((s,r)=>s+r.결제금액,0);
+  const totalVisitor=rows.reduce((s,r)=>s+r.방문자,0);
+  const avgCvr=totalVisitor>0?(rows.reduce((s,r)=>s+r.결제구매자,0)/totalVisitor*100):0;
+  const avgAov=totalVisitor>0?totalGmv/totalVisitor:0;
+  // 상품 단위 집계
+  const byLine={};
+  rows.forEach(r=>{
+    const k=r.라인명||r.상품명_CN||'-';
+    if(!byLine[k])byLine[k]={gmv:0,v:0,line:k,cat:r.카테고리};
+    byLine[k].gmv+=r.결제금액; byLine[k].v+=r.방문자;
+  });
+  const skus=Object.values(byLine);
+  const activeSkus=skus.filter(s=>s.gmv>0).length;
+  // KOL 조인
+  const kolMatched=skus.filter(s=>_productKolMatch(s.line).count>0).length;
+  const cards=[
+    {lab:'SKU数<span class="ko-sub">(상품 수)</span>',hint:'活跃',val:fmt(activeSkus)+' 종',sub:'판매 발생 SKU',core:true},
+    {lab:'总GMV<span class="ko-sub">(총 판매액)</span>',hint:'实测',val:'￥'+fmt(totalGmv)+`<div class="krw-sub">₩${fmt(totalGmv*fx)}</div>`,sub:'전 SKU 결제 완료 매출',core:true},
+    {lab:'总访客<span class="ko-sub">(총 방문자)</span>',hint:'UV',val:fmt(totalVisitor),sub:'전 SKU 누적 UV'},
+    {lab:'平均CVR<span class="ko-sub">(평균 전환율)</span>',hint:'均值',val:avgCvr.toFixed(2)+'%',sub:'방문자÷결제구매자'},
+    {lab:'访客单价<span class="ko-sub">(UV당 가치)</span>',hint:'ARPU',val:'￥'+avgAov.toFixed(1)+`<div class="krw-sub">₩${fmt(avgAov*fx)}</div>`,sub:'GMV÷방문자'},
+    {lab:'KOL협업 SKU<span class="ko-sub">(KOL 조인 상품)</span>',hint:'匹配',val:fmt(kolMatched)+' 종',sub:'KOL 주력상품과 매칭된 SKU',core:true}
+  ];
+  el.innerHTML=cards.map(c=>{
+    const cls='kpi'+(c.core?' core':'');
+    return `<div class="${cls}" title="${c.sub}"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div></div>`;
+  }).join('');
+}
+function productsInsight(){
+  const el=document.getElementById('productsInsight'); if(!el) return;
+  const rows=_productsRows();
+  if(!rows.length){el.innerHTML='<span style="color:var(--ink-soft)">데이터 대기</span>';return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  const byLine={};
+  rows.forEach(r=>{
+    const k=r.라인명||r.상품명_CN||'-';
+    if(!byLine[k])byLine[k]={line:k,gmv:0,v:0,cvr:[],cat:r.카테고리};
+    byLine[k].gmv+=r.결제금액; byLine[k].v+=r.방문자;
+    if(r.결제전환율>0)byLine[k].cvr.push(r.결제전환율);
+  });
+  const skus=Object.values(byLine).map(s=>({...s,avgCvr:s.cvr.length?s.cvr.reduce((a,x)=>a+x,0)/s.cvr.length:0,kol:_productKolMatch(s.line)}));
+  const totalGmv=skus.reduce((s,x)=>s+x.gmv,0);
+  const withKol=skus.filter(s=>s.kol.count>0);
+  const withoutKol=skus.filter(s=>s.kol.count===0);
+  const topSku=[...skus].sort((a,b)=>b.gmv-a.gmv)[0];
+  const kolGmv=withKol.reduce((s,x)=>s+x.gmv,0);
+  const kolShare=totalGmv>0?(kolGmv/totalGmv*100):0;
+  el.innerHTML=`
+    <div style="padding:8px 12px;background:rgba(129,140,248,0.10);border-left:4px solid var(--gold-deep);border-radius:4px;margin-bottom:8px;font-size:13.5px">
+      📌 <b>요약:</b> ${skus.length}종 SKU 중 <b>${topSku?topSku.line:'-'}</b>이 매출 1위 (￥${topSku?fmt(topSku.gmv):'-'} · ₩${topSku?fmt(topSku.gmv*fx):'-'}) · <b>KOL 협업 SKU가 전체 매출의 ${kolShare.toFixed(1)}%</b> 차지 (${withKol.length}종/${skus.length}종)
+    </div>
+    <ul style="padding-left:22px;margin:0;font-size:12.5px;line-height:1.7">
+      ${topSku?`<li>🥇 <b>매출 Top:</b> ${topSku.line} — ￥${fmt(topSku.gmv)} · UV ${fmt(topSku.v)} · 카테고리 ${topSku.cat}</li>`:''}
+      <li>🔗 <b>KOL 협업 SKU ${withKol.length}종</b> vs <b>非협업 ${withoutKol.length}종</b> — 협업 SKU 평균 매출 ￥${fmt(withKol.length?kolGmv/withKol.length:0)}, 非협업 평균 ￥${fmt(withoutKol.length?withoutKol.reduce((s,x)=>s+x.gmv,0)/withoutKol.length:0)}</li>
+      <li>💡 <b>액션:</b> 매출 상위 5 SKU 중 KOL 협업 없는 SKU가 있다면 다음 캠페인 시드 우선순위</li>
+    </ul>`;
+}
+function productsTop(){
+  const el=document.getElementById('productsTop'); if(!el) return;
+  const rows=_productsRows();
+  if(!rows.length){el.innerHTML=_emptyDataNotice('데이터 없음','시트 대기');return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  const byLine={};
+  rows.forEach(r=>{
+    const k=r.라인명||r.상품명_CN||'-';
+    if(!byLine[k])byLine[k]={line:k,gmv:0,v:0,buy:0,cat:r.카테고리};
+    byLine[k].gmv+=r.결제금액; byLine[k].v+=r.방문자; byLine[k].buy+=r.결제구매자;
+  });
+  const top10=Object.values(byLine).sort((a,b)=>b.gmv-a.gmv).slice(0,10);
+  el.innerHTML=top10.map((s,i)=>{
+    const kol=_productKolMatch(s.line);
+    const cvr=s.v>0?(s.buy/s.v*100):0;
+    return `<div class="best-card" style="border-top:3px solid ${i===0?'var(--gong-red-deep)':i<3?'var(--gold)':'var(--sky)'}">
+      <div class="lbl">🥇 #${i+1} · <span style="color:var(--ink-soft)">${s.cat}</span></div>
+      <div class="name">${s.line}</div>
+      <div class="stat">GMV <b>￥${fmt(s.gmv)}</b><div class="krw-sub">₩${fmt(s.gmv*fx)}</div>访客 <b>${fmt(s.v)}</b> · CVR <b>${cvr.toFixed(2)}%</b></div>
+      <div class="reason">${kol.count>0?`🔗 KOL 협업 <b>${kol.count}건</b> · 투입 ￥${fmt(kol.cost)}`:'⚪ KOL 협업 없음'}</div>
+    </div>`;
+  }).join('');
+}
+function productsTable(){
+  const tbl=document.getElementById('productsTable'); if(!tbl) return;
+  const rows=_productsRows();
+  if(!rows.length){tbl.querySelector('thead').innerHTML='';tbl.querySelector('tbody').innerHTML=`<tr><td>${_emptyDataNotice('데이터 없음','시트 대기')}</td></tr>`;return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  const byLine={};
+  rows.forEach(r=>{
+    const k=r.라인명||r.상품명_CN||'-';
+    if(!byLine[k])byLine[k]={line:k,gmv:0,v:0,buy:0,cat:r.카테고리,cvr:[]};
+    byLine[k].gmv+=r.결제금액; byLine[k].v+=r.방문자; byLine[k].buy+=r.결제구매자;
+    if(r.결제전환율>0)byLine[k].cvr.push(r.결제전환율);
+  });
+  const skus=Object.values(byLine).map(s=>({...s,avgCvr:s.cvr.length?s.cvr.reduce((a,x)=>a+x,0)/s.cvr.length:0,kol:_productKolMatch(s.line)})).sort((a,b)=>b.gmv-a.gmv);
+  tbl.querySelector('thead').innerHTML=`<tr><th>#</th><th>라인명(상품)</th><th>类目<div class="ko-sub">(카테고리)</div></th><th style="text-align:right">GMV ￥·₩</th><th style="text-align:right">访客<div class="ko-sub">(UV)</div></th><th style="text-align:center">CVR</th><th style="text-align:center">KOL협업<div class="ko-sub">(건수)</div></th></tr>`;
+  tbl.querySelector('tbody').innerHTML=skus.map((s,i)=>`<tr><td style="text-align:center">${i===0?'👑':i+1}</td><td><b>${s.line}</b></td><td>${s.cat}</td><td style="text-align:right">￥${fmt(s.gmv)}<div class="krw-sub" style="text-align:right">₩${fmt(s.gmv*fx)}</div></td><td style="text-align:right">${fmt(s.v)}</td><td style="text-align:center">${s.avgCvr.toFixed(2)}%</td><td style="text-align:center">${s.kol.count>0?`<b style="color:var(--gold-deep)">${s.kol.count}건</b>`:'—'}</td></tr>`).join('');
+}
+
+// ============================================================
+// 📢 티몰 내부광고 (Tmall Ads) 탭 · Tmall_Map 채널 41개 + KOL 연계 (2026-07-02 신설)
+// ============================================================
+function renderTmallAds(){
+  const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  safe(tmallAdsCoverageBadge,'tmallAdsCoverageBadge');
+  safe(tmallAdsKpis,'tmallAdsKpis');
+  safe(tmallAdsInsight,'tmallAdsInsight');
+  safe(tmallAdsCategoryGrid,'tmallAdsCategoryGrid');
+  safe(tmallAdsKolCmp,'tmallAdsKolCmp');
+  safe(tmallAdsCorr,'tmallAdsCorr');
+  safe(tmallAdsChannelRef,'tmallAdsChannelRef');
+}
+function tmallAdsCoverageBadge(){
+  const el=document.getElementById('tmallAdsCoverage'); if(!el) return;
+  const def=DATA.tmallChannelDef||{};
+  const cnt=Object.keys(def).length;
+  const kolCnt=(KOL.kol[brand]||[]).length;
+  el.innerHTML=`채널 정의 ${cnt}개 · KOL 소재 ${kolCnt}건 (${brand==='TOTAL'?'Total':brand})`;
+}
+function tmallAdsKpis(){
+  const el=document.getElementById('tmallAdsKpis'); if(!el) return;
+  const def=DATA.tmallChannelDef||{};
+  const catKeys=['xhs','live','search','retarget','paid','other'];
+  const groups={};
+  Object.keys(def).forEach(k=>{const c=_classifyTmallChannel(k,def[k]||'');groups[c.key]=(groups[c.key]||0)+1;});
+  const cards=catKeys.map(k=>{
+    const labels={xhs:'小红书',live:'直播',search:'搜索',retarget:'再访问',paid:'付费推广',other:'其他'};
+    return {lab:labels[k]+'<span class="ko-sub">('+({xhs:'샤오홍슈',live:'라이브',search:'검색',retarget:'재방문',paid:'유료광고',other:'기타'})[k]+')</span>',hint:'분류',val:(groups[k]||0)+' 개',sub:'해당 카테고리 광고명 수'};
+  }).filter(c=>+c.val.split(' ')[0]>0);
+  el.innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div></div>`).join('');
+}
+function tmallAdsInsight(){
+  const el=document.getElementById('tmallAdsInsight'); if(!el) return;
+  const cats=_tmallCategoriesForBrand?.()||[];
+  const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업');
+  if(!cats.length){el.innerHTML='<span style="color:var(--ink-soft)">Tmall + KOL 데이터 대기</span>';return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const withKolCats=cats.filter(c=>c._kolLinks && c._kolLinks.length>0);
+  const withoutKolCats=cats.filter(c=>!c._kolLinks || c._kolLinks.length===0);
+  const avgKolGmv=withKolCats.length?withKolCats.reduce((s,c)=>s+c.결제금액,0)/withKolCats.length:0;
+  const avgNonGmv=withoutKolCats.length?withoutKolCats.reduce((s,c)=>s+c.결제금액,0)/withoutKolCats.length:0;
+  const lift=avgNonGmv>0?((avgKolGmv-avgNonGmv)/avgNonGmv*100):0;
+  el.innerHTML=`
+    <div style="padding:8px 12px;background:rgba(34,211,238,0.10);border-left:4px solid var(--gong-red-deep);border-radius:4px;margin-bottom:8px;font-size:13.5px">
+      📌 <b>요약:</b> KOL 협업 카테고리(${withKolCats.length}개) 평균 매출 <b>￥${fmt(avgKolGmv)}</b> vs 비협업(${withoutKolCats.length}개) 평균 <b>￥${fmt(avgNonGmv)}</b> · <b style="color:${lift>0?'var(--gold-deep)':'var(--accent)'}">${lift>0?'+':''}${lift.toFixed(0)}% 리프트</b>
+    </div>
+    <ul style="padding-left:22px;margin:0;font-size:12.5px;line-height:1.7">
+      <li>🔗 KOL 협업 有 카테고리 ${withKolCats.length}개 (총 KOL 소재 ${withKolCats.reduce((s,c)=>s+(c._kolLinks?.length||0),0)}건)</li>
+      <li>${withoutKolCats.length>0?`⚠ KOL 협업 없이 매출 발생 카테고리: <b>${withoutKolCats.map(c=>c.카테고리).slice(0,5).join(', ')}</b> — 검색·타오바오 자연 유입 강함 (혹은 KOL 시드 후보)`:''}</li>
+      <li>💡 <b>액션:</b> 매출 상위 카테고리 중 KOL 없는 곳에 시드 우선 배치 → 리프트 효과 검증</li>
+    </ul>`;
+}
+function tmallAdsCategoryGrid(){
+  const el=document.getElementById('tmallAdsCatGrid'); if(!el) return;
+  const def=DATA.tmallChannelDef||{};
+  if(!Object.keys(def).length){el.innerHTML=_emptyDataNotice('Tmall_Map 시트 대기','채널 정의 로딩 중');return;}
+  const groups={};
+  Object.keys(def).forEach(k=>{
+    const c=_classifyTmallChannel(k,def[k]||'');
+    if(!groups[c.key])groups[c.key]={cat:c.cat,color:c.color,items:[]};
+    groups[c.key].items.push({name:k,desc:def[k]});
+  });
+  const order=['xhs','live','paid','search','retarget','other'];
+  el.innerHTML=order.filter(k=>groups[k]).map(k=>{
+    const g=groups[k];
+    const examples=g.items.slice(0,3).map(x=>x.name).join(', ');
+    return `<div class="live-tier-card" style="border-top-color:${g.color}">
+      <div class="t-hd" style="color:${g.color}">${g.cat}</div>
+      <div class="t-sub">${g.items.length}개 광고명</div>
+      <div class="t-roi-big" style="color:${g.color}">${g.items.length}</div>
+      <div class="t-metric"><span class="k">주요 예시</span><span class="v" style="font-size:10.5px">${examples}${g.items.length>3?'…':''}</span></div>
+    </div>`;
+  }).join('');
+}
+function tmallAdsKolCmp(){
+  const el=document.getElementById('tmallAdsKolCmp'); if(!el) return;
+  const cats=(typeof _tmallCategoriesForBrand==='function')?_tmallCategoriesForBrand():[];
+  if(!cats.length){el.innerHTML=_emptyDataNotice('Tmall 카테고리 데이터 없음','시트 대기');return;}
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  const fx=(globalFx||195);
+  const withKol=cats.filter(c=>c._kolLinks && c._kolLinks.length>0);
+  const withoutKol=cats.filter(c=>!c._kolLinks || c._kolLinks.length===0);
+  const agg=(arr)=>{
+    const gmv=arr.reduce((s,c)=>s+c.결제금액,0);
+    const v=arr.reduce((s,c)=>s+c.방문자,0);
+    const cvrs=arr.filter(c=>c.평균결제전환율>0).map(c=>c.평균결제전환율);
+    return {cnt:arr.length,gmv,v,cvr:cvrs.length?cvrs.reduce((a,x)=>a+x,0)/cvrs.length:0,avgGmv:arr.length?gmv/arr.length:0};
+  };
+  const a=agg(withKol), b=agg(withoutKol);
+  const lift=b.avgGmv>0?((a.avgGmv-b.avgGmv)/b.avgGmv*100):0;
+  el.innerHTML=`<div style="overflow:auto"><table style="width:100%;font-size:12px"><thead><tr><th>구분</th><th style="text-align:center">카테고리 수</th><th style="text-align:right">평균 GMV ￥</th><th style="text-align:right">평균 UV</th><th style="text-align:center">평균 CVR</th><th style="text-align:right">총 GMV ￥·₩</th></tr></thead><tbody>
+    <tr style="background:rgba(129,140,248,0.10)"><td><b style="color:var(--gold-deep)">🔗 KOL 협업 有</b></td><td style="text-align:center">${a.cnt}</td><td style="text-align:right"><b>￥${fmt(a.avgGmv)}</b></td><td style="text-align:right">${fmt(a.v/Math.max(1,a.cnt))}</td><td style="text-align:center">${a.cvr.toFixed(2)}%</td><td style="text-align:right">￥${fmt(a.gmv)}<div class="krw-sub" style="text-align:right">₩${fmt(a.gmv*fx)}</div></td></tr>
+    <tr><td>⚪ KOL 협업 无</td><td style="text-align:center">${b.cnt}</td><td style="text-align:right">￥${fmt(b.avgGmv)}</td><td style="text-align:right">${fmt(b.v/Math.max(1,b.cnt))}</td><td style="text-align:center">${b.cvr.toFixed(2)}%</td><td style="text-align:right">￥${fmt(b.gmv)}<div class="krw-sub" style="text-align:right">₩${fmt(b.gmv*fx)}</div></td></tr>
+    <tr style="border-top:2px solid var(--gold)"><td colspan="6" style="padding:10px 12px;background:rgba(129,140,248,0.05);text-align:center;font-size:13px"><b>KOL 리프트: <span style="color:${lift>0?'var(--gold-deep)':'var(--accent)'};font-size:15px">${lift>0?'+':''}${lift.toFixed(0)}%</span></b> (KOL 협업 카테고리가 비협업 대비 평균 매출 증분)</td></tr>
+  </tbody></table></div>`;
+}
+function tmallAdsCorr(){
+  const el=document.getElementById('tmallAdsCorr'); if(!el) return;
+  const cats=(typeof _tmallCategoriesForBrand==='function')?_tmallCategoriesForBrand():[];
+  const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.게시일);
+  if(!cats.length||!kolRows.length){el.innerHTML=_emptyDataNotice('KOL 또는 Tmall 데이터 부족','최소 5개월 이상 필요');return;}
+  // 월별 KOL 노출량 vs Tmall Top 5 카테고리 UV
+  const months=getActiveMonths();
+  const kolByMonth=months.map(m=>{
+    const cnt=kolRows.filter(r=>{const mm=(r.게시일||'').match(/(\d{2})-(\d{2})/);return mm&&+mm[1]===m;}).reduce((s,r)=>s+(+r.노출량||0),0);
+    return cnt;
+  });
+  const top5=cats.slice(0,5);
+  const rows=top5.map(c=>{
+    const uv=months.map(m=>{const x=c._monthly?.find(mm=>mm.월===m);return x?x.방문자:0;});
+    const r=(typeof pearson==='function')?pearson(kolByMonth,uv):null;
+    return {cat:c.카테고리,r,uv};
+  });
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  el.innerHTML=`<div style="overflow:auto"><table style="width:100%;font-size:12px"><thead><tr><th>Top 5 카테고리</th><th style="text-align:center">Pearson r</th><th style="text-align:center">상관 강도</th><th>해석</th></tr></thead><tbody>${rows.map(r=>{
+    const val=r.r!=null?r.r:0;
+    const strength=Math.abs(val)>=0.7?'매우 강함':Math.abs(val)>=0.5?'강함':Math.abs(val)>=0.3?'중간':Math.abs(val)>=0.1?'약함':'없음';
+    const color=val>=0.5?'var(--gold-deep)':val<=-0.3?'var(--accent)':'var(--ink-soft)';
+    const interp=val>=0.5?'✅ KOL 노출↑ → 티몰 UV↑ (강한 견인)':val>=0.3?'⚠ 부분적 견인':val>=0?'⚪ 상관 낮음 (다른 요인 지배)':val<=-0.3?'❌ 역효과 (자기잠식/타이밍 이슈)':'⚪ 미미';
+    return `<tr><td><b>${r.cat}</b></td><td style="text-align:center;color:${color};font-weight:700;font-size:14px">${val.toFixed(2)}</td><td style="text-align:center">${strength}</td><td style="font-size:11.5px">${interp}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function tmallAdsChannelRef(){
+  const el=document.getElementById('tmallAdsChannelRef'); if(!el) return;
+  const def=DATA.tmallChannelDef||{};
+  if(!Object.keys(def).length){el.innerHTML='<div style="color:var(--ink-soft)">Tmall_Map 시트 매핑 사전 대기 중...</div>';return;}
+  const groups={};
+  Object.keys(def).forEach(k=>{
+    const c=_classifyTmallChannel(k,def[k]||'');
+    if(!groups[c.key])groups[c.key]={cat:c.cat,color:c.color,items:[]};
+    groups[c.key].items.push({name:k,desc:def[k]});
+  });
+  const order=['xhs','live','paid','search','retarget','other'];
+  el.innerHTML=order.filter(k=>groups[k]).map(k=>{
+    const g=groups[k];
+    const header=`<div style="grid-column:1/-1;margin-top:10px;padding:8px 12px;background:${g.color}22;border-left:4px solid ${g.color};border-radius:4px"><b style="color:${g.color};font-size:13px;font-family:'Noto Serif SC',serif">${g.cat}</b><span style="color:var(--ink-soft);font-size:10.5px;margin-left:8px">${g.items.length}개 광고명</span></div>`;
+    const items=g.items.map(it=>`<div style="padding:6px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px;border-left:3px solid ${g.color}"><b style="color:var(--gold-deep);font-size:11px">${it.name}</b><br><span style="color:var(--ink-soft);font-size:10.5px">${it.desc}</span></div>`).join('');
+    return header+items;
+  }).join('');
 }
 
 // ============================================================
