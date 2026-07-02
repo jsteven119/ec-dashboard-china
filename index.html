@@ -3130,6 +3130,8 @@ function productsTable(){
 // ============================================================
 function renderTmallAds(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
+  // 진단 로그 (2026-07-02 사용자 "티몰 내부광고 탭 왜 아무것도 안나와?")
+  console.info('[tmallads] render 시작 · brand=', brand, '· channelDef=', Object.keys(DATA.tmallChannelDef||{}).length, '개 · tmallDaily=', (DATA.tmallDaily||[]).length, '건 · KOL=', (KOL.kol[brand]||[]).length, '건');
   safe(tmallAdsCoverageBadge,'tmallAdsCoverageBadge');
   safe(tmallAdsKpis,'tmallAdsKpis');
   safe(tmallAdsInsight,'tmallAdsInsight');
@@ -3143,25 +3145,38 @@ function tmallAdsCoverageBadge(){
   const def=DATA.tmallChannelDef||{};
   const cnt=Object.keys(def).length;
   const kolCnt=(KOL.kol[brand]||[]).length;
-  el.innerHTML=`채널 정의 ${cnt}개 · KOL 소재 ${kolCnt}건 (${brand==='TOTAL'?'Total':brand})`;
+  const status=cnt>0?'':' <b style="color:var(--accent)">⚠ Tmall_Map 로딩 대기</b>';
+  el.innerHTML=`채널 정의 ${cnt}개 · KOL 소재 ${kolCnt}건 (${brand==='TOTAL'?'Total':brand})${status}`;
 }
 function tmallAdsKpis(){
   const el=document.getElementById('tmallAdsKpis'); if(!el) return;
   const def=DATA.tmallChannelDef||{};
+  // 채널 정의 로딩 대기 안내 (empty state 명시)
+  if(!Object.keys(def).length){
+    el.innerHTML=`<div style="grid-column:1/-1">${_emptyDataNotice('Tmall_Map 시트 로딩 대기','상단 🔄 동기화 버튼 클릭 · 또는 페이지 새로고침<br>완료 후 5카테고리 자동 분류 표시')}</div>`;
+    return;
+  }
   const catKeys=['xhs','live','search','retarget','paid','other'];
   const groups={};
   Object.keys(def).forEach(k=>{const c=_classifyTmallChannel(k,def[k]||'');groups[c.key]=(groups[c.key]||0)+1;});
+  // 필터 제거 · 0개여도 표시 (사용자 인지)
   const cards=catKeys.map(k=>{
     const labels={xhs:'小红书',live:'直播',search:'搜索',retarget:'再访问',paid:'付费推广',other:'其他'};
-    return {lab:labels[k]+'<span class="ko-sub">('+({xhs:'샤오홍슈',live:'라이브',search:'검색',retarget:'재방문',paid:'유료광고',other:'기타'})[k]+')</span>',hint:'분류',val:(groups[k]||0)+' 개',sub:'해당 카테고리 광고명 수'};
-  }).filter(c=>+c.val.split(' ')[0]>0);
-  el.innerHTML=cards.map(c=>`<div class="kpi"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div></div>`).join('');
+    const koLabels={xhs:'샤오홍슈',live:'라이브',search:'검색',retarget:'재방문',paid:'유료광고',other:'기타'};
+    return {lab:labels[k]+'<span class="ko-sub">('+koLabels[k]+')</span>',hint:'분류',val:(groups[k]||0)+' 개',sub:'해당 카테고리 광고명 수',dim:(groups[k]||0)===0};
+  });
+  el.innerHTML=cards.map(c=>`<div class="kpi" style="${c.dim?'opacity:0.4':''}"><div class="lab">${c.lab}<span class="hint">${c.hint}</span></div><div class="val">${c.val}</div><div class="sm">${c.sub}</div></div>`).join('');
 }
 function tmallAdsInsight(){
   const el=document.getElementById('tmallAdsInsight'); if(!el) return;
-  const cats=_tmallCategoriesForBrand?.()||[];
+  const cats=(typeof _tmallCategoriesForBrand==='function')?_tmallCategoriesForBrand():[];
   const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업');
-  if(!cats.length){el.innerHTML='<span style="color:var(--ink-soft)">Tmall + KOL 데이터 대기</span>';return;}
+  // 명시적 안내 (CG/DELIGHT일 때 대안 알림)
+  if(!cats.length){
+    const cgMsg=(brand==='COLORGRAM'||brand==='DELIGHT')?`<br>브랜드 필터를 <b style="color:var(--gold-deep)">TOTAL</b> 또는 <b style="color:var(--gold-deep)">WAKEMAKE</b>로 전환하세요 (Tmall 데이터가 WM만 있음).`:'';
+    el.innerHTML=`<div style="padding:12px;color:var(--ink-soft);text-align:center">📭 <b>Tmall 카테고리 데이터 없음</b> (기간 필터/브랜드 필터 확인)${cgMsg}</div>`;
+    return;
+  }
   const fmt=n=>Math.round(n).toLocaleString('ko-KR');
   const withKolCats=cats.filter(c=>c._kolLinks && c._kolLinks.length>0);
   const withoutKolCats=cats.filter(c=>!c._kolLinks || c._kolLinks.length===0);
@@ -3203,7 +3218,10 @@ function tmallAdsCategoryGrid(){
 function tmallAdsKolCmp(){
   const el=document.getElementById('tmallAdsKolCmp'); if(!el) return;
   const cats=(typeof _tmallCategoriesForBrand==='function')?_tmallCategoriesForBrand():[];
-  if(!cats.length){el.innerHTML=_emptyDataNotice('Tmall 카테고리 데이터 없음','시트 대기');return;}
+  if(!cats.length){
+    const cgMsg=(brand==='COLORGRAM'||brand==='DELIGHT')?'<br>브랜드를 <b>TOTAL/WAKEMAKE</b>로 전환':'';
+    el.innerHTML=_emptyDataNotice('Tmall 카테고리 없음',`sync 대기 or 브랜드/기간 필터 확인${cgMsg}`);return;
+  }
   const fmt=n=>Math.round(n).toLocaleString('ko-KR');
   const fx=(globalFx||195);
   const withKol=cats.filter(c=>c._kolLinks && c._kolLinks.length>0);
@@ -3226,7 +3244,12 @@ function tmallAdsCorr(){
   const el=document.getElementById('tmallAdsCorr'); if(!el) return;
   const cats=(typeof _tmallCategoriesForBrand==='function')?_tmallCategoriesForBrand():[];
   const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.게시일);
-  if(!cats.length||!kolRows.length){el.innerHTML=_emptyDataNotice('KOL 또는 Tmall 데이터 부족','최소 5개월 이상 필요');return;}
+  if(!cats.length||!kolRows.length){
+    const missing=[];
+    if(!cats.length) missing.push('Tmall 카테고리');
+    if(!kolRows.length) missing.push('KOL 게시일 있는 소재');
+    el.innerHTML=_emptyDataNotice(missing.join(' + ')+' 데이터 부족','최소 3개월 이상 & KOL 게시일 필요<br>브랜드/기간 필터 확인');return;
+  }
   // 월별 KOL 노출량 vs Tmall Top 5 카테고리 UV
   const months=getActiveMonths();
   const kolByMonth=months.map(m=>{
