@@ -1572,22 +1572,58 @@ function chRoi(){destroy('cRoi');
   charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{y:{beginAtZero:true}}}});}
 function chDaily(){destroy('cDaily');
   // brandByday: brand + 기간 필터 자동 적용
-  const rows=brandByday().filter(r=>(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
+  // 사용자 요구 (2026-07-02): 일별 광고비·샤오홍슈 GMV + Tmall GMV(월값을 일수로 균등분배) + KOL/KOC 게시 건수
+  const byRows=brandByday();
+  // rows 유효 조건 완화 — 광고비 없어도 GMV or KOL 게시 있으면 표시
   let allDates=[];
-  rows.forEach(r=>{if(!allDates.includes(r.날짜))allDates.push(r.날짜);});
+  byRows.forEach(r=>{if(!allDates.includes(r.날짜))allDates.push(r.날짜);});
   allDates.sort();
-  const labels=allDates.map(d=>d.slice(5));
   // 일별 합산 맵 (TOTAL이면 두 브랜드 자동 합산)
   const spendMap={}, gmvMap={};
-  brandByday().forEach(r=>{
+  byRows.forEach(r=>{
     spendMap[r.날짜]=(spendMap[r.날짜]||0)+(r['쥐광_광고비']||0);
     gmvMap[r.날짜]=(gmvMap[r.날짜]||0)+(r['샤오홍싱_전점GMV']||0);
   });
+  // KOL/KOC 게시일 기반 일별 건수
+  const kolMap={}, kocMap={};
+  const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.게시일);
+  kolRows.forEach(r=>{
+    const d=r.게시일;
+    if(!d) return;
+    if(_isKoc(r.팔로워구간)) kocMap[d]=(kocMap[d]||0)+1;
+    else kolMap[d]=(kolMap[d]||0)+1;
+  });
+  // Tmall 일별 GMV 근사 — Tmall 시트는 월 단위 → 월 총액을 그 달 유효 일수로 균등 분배
+  const tmallDaily=DATA.tmallDaily||[];
+  const monthGmv={};  // {월: 합산 GMV}
+  tmallDaily.forEach(r=>{
+    if(brand!=='TOTAL' && r.브랜드!==brand) return;
+    monthGmv[r.월]=(monthGmv[r.월]||0)+(r.결제금액||0);
+  });
+  const monthDayCount={};
+  allDates.forEach(d=>{const m=+d.slice(5,7); monthDayCount[m]=(monthDayCount[m]||0)+1;});
+  const tmallMap={};
+  allDates.forEach(d=>{const m=+d.slice(5,7); const total=monthGmv[m]||0; const cnt=monthDayCount[m]||1; if(total>0) tmallMap[d]=total/cnt;});
+  // 게시일이 데이터 범위 밖이면 allDates에 없어서 표시 안 됨 → dates 통합
+  Object.keys(kolMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
+  Object.keys(kocMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
+  allDates.sort();
+  const labels=allDates.map(d=>d.slice(5));
+  // 원본 필터 (사용자 뭘 봐도 되게)
+  const rows=byRows.filter(r=>(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
   const spend=allDates.map(d=>spendMap[d]||null);
   const gmv=allDates.map(d=>gmvMap[d]||null);
+  const tmall=allDates.map(d=>tmallMap[d]||null);
+  const kolCnt=allDates.map(d=>kolMap[d]||0);
+  const kocCnt=allDates.map(d=>kocMap[d]||0);
   const datasets=[
-    {label:'쥐광 광고비',data:spend,borderColor:COL.sky,backgroundColor:COL.sky+'1F',fill:true,tension:.25,pointRadius:0},
-    {label:'전점 GMV',data:gmv,borderColor:COL.accent,tension:.25,pointRadius:0}
+    // 라인 3개 (매출·광고비 y축)
+    {type:'line',label:'광고비 ￥',data:spend,borderColor:'#818CF8',backgroundColor:'#818CF81F',fill:false,tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2},
+    {type:'line',label:'샤오홍슈 GMV ￥',data:gmv,borderColor:'#F472B6',backgroundColor:'#F472B6',tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2},
+    {type:'line',label:'Tmall GMV ￥ (월값÷일수)',data:tmall,borderColor:'#22D3EE',backgroundColor:'#22D3EE10',fill:true,tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2,borderDash:[4,3]},
+    // 막대 2개 (건수 y1축)
+    {type:'bar',label:'KOL 게시',data:kolCnt,backgroundColor:'#67E8F9AA',borderColor:'#22D3EE',borderWidth:1,yAxisID:'y1',order:5,barPercentage:0.6},
+    {type:'bar',label:'KOC 게시',data:kocCnt,backgroundColor:'#FBBF24AA',borderColor:'#FBBF24',borderWidth:1,yAxisID:'y1',order:6,barPercentage:0.6}
   ];
   // forecast: date range가 1월 시작 ~ 5월 끝일 때(전체 기간) 의미 있음. 그 외엔 비활성
   let forecastInfo=null;
@@ -1640,7 +1676,7 @@ function chDaily(){destroy('cDaily');
       ctx.restore();
     });
   }};
-  charts.cDaily=new Chart(document.getElementById('cDaily'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{ticks:{callback:v=>FMT(v)}}}},plugins:[mk]});
+  charts.cDaily=new Chart(document.getElementById('cDaily'),{data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:10}}},crown:{enabled:true}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{position:'left',title:{display:true,text:'￥ (매출·광고비)'},ticks:{callback:v=>FMT(v)}},y1:{position:'right',title:{display:true,text:'KOL/KOC 건수'},grid:{display:false},beginAtZero:true,ticks:{precision:0,stepSize:1}}}},plugins:[mk]});
   renderCampCalendar(allDates,camps);
 }
 // 캠페인 캘린더 패널: 데이터 기간에 걸친 캠페인 + 다음 예정 캠페인 카드
@@ -1693,23 +1729,39 @@ function renderCampCalendar(dates,inRange){
 }
 function chChannel(){destroy('cChannel');
   const m=brandMonthly();
-  const ds=[{label:'KOL',data:m.map(x=>x.KOL비),backgroundColor:COL.navy},{label:'쥐광',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky}];
-  if(brand==='COLORGRAM'||brand==='TOTAL')ds.push({label:'CID',data:m.map(x=>x.CID비||0),backgroundColor:COL.green});
+  if(!m||!m.length){_showCanvasEmpty('cChannel','월별 데이터 없음','기간/브랜드 필터 확인');return;}
+  // 각 필드 총합 계산 → 다 0이면 안내
+  const kolSum=m.reduce((s,x)=>s+(x.KOL비||0),0);
+  const juSum=m.reduce((s,x)=>s+(x.쥐광비||0),0);
+  const cidSum=m.reduce((s,x)=>s+(x.CID비||0),0);
+  if(kolSum+juSum+cidSum===0){_showCanvasEmpty('cChannel','매체 광고비 데이터 0','시트에 광고비 컬럼 매핑 확인');return;}
+  const ds=[
+    {label:'KOL',data:m.map(x=>x.KOL비||0),backgroundColor:'#818CF8'},
+    {label:'쥐광',data:m.map(x=>x.쥐광비||0),backgroundColor:'#22D3EE'}
+  ];
+  if(brand==='COLORGRAM'||brand==='TOTAL')ds.push({label:'CID',data:m.map(x=>x.CID비||0),backgroundColor:'#34D399'});
   charts.cChannel=new Chart(document.getElementById('cChannel'),{type:'bar',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>FMT(v)}}}}});}
 function chSearch(){destroy('cSearch');
+  if(!DATA.search||typeof DATA.search!=='object'){_showCanvasEmpty('cSearch','검색지수 데이터 없음','sync 대기 or 시트 확인');return;}
   if(brand==='TOTAL'){
-    // TOTAL: 두 브랜드 메인 키워드 모두 표시 (검색지수는 합산 무의미, 각각 비교)
     const wm=DATA.search.WAKEMAKE, cg=DATA.search.COLORGRAM;
+    if(!wm||!cg||!Object.keys(wm).length||!Object.keys(cg).length){_showCanvasEmpty('cSearch','검색지수 데이터 없음','WM/CG 데이터 확인');return;}
     const months=Object.keys(wm).sort((a,b)=>a-b);
-    const wmKey=Object.keys(wm[months[0]])[0], cgKey=Object.keys(cg[months[0]])[0];
+    const wmKey=Object.keys(wm[months[0]]||{})[0], cgKey=Object.keys(cg[months[0]]||{})[0];
+    if(!wmKey||!cgKey){_showCanvasEmpty('cSearch','검색지수 키워드 데이터 없음','시트 컬럼 확인');return;}
     charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:[
-      {label:'WAKEMAKE',data:months.map(m=>wm[m][wmKey]),borderColor:COL.red,backgroundColor:COL.red,tension:.3,pointRadius:3},
-      {label:'COLORGRAM',data:months.map(m=>cg[m][cgKey]),borderColor:COL.gold,backgroundColor:COL.gold,tension:.3,pointRadius:3}
+      {label:'WAKEMAKE',data:months.map(m=>wm[m]?.[wmKey]),borderColor:'#F472B6',backgroundColor:'#F472B6',tension:.3,pointRadius:3},
+      {label:'COLORGRAM',data:months.map(m=>cg[m]?.[cgKey]),borderColor:'#FBBF24',backgroundColor:'#FBBF24',tension:.3,pointRadius:3}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}}}});
     return;
   }
-  const s=DATA.search[brand];const months=Object.keys(s).sort((a,b)=>a-b);const keys=Object.keys(s[months[0]]);const pal=[COL.navy,COL.accent,COL.sky,COL.green,COL.orange,COL.blue,COL.grey,COL.purple];
-  const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m][k]),borderColor:pal[i%pal.length],backgroundColor:pal[i%pal.length],tension:.3,pointRadius:2}));
+  const s=DATA.search[brand];
+  if(!s||!Object.keys(s).length){_showCanvasEmpty('cSearch','검색지수 데이터 없음',brand+' 데이터 확인');return;}
+  const months=Object.keys(s).sort((a,b)=>a-b);
+  const keys=Object.keys(s[months[0]]||{});
+  if(!keys.length){_showCanvasEmpty('cSearch','키워드 없음','시트 컬럼 확인');return;}
+  const pal=['#818CF8','#22D3EE','#34D399','#FBBF24','#F472B6','#60A5FA','#9AA0AD','#A78BFA'];
+  const ds=keys.slice(0,6).map((k,i)=>({label:SMAP[k]||k,data:months.map(m=>s[m]?.[k]),borderColor:pal[i%pal.length],backgroundColor:pal[i%pal.length],tension:.3,pointRadius:2}));
   charts.cSearch=new Chart(document.getElementById('cSearch'),{type:'line',data:{labels:months.map(m=>m+'월'),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}}}});}
 function renderOverview(){
   const safe=(fn,n)=>{try{fn();}catch(e){console.error('['+n+'] err:',e);}};
@@ -2228,6 +2280,7 @@ function renderKolBest(){
 }
 
 // ===== 개요탭 우수 KOL/KOC hero (구매여정 자리 대체 · 2026-07) =====
+// 우수 KOL/KOC (사용자 요구 2026-07-02: KOL/KOC 구분·이름·광고비·섭외비·CPUV·진행상품·앵글)
 function renderOverviewBestKolKoc(){
   const el=document.getElementById('overviewBestKolKoc'); if(!el) return;
   const rows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&(+r.종합CPUV)>0&&(+r.총비용)>0);
@@ -2239,16 +2292,27 @@ function renderOverviewBestKolKoc(){
   const card=(role,r,rank)=>{
     if(!r) return '';
     const cost=+r.총비용||0;
+    // 광고금액 + 섭외비 세부 분리 (없으면 총비용에서 추정 or "-" 표시)
+    const adCost = +r.광고금액 || 0;
+    const collabFee = +r.섭외비 || 0;
+    const hasSplit = adCost>0 || collabFee>0;
     const cpuv=+r.종합CPUV||0;
-    const inter=+r.인터랙션||0;
     const hot=_isHotRow(r)?' 🔥':'';
-    const roleColor=role==='KOL'?'var(--gong-red)':'var(--gold-deep)';
-    const roleBg=role==='KOL'?'rgba(165,42,42,0.08)':'rgba(212,175,55,0.12)';
+    const roleColor=role==='KOL'?'var(--gong-red-deep)':'var(--gold-deep)';
+    const roleBg=role==='KOL'?'rgba(129,140,248,0.10)':'rgba(212,175,55,0.12)';
+    const angle=(r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력')?r.콘텐츠앵글:'';
     return `<div class="best-card" style="border-top:3px solid ${roleColor}">
       <div class="lbl" style="background:${roleBg};color:${roleColor}"><b>#${rank} ${role}${hot}</b> · ${r.팔로워구간||'-'}</div>
       <div class="name">${r.인플루언서_한글||r.인플루언서||'-'}</div>
-      <div class="stat">CPUV <b>￥${cpuv.toFixed(2)}</b> · <span style="color:var(--grey)">₩${fmt(cpuv*fx)}</span><br>互动<span class="ko-sub">(인터랙션)</span> <b>${fmt(inter)}</b> · 广告费<span class="ko-sub">(광고비)</span> ￥${fmt(cost)}<div class="krw-sub" style="color:var(--grey);font-size:10.5px">≈ ₩${fmt(cost*fx)}</div></div>
-      <div class="reason">${r.주력상품||'-'}${r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력'?' · '+r.콘텐츠앵글:''}</div>
+      <div class="stat" style="font-size:11.5px;line-height:1.65">
+        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 0"><span style="color:var(--ink-soft)">CPUV</span><b>￥${cpuv.toFixed(2)}</b></div>
+        ${hasSplit
+          ? `<div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--ink-soft)">广告费 (광고비)</span><b>￥${fmt(adCost)}</b></div>
+             <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 0"><span style="color:var(--ink-soft)">合作费 (섭외비)</span><b>￥${fmt(collabFee)}</b></div>`
+          : `<div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:3px 0"><span style="color:var(--ink-soft)">总费用 (총비용)</span><b>￥${fmt(cost)}</b></div>`}
+        <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--ink-soft)">진행 상품</span><b>${r.주력상품||'-'}</b></div>
+        <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--ink-soft)">앵글</span><b>${angle||'-'}</b></div>
+      </div>
     </div>`;
   };
   const kolCards=kols.length?kols.map((r,i)=>card('KOL',r,i+1)).join(''):'<div class="best-card empty"><div class="lbl">KOL</div><div class="name">해당 팔로워 구간 소재 없음</div></div>';
@@ -4054,12 +4118,19 @@ function renderBenchmark(){
   const box=document.getElementById('benchmark'); if(!box) return;
   const brands=brand==='TOTAL'?['WAKEMAKE','COLORGRAM']:[brand];
   let html='';
+  // 최신 데이터 월 (전 브랜드 통합)
+  const allLastMonths=[];
+  brands.forEach(b=>{const s=DATA.search?.[b]; if(!s)return; const months=Object.keys(s).sort((a,b)=>a-b); if(months.length)allLastMonths.push(+months[months.length-1]);});
+  const globalLastMonth=allLastMonths.length?Math.max(...allLastMonths):0;
+  if(globalLastMonth>0){
+    html+=`<div style="padding:6px 10px;margin-bottom:10px;background:rgba(129,140,248,0.10);border-left:3px solid var(--gold-deep);border-radius:4px;font-size:11.5px;color:var(--ink)"><b>📅 최신 데이터 업데이트: ${globalLastMonth}월</b> <span style="color:var(--ink-soft)">· 검색지수 시트 최근 반영 월 기준</span></div>`;
+  }
   brands.forEach(b=>{
     const s=DATA.search[b]; if(!s){html+=`<div>${b}: 검색지수 데이터 없음</div>`;return;}
     const months=Object.keys(s).sort((a,b)=>a-b);
     const first=months[0], last=months[months.length-1];
     const keys=Object.keys(s[first]);
-    html+=`<div style="margin-bottom:10px"><b style="color:var(--navy)">${b}</b> <span style="color:var(--grey);font-size:11.5px">· ${first}월 → ${last}월 변화</span></div>`;
+    html+=`<div style="margin-bottom:10px"><b style="color:var(--gold-deep)">${b}</b> <span style="color:var(--ink-soft);font-size:11.5px">· ${first}월 → ${last}월 변화</span></div>`;
     keys.slice(0,6).forEach(k=>{
       const v1=s[first][k]||0, v2=s[last][k]||0;
       if(!v1)return;
@@ -5270,6 +5341,8 @@ function getViews(r){return pickNum(r, ['조회수','阅读量','阅读数','浏
 function getInter(r){return pickNum(r, ['인터랙션','互动量','互动数','互动','interactions']);}
 function getImp(r){return pickNum(r, ['노출량','曝光量','曝光数','曝光','impressions']);}
 function getCost(r){return pickNum(r, ['총비용','总费用','费用','cost']);}
+function getCollabFee(r){return pickNum(r, ['협업비','合作费用','섭외비','协作费','collab_fee']);}
+function getAdSpend(r){return pickNum(r, ['광고금액','广告金额','광고비','ad_spend']);}
 function getUv(r){return pickNum(r, ['외부행동UV','站外UV','外部UV','externalUV','uv']);}
 function getCpuv(r){return pickNum(r, ['종합CPUV','综合CPUV','CPUV']);}
 function getCpe(r){return pickNum(r, ['CPE','cpe']);}
@@ -5301,6 +5374,8 @@ function dedupeByLatest(rows){
       인터랙션: inter || r.인터랙션 || 0,
       노출량: getImp(r) || r.노출량 || 0,
       총비용: getCost(r) || r.총비용 || 0,
+      섭외비: getCollabFee(r) || r.섭외비 || r.협업비 || 0,
+      광고금액: getAdSpend(r) || r.광고금액 || r.광고비 || 0,
       외부행동UV: getUv(r) || r.외부행동UV || 0,
       종합CPUV: getCpuv(r) || r.종합CPUV || 0,
       CPE: getCpe(r) || r.CPE || 0,
