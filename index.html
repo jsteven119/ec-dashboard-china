@@ -1584,12 +1584,14 @@ function chDaily(){destroy('cDaily');
     spendMap[r.날짜]=(spendMap[r.날짜]||0)+(r['쥐광_광고비']||0);
     gmvMap[r.날짜]=(gmvMap[r.날짜]||0)+(r['샤오홍싱_전점GMV']||0);
   });
-  // KOL/KOC 게시일 기반 일별 건수
+  // KOL/KOC 게시일 기반 일별 건수 — 반드시 기간필터(globalDateFrom~To) 범위 안으로 제한
+  // (게시일은 최대 전년도까지 존재 → 필터 없이 넣으면 차트 x축이 전체 기간으로 퍼지고 lastDate가 오염됨)
   const kolMap={}, kocMap={};
   const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.게시일);
   kolRows.forEach(r=>{
-    const d=r.게시일;
-    if(!d) return;
+    const d=String(r.게시일).slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;          // 비정상 포맷 방어
+    if(d<globalDateFrom||d>globalDateTo) return;         // 기간필터 반영
     if(_isKoc(r.팔로워구간)) kocMap[d]=(kocMap[d]||0)+1;
     else kolMap[d]=(kolMap[d]||0)+1;
   });
@@ -1604,7 +1606,7 @@ function chDaily(){destroy('cDaily');
   allDates.forEach(d=>{const m=+d.slice(5,7); monthDayCount[m]=(monthDayCount[m]||0)+1;});
   const tmallMap={};
   allDates.forEach(d=>{const m=+d.slice(5,7); const total=monthGmv[m]||0; const cnt=monthDayCount[m]||1; if(total>0) tmallMap[d]=total/cnt;});
-  // 게시일이 데이터 범위 밖이면 allDates에 없어서 표시 안 됨 → dates 통합
+  // 기간 내 게시일 중 byday 행이 없는 날짜도 x축에 표시 (범위는 위에서 이미 제한됨)
   Object.keys(kolMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
   Object.keys(kocMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
   allDates.sort();
@@ -1685,6 +1687,7 @@ function renderCampCalendar(dates,inRange){
   if(!dates||!dates.length){el.innerHTML='';return;}
   const lastDate=dates[dates.length-1];
   const today=new Date(lastDate); // 데이터 최신일 기준
+  if(isNaN(today.getTime())){el.innerHTML='';return;} // 최신일 오염 방어 (D-NaN 재발 방지)
   // 다음 예정 캠페인 (현재 mmdd 이후 가장 가까운 것 — 연도 wrap 처리)
   const curMM=_mmdd(lastDate);
   const upcoming=[];
