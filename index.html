@@ -797,7 +797,7 @@
     <div class="grid">
       <div class="panel"><h3>月度广告费 vs 广告GMV <span class="hint-inline">월별 광고비 vs 광고매출 추정</span></h3><div class="note"><b class="cn">柱=广告费 · 线=广告GMV(聚光估算) · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=<b>광고매출 추정 (쥐광 추정치)</b> · 실제 전체매출 아님</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
       <div class="panel" style="opacity:0.92"><h3 style="color:var(--ink-soft)">月度ROI趋势 <span class="hint-inline" style="background:var(--rice-deep);color:var(--ink-soft)">参考 (참고용)</span></h3><div class="note"><span style="color:var(--orange);font-weight:700">⚠ GMV 추정치 기반 — 메인 KPI는 CPUV로 보세요</span><br><b class="cn">ROAS=广告GMV(估算)÷广告费 · 实际全店GMV 反映后 升级为主KPI</b><br><span class="ko">실제 SKU별 매출 데이터 추가되면 메인 KPI로 승격 예정</span><br><span style="font-size:10.5px;background:rgba(165,42,42,0.08);padding:2px 6px;border-radius:3px;color:var(--gong-red-deep);font-weight:700">📅 归因窗口 30天 · 红猫计划 · 어트리뷰션 30일</span></div><div class="cwrap"><canvas id="cRoi"></canvas></div><div id="roiInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(184,148,31,0.06);border-left:3px solid var(--ink-soft);border-radius:4px"></div></div>
-      <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">쥐광 광고비 & 샤오홍싱 전점 GMV · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · 회색 점선 = 7일 MA forecast</div><div class="cwrap tall"><canvas id="cDaily"></canvas></div>
+      <div class="panel full"><h3>일별 추세 (byday raw) <span class="badge" id="forecastBadge"></span></h3><div class="note">￥ 라인 = 광고비·샤오홍슈 GMV·티몰 GMV(월값÷일수) · 막대 = KOL/KOC 업로드 건수(우축) · 朱红 점선 = 빅 캠페인(618·쌍11) · 황금 점선 = 중간 캠페인(520·38·818·99·국경절·쌍12) · <b>차트 위 마우스 = 그날 광고비 투입률 %(쥐광비÷샤오홍슈GMV)</b> 표시<br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 광고비 라인이 GMV 라인 위로 벌어지면 <b>광고 과의존(투입률↑·비효율)</b> 신호 → 소재·타깃 점검 · 캠페인 점선 직전 업로드(막대) 집중 여부로 <b>사전 준비 상태</b> 점검 · 데이터 없으면 <b>데이터 없음</b> 표기</div><div class="cwrap huge"><canvas id="cDaily"></canvas></div>
       <div id="campCalendar" style="margin-top:14px"></div></div>
       <div class="panel full"><h3>🌟 우수 KOL/KOC 성과 <span class="hint-inline">이 기간 베스트 인플루언서 Top 6</span></h3><div class="note">CPUV(매장 유입 1명당 광고비) 낮은 순 · 인기콘텐츠(爆文) 우선 · KOL(팔로워 1만+) / KOC(팔로워 1만-) 각각 Top 3 <br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 각 카드 CPUV·인터랙션·광고비 → <b>다음 캠페인 재매칭 우선순위</b></div><div id="overviewBestKolKoc" class="best-grid"></div></div>
       <div class="panel"><h3>媒介广告费构成 <span class="hint-inline">매체별 광고비 구성 (월별)</span></h3><div class="note"><b class="cn">聚光·CID·达人 · CID↑=短期推动 / 达人↑=品牌扩张 / 40~60%均衡=峰值</b><br><span class="ko">CID↑ 단기 푸시 / KOL↑ 브랜딩 확장 / 균형(40~60%) 효율 정점</span></div><div class="cwrap"><canvas id="cChannel"></canvas></div><div id="channelInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(74,102,112,0.06);border-left:3px solid var(--blue);border-radius:4px"></div></div>
@@ -1562,72 +1562,69 @@ function kpis(){
 function _pct(cur,prev){if(!prev||prev===0||cur==null||isNaN(cur))return null;return((cur-prev)/Math.abs(prev))*100;}
 function chSpend(){destroy('cSpend');
   const m=brandMonthly();
+  if(!m||!m.length){_showCanvasEmpty('cSpend','데이터 없음','선택 기간에 월별 광고비 데이터가 없습니다 · 상단에서 기간을 넓혀보세요');return;}
+  if(m.length<2){_showCanvasEmpty('cSpend','데이터 없음','추세 비교엔 2개월 이상 필요 · 현재 '+m[0].월+'월 단일 (기간을 넓혀보세요)');return;}
   charts.cSpend=new Chart(document.getElementById('cSpend'),{data:{labels:ML(m),datasets:[{type:'bar',label:'쥐광 광고비',data:m.map(x=>x.쥐광비),backgroundColor:COL.sky,borderRadius:5},{type:'line',label:'전점 GMV',data:m.map(x=>x.전점GMV),borderColor:COL.accent,backgroundColor:COL.accent,tension:.3,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{y:{ticks:{callback:v=>FMT(v)}}}}});}
 function chRoi(){destroy('cRoi');
   const m=brandMonthly();
+  if(!m||!m.length){_showCanvasEmpty('cRoi','데이터 없음','선택 기간에 월별 ROI 데이터가 없습니다 · 상단에서 기간을 넓혀보세요');return;}
+  if(m.length<2){_showCanvasEmpty('cRoi','데이터 없음','추세 비교엔 2개월 이상 필요 · 현재 '+m[0].월+'월 단일 (기간을 넓혀보세요)');return;}
   // 쥐광 ROI = 추정 매출 (점선·청자색) / CID ROI = 확정 매출 (실선·옥색 두꺼움 = 핵심)
   const ds=[{label:'쥐광 ROI (추정매출)',data:m.map(x=>x.샤오홍싱ROI),borderColor:COL.blue,backgroundColor:COL.blue,tension:.3,pointRadius:3,borderWidth:1.5}];
   if(brand==='COLORGRAM'||brand==='TOTAL')ds.push({label:'★ CID ROI (확정매출 · 핵심)',data:m.map(x=>x.CID_ROI),borderColor:COL.green,backgroundColor:COL.green,tension:.3,pointRadius:5,pointStyle:'rectRot',borderWidth:3});
   ds.push({label:'손익분기(1.0)',data:m.map(()=>1),borderColor:COL.grey,borderDash:[5,5],pointRadius:0,borderWidth:1});
   charts.cRoi=new Chart(document.getElementById('cRoi'),{type:'line',data:{labels:ML(m),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},crown:{enabled:true}},scales:{y:{beginAtZero:true}}}});}
 function chDaily(){destroy('cDaily');
-  // brandByday: brand + 기간 필터 자동 적용
-  // 사용자 요구 (2026-07-02): 일별 광고비·샤오홍슈 GMV + Tmall GMV(월값을 일수로 균등분배) + KOL/KOC 게시 건수
+  // 항목 정리(사용자 2026-07-06): ① 티몰 GMV(청록 라인) ② KOL/KOC 업로드(막대) ③ 프로모션 일정(캠페인 세로 마커) + 광고비 투입률(툴팁)
+  // 축/데이터셋 구조는 HEAD 검증본 유지(라인3+막대2, 2축) — 변형 시 Chart.js 'Recursion detected'로 백지화되므로 유지.
   const byRows=brandByday();
-  // rows 유효 조건 완화 — 광고비 없어도 GMV or KOL 게시 있으면 표시
   let allDates=[];
   byRows.forEach(r=>{if(!allDates.includes(r.날짜))allDates.push(r.날짜);});
   allDates.sort();
-  // 일별 합산 맵 (TOTAL이면 두 브랜드 자동 합산)
   const spendMap={}, gmvMap={};
   byRows.forEach(r=>{
     spendMap[r.날짜]=(spendMap[r.날짜]||0)+(r['쥐광_광고비']||0);
     gmvMap[r.날짜]=(gmvMap[r.날짜]||0)+(r['샤오홍싱_전점GMV']||0);
   });
-  // KOL/KOC 게시일 기반 일별 건수 — 반드시 기간필터(globalDateFrom~To) 범위 안으로 제한
-  // (게시일은 최대 전년도까지 존재 → 필터 없이 넣으면 차트 x축이 전체 기간으로 퍼지고 lastDate가 오염됨)
   const kolMap={}, kocMap={};
   const kolRows=(KOL.kol[brand]||[]).filter(r=>r.데이터상태!=='이전작업'&&r.게시일);
   kolRows.forEach(r=>{
     const d=String(r.게시일).slice(0,10);
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;          // 비정상 포맷 방어
-    if(d<globalDateFrom||d>globalDateTo) return;         // 기간필터 반영
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
+    if(d<globalDateFrom||d>globalDateTo) return;
     if(_isKoc(r.팔로워구간)) kocMap[d]=(kocMap[d]||0)+1;
     else kolMap[d]=(kolMap[d]||0)+1;
   });
-  // Tmall 일별 GMV 근사 — Tmall 시트는 월 단위 → 월 총액을 그 달 유효 일수로 균등 분배
   const tmallDaily=DATA.tmallDaily||[];
-  const monthGmv={};  // {월: 합산 GMV}
-  tmallDaily.forEach(r=>{
-    if(brand!=='TOTAL' && r.브랜드!==brand) return;
-    monthGmv[r.월]=(monthGmv[r.월]||0)+(r.결제금액||0);
-  });
+  const monthGmv={};
+  tmallDaily.forEach(r=>{ if(brand!=='TOTAL' && r.브랜드!==brand) return; monthGmv[r.월]=(monthGmv[r.월]||0)+(r.결제금액||0); });
   const monthDayCount={};
   allDates.forEach(d=>{const m=+d.slice(5,7); monthDayCount[m]=(monthDayCount[m]||0)+1;});
   const tmallMap={};
   allDates.forEach(d=>{const m=+d.slice(5,7); const total=monthGmv[m]||0; const cnt=monthDayCount[m]||1; if(total>0) tmallMap[d]=total/cnt;});
-  // 기간 내 게시일 중 byday 행이 없는 날짜도 x축에 표시 (범위는 위에서 이미 제한됨)
   Object.keys(kolMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
   Object.keys(kocMap).forEach(d=>{if(!allDates.includes(d))allDates.push(d);});
   allDates.sort();
+  if(!allDates.length){
+    _showCanvasEmpty('cDaily','데이터 없음','선택 기간에 일별 원본 데이터가 없습니다 · 상단에서 기간을 넓혀보세요');
+    const fb=document.getElementById('forecastBadge'); if(fb){fb.textContent='';fb.style.background='';}
+    renderCampCalendar([],[]);
+    return;
+  }
   const labels=allDates.map(d=>d.slice(5));
-  // 원본 필터 (사용자 뭘 봐도 되게)
-  const rows=byRows.filter(r=>(r['쥐광_광고비']>0||r['샤오홍싱_전점GMV']>0));
   const spend=allDates.map(d=>spendMap[d]||null);
   const gmv=allDates.map(d=>gmvMap[d]||null);
   const tmall=allDates.map(d=>tmallMap[d]||null);
   const kolCnt=allDates.map(d=>kolMap[d]||0);
   const kocCnt=allDates.map(d=>kocMap[d]||0);
+  const adRatio=allDates.map((d,i)=>{const g=gmv[i], s=spend[i]; return (g&&g>0&&s!=null)?+(s/g*100).toFixed(1):null;});
   const datasets=[
-    // 라인 3개 (매출·광고비 y축)
     {type:'line',label:'광고비 ￥',data:spend,borderColor:'#818CF8',backgroundColor:'#818CF81F',fill:false,tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2},
     {type:'line',label:'샤오홍슈 GMV ￥',data:gmv,borderColor:'#F472B6',backgroundColor:'#F472B6',tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2},
-    {type:'line',label:'Tmall GMV ￥ (월값÷일수)',data:tmall,borderColor:'#22D3EE',backgroundColor:'#22D3EE10',fill:true,tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2,borderDash:[4,3]},
-    // 막대 2개 (건수 y1축)
-    {type:'bar',label:'KOL 게시',data:kolCnt,backgroundColor:'#67E8F9AA',borderColor:'#22D3EE',borderWidth:1,yAxisID:'y1',order:5,barPercentage:0.6},
-    {type:'bar',label:'KOC 게시',data:kocCnt,backgroundColor:'#FBBF24AA',borderColor:'#FBBF24',borderWidth:1,yAxisID:'y1',order:6,barPercentage:0.6}
+    {type:'line',label:'티몰 GMV ￥ (월값÷일수)',data:tmall,borderColor:'#22D3EE',backgroundColor:'#22D3EE10',fill:true,tension:.25,pointRadius:0,yAxisID:'y',borderWidth:2,borderDash:[4,3]},
+    {type:'bar',label:'KOL 업로드',data:kolCnt,backgroundColor:'#67E8F9AA',borderColor:'#22D3EE',borderWidth:1,yAxisID:'y1',order:5,barPercentage:0.6},
+    {type:'bar',label:'KOC 업로드',data:kocCnt,backgroundColor:'#FBBF24AA',borderColor:'#FBBF24',borderWidth:1,yAxisID:'y1',order:6,barPercentage:0.6}
   ];
-  // forecast: date range가 1월 시작 ~ 5월 끝일 때(전체 기간) 의미 있음. 그 외엔 비활성
   let forecastInfo=null;
   const isFullRange=(globalDateFrom<='2026-01-31'&&globalDateTo>='2026-05-25');
   if(isFullRange){
@@ -1646,12 +1643,11 @@ function chDaily(){destroy('cDaily');
   }
   if(forecastInfo){
     const fc=forecastInfo;
-    datasets.push({label:`${fc.curMonth}월 forecast (${WON(fc.projGmv)})`,data:fc.gmvLine,borderColor:COL.orange,backgroundColor:COL.orange,borderDash:[6,4],pointRadius:0,tension:0});
-    document.getElementById('forecastBadge').textContent=`${fc.curMonth}월 예상 GMV ${WON(fc.projGmv)} (${fc.projDelta>=0?'+':''}${fc.projDelta.toFixed(0)}% vs ${fc.prevMonth}월)`;
+    datasets.push({label:fc.curMonth+'월 forecast ('+WON(fc.projGmv)+')',data:fc.gmvLine,borderColor:COL.orange,backgroundColor:COL.orange,borderDash:[6,4],pointRadius:0,tension:0});
+    document.getElementById('forecastBadge').textContent=fc.curMonth+'월 예상 GMV '+WON(fc.projGmv)+' ('+(fc.projDelta>=0?'+':'')+fc.projDelta.toFixed(0)+'% vs '+fc.prevMonth+'월)';
     document.getElementById('forecastBadge').style.background=fc.projDelta>=0?'rgba(30,86,49,0.14)':'rgba(200,16,46,0.12)';
     document.getElementById('forecastBadge').style.color=fc.projDelta>=0?COL.green:COL.redDeep;
   } else {document.getElementById('forecastBadge').textContent='';document.getElementById('forecastBadge').style.background='';}
-  // 중국 캠페인 캘린더 자동 마커 (38·520·618·818·99·국경절·쌍11·쌍12 등)
   const camps=getCampaignsInRange(allDates);
   const mk={id:'mk',afterDraw:c=>{
     if(!camps.length)return;
@@ -1666,11 +1662,10 @@ function chDaily(){destroy('cDaily');
       ctx.setLineDash(cp.type==='big'?[5,4]:[3,3]);
       ctx.lineWidth=cp.type==='big'?1.8:1.2;
       ctx.beginPath();ctx.moveTo(x,a.top);ctx.lineTo(x,a.bottom);ctx.stroke();
-      // 라벨 배경 (가독성)
       const label=cp.ko;
       ctx.font="bold 10.5px Inter,system-ui,sans-serif";
       const w=ctx.measureText(label).width+10;
-      const yOff=a.top+10+((i%3)*16); // 세 줄 stagger
+      const yOff=a.top+10+((i%3)*16);
       ctx.fillStyle=cp.type==='big'?'rgba(165,42,42,0.95)':'rgba(212,175,55,0.95)';
       ctx.fillRect(x+3,yOff-9,w,15);
       ctx.fillStyle=cp.type==='big'?'#FFFDF5':'#5C0F0F';
@@ -1678,7 +1673,7 @@ function chDaily(){destroy('cDaily');
       ctx.restore();
     });
   }};
-  charts.cDaily=new Chart(document.getElementById('cDaily'),{data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:10}}},crown:{enabled:true}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{position:'left',title:{display:true,text:'￥ (매출·광고비)'},ticks:{callback:v=>FMT(v)}},y1:{position:'right',title:{display:true,text:'KOL/KOC 건수'},grid:{display:false},beginAtZero:true,ticks:{precision:0,stepSize:1}}}},plugins:[mk]});
+  charts.cDaily=new Chart(document.getElementById('cDaily'),{data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:10}}},crown:{enabled:true},tooltip:{callbacks:{afterBody:(items)=>{if(!items||!items.length)return '';const i=items[0].dataIndex;const v=adRatio[i];return v!=null?('광고비 투입률: '+v+'% (쥐광비÷샤오홍슈GMV)'):'';}}}},scales:{x:{ticks:{maxTicksLimit:16,autoSkip:true}},y:{position:'left',title:{display:true,text:'￥ (매출·광고비)'},ticks:{callback:v=>FMT(v)}},y1:{position:'right',title:{display:true,text:'KOL/KOC 업로드 건수'},grid:{display:false},beginAtZero:true,ticks:{precision:0,stepSize:1}}}},plugins:[mk]});
   renderCampCalendar(allDates,camps);
 }
 // 캠페인 캘린더 패널: 데이터 기간에 걸친 캠페인 + 다음 예정 캠페인 카드
