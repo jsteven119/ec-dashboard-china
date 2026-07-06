@@ -793,6 +793,12 @@
       <h3>📌 大盘一览 <span class="ko-sub">(전체 요약)</span> <span class="hint-inline">한 줄 상황 요약</span></h3>
       <div id="dashboardOneLine"></div>
     </div>
+    <!-- 🧭 매출 방향성 (사용자 정의 2026-07-06: 외부 KOL/KOC·라이브 → 내부 티몰 → 다음 방향성 결정용 대시보드) -->
+    <div class="panel full">
+      <h3>🧭 매출 방향성 <span class="ko-sub">(战略罗盘 · 전략 나침반)</span> <span class="hint-inline">외부(KOL/KOC·라이브) → 내부(티몰) → 다음 액션</span></h3>
+      <div class="note"><b class="cn">外部种草(KOL/KOC·直播) → 内部收割(天猫流量·内部广告) → 下一步</b><br><span class="ko">외부에서 인지·수요를 만들고(种草 씨뿌리기) → 티몰 내부에서 수확(收割)하는 구조가 작동하는지 단계별 판정 · 대행사 공유용</span><br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 각 단계 판정(🟢양호/🟡점검/🔴부족)을 왼쪽→오른쪽으로 읽으면 <b>지금 예산을 어디에 더 실어야 하는지</b>가 나옵니다</div>
+      <div id="directionFlow"></div>
+    </div>
     <div class="kpis" id="kpis"></div>
     <div class="grid">
       <div class="panel"><h3>月度广告费 vs 广告GMV <span class="hint-inline">월별 광고비 vs 광고매출 추정</span></h3><div class="note"><b class="cn">柱=广告费 · 线=广告GMV(聚光估算) · 👑=峰值月</b><br><span class="ko">막대=광고비 · 선=<b>광고매출 추정 (쥐광 추정치)</b> · 실제 전체매출 아님</span></div><div class="cwrap"><canvas id="cSpend"></canvas></div><div id="spendInterp" style="margin-top:10px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;padding:8px 12px;background:rgba(212,175,55,0.06);border-left:3px solid var(--gold);border-radius:4px"></div></div>
@@ -943,6 +949,12 @@
         <div class="panel full">
           <h3>📋 종합 앵글 방향성 제안</h3>
           <div class="insight" id="angleStrategy"></div>
+        </div>
+        <!-- 🤝 꽌시 우선순위 (사용자 정의 2026-07-06: 효과적인 인플루언서와의 꽌시 형성이 중국 대시보드 핵심 목적) -->
+        <div class="panel full">
+          <h3>🤝 꽌시(关系) 형성 우선순위 <span class="hint-inline">누구에게 관계 투자할지</span></h3>
+          <div class="note"><b class="cn">重复合作·爆文·CPUV 기준 자동 분류 — 长期伙伴(장기 파트너) / 再合作(재협업) / 再评估(재검토)</b><br><span class="ko">협업 이력·효율·화제성으로 <b>관계 투자 대상</b>을 자동 선별 · 대행사에 "이 사람들과 꽌시 심화" 리스트로 전달</span><br><span style="color:var(--gong-red-deep);font-weight:700">→ 읽는 법:</span> 🥇 = 연간·시즌 계약 제안 + 신제품 우선 시딩 · 🌱 = 2차 협업 제안으로 관계 시작 · ⏸ = 조건 재협상 또는 종료</div>
+          <div id="guanxiPanel"></div>
         </div>
       </div>
 
@@ -1774,6 +1786,7 @@ function renderOverview(){
   safe(renderBenchmark,'renderBenchmark');
   safe(renderOverviewInterp,'renderOverviewInterp');
   safe(renderDashboardOneLine,'renderDashboardOneLine');
+  safe(renderDirection,'renderDirection');
   // 자동 인사이트 완전 제거 (2026-07-02 사용자 요구) — insightOv 노드 없어도 안전
   const _iov=document.getElementById('insightOv'); if(_iov){try{_iov.innerHTML=autoInsightOv(brand);}catch(e){console.error('insightOv err:',e);}}
 }
@@ -4240,6 +4253,7 @@ function renderAngleInsight(){
   renderAngleActions(b,ok);
   renderAngleProductHeatmap(b);
   renderAngleStrategy(b,ok);
+  try{renderGuanxi(b);}catch(e){console.error('guanxi err:',e);}
   try{renderQuadrantInterp(b,ok);}catch(e){console.error('quadInterp err:',e);}
   try{renderMatrixInterp(b);}catch(e){console.error('matrixInterp err:',e);}
 }
@@ -4706,6 +4720,130 @@ function renderAngleStrategy(b,hasAngle){
   const cut=ag.filter(a=>a.평균CPUV>cpuvMed&&a.인기콘텐츠비율<hotMed).length;
   lines.push(`<br>🎯 <b>다음 분기 작전</b>: 최우선 증량 ${boost}개 앵글, 제외 검토 ${cut}개 앵글. 매트릭스 좌상단을 80%/우상단 20% 비율로 예산 배분 권장.`);
   box.innerHTML=lines.join('');
+}
+
+// ==================== 🧭 매출 방향성 (요약 탭 · 외부→내부→다음) ====================
+// 목적 (2026-07-06 사용자 정의): 중국 대행사·내부 성과파악용 — 외부(KOL/KOC·라이브) 种草 → 내부(티몰) 收割 구조 판정 → 다음 방향성 결정
+function renderDirection(){
+  const el=document.getElementById('directionFlow'); if(!el) return;
+  const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+  // ── ① 외부: KOL/KOC (기간 필터 적용) + 라이브
+  const kolRows=(brand==='TOTAL'
+    ? [...filterKolByDate(KOL.kol.WAKEMAKE||[]),...filterKolByDate(KOL.kol.COLORGRAM||[])]
+    : filterKolByDate(KOL.kol[brand]||[])).filter(r=>r.데이터상태!=='이전작업');
+  const kCost=kolRows.reduce((s,r)=>s+(+r.총비용||0),0);
+  const kUv=kolRows.reduce((s,r)=>s+(+r.외부행동UV||0),0);
+  const kCpuv=kUv>0?kCost/kUv:0;
+  const kHot=kolRows.filter(r=>r.인기콘텐츠).length;
+  const kHotRate=kolRows.length?kHot/kolRows.length*100:0;
+  const liveRows=(DATA.live||[]).filter(r=>brand==='TOTAL'||r.브랜드===brand);
+  const liveGmv=liveRows.reduce((s,r)=>s+(+r.GMV||0),0);
+  const liveCost=liveRows.reduce((s,r)=>s+(+r.합계비용||0),0);
+  const liveRoi=liveCost>0?liveGmv/liveCost:0;
+  // 외부 판정: CPUV 2.5 임계 (사내 메인 KPI 기준) + 爆文율 20%
+  let extIcon='🟡', extVerdict='점검';
+  if(kolRows.length&&kCpuv>0&&kCpuv<=2.5&&kHotRate>=15){extIcon='🟢';extVerdict='양호';}
+  else if(!kolRows.length){extIcon='🔴';extVerdict='데이터 없음';}
+  else if(kCpuv>3.5){extIcon='🔴';extVerdict='효율 저하';}
+  // ── ② 내부: 티몰 非搜索 유입 비중 (외부→내부 연결 증거) + 내부광고 직접 ROI
+  let nonSearchPct=null;
+  try{
+    if(typeof _tmallCategoriesForBrand==='function'&&brand!=='COLORGRAM'){
+      const cats=_tmallCategoriesForBrand()||[];
+      let v=0,sv=0; cats.forEach(c=>{v+=(+c.방문자||0); sv+=(+c.검색유입_방문자||0);});
+      if(v>0) nonSearchPct=Math.round((v-sv)/v*100);
+    }
+  }catch(e){}
+  let adsRoi=null, adsCost=0;
+  try{
+    if(typeof _tmallAdsRows==='function'){
+      const ar=_tmallAdsRows()||[];
+      adsCost=ar.reduce((s,r)=>s+(+r.광고비||0),0);
+      const dr=ar.reduce((s,r)=>s+(+r.직접매출||0),0);
+      if(adsCost>0) adsRoi=dr/adsCost;
+    }
+  }catch(e){}
+  let inIcon='🟡', inVerdict='점검';
+  if(nonSearchPct==null&&adsRoi==null){inIcon='🔴';inVerdict='데이터 연결 대기';}
+  else if((nonSearchPct||0)>=50&&(adsRoi==null||adsRoi>=1)){inIcon='🟢';inVerdict='양호';}
+  else if(adsRoi!=null&&adsRoi<1){inIcon='🔴';inVerdict='내부광고 적자';}
+  // ── ③ 다음 방향성 (rule-based)
+  const next=[];
+  if(extIcon==='🟢'&&nonSearchPct!=null&&nonSearchPct>=50)
+    next.push(`🟢 <b>외부→내부 파이프 작동 중</b> (非搜索 유입 ${nonSearchPct}%) — 티몰 <b>내부광고 증액으로 수확(收割) 극대화</b>가 다음 단계`);
+  if(extIcon==='🟢'&&adsRoi==null)
+    next.push(`📊 외부 种草는 효율 확보 (CPUV ¥${kCpuv.toFixed(2)}) — <b>내부광고 데이터 연결/집행</b>이 병목. 대행사에 内部广告 리포트 요청`);
+  if(extIcon!=='🟢'&&kolRows.length)
+    next.push(`🎯 외부 효율 개선 우선 (CPUV ¥${kCpuv.toFixed(2)}${kCpuv>2.5?' — 임계 ¥2.5 초과':''}) — 아래 <b>🤝 꽌시 우선순위</b>의 🥇 파트너 중심으로 재편 + 마이크로 KOC 비중 확대`);
+  if(liveCost>0&&liveRoi<1)
+    next.push(`📺 라이브 ROI ${Math.round(liveRoi*100)}% (적자) — 达人(다런) 라이브 조건 재협상 또는 자체 라이브 전환 검토`);
+  if(liveCost>0&&liveRoi>=1.5)
+    next.push(`📺 라이브 ROI ${Math.round(liveRoi*100)}% 우수 — <b>라이브 편성 확대</b> + 라이브 전 KOC 예열 콘텐츠 연동`);
+  if(!next.length) next.push(`📊 판정 데이터 부족 — 기간을 넓히거나 시트 동기화 후 다시 확인`);
+  const card=(step,cn,icon,verdict,body)=>`
+    <div style="flex:1;min-width:240px;padding:14px 16px;background:var(--rice-deep);border:1px solid var(--line);border-left:4px solid ${icon==='🟢'?'var(--green)':icon==='🟡'?'var(--gold)':'var(--accent)'};border-radius:8px">
+      <div style="font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px">${step} <span style="font-family:'Noto Serif SC',serif">${cn}</span></div>
+      <div style="font-size:15px;font-weight:800;margin:4px 0;color:var(--ink)">${icon} ${verdict}</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.6">${body}</div>
+    </div>`;
+  el.innerHTML=`
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:stretch">
+      ${card('① 외부 인지 확보','外部种草 (KOL/KOC·直播)',extIcon,extVerdict,
+        kolRows.length
+          ?`KOL/KOC ${kolRows.length}건 · 비용 ¥${fmt(kCost)} · CPUV <b>¥${kCpuv.toFixed(2)}</b> (임계 ¥2.5) · 爆文율 ${kHotRate.toFixed(0)}%`
+            +(liveCost>0?`<br>라이브 GMV ¥${fmt(liveGmv)} · ROI ${Math.round(liveRoi*100)}%`:'<br>라이브 데이터 없음 (直播 탭 시트 연결 대기)')
+          :'선택 기간에 KOL/KOC 데이터 없음 — 기간 확대 또는 동기화')}
+      ${card('② 내부 수확','内部收割 (天猫流量·内部广告)',inIcon,inVerdict,
+        (nonSearchPct!=null?`非搜索 유입 <b>${nonSearchPct}%</b> (샤오홍슈·라이브발 유입 = 외부 콘텐츠가 티몰로 넘어오는 비중)`:'티몰 유입 데이터 없음')
+        +(adsRoi!=null?`<br>내부광고 ¥${fmt(adsCost)} · 직접 ROI <b>${Math.round(adsRoi*100)}%</b>`:'<br>내부광고 데이터 연결 대기 (WM만 시트 있음)'))}
+      ${card('③ 다음 방향성','下一步 (예산 재배분)',next[0].startsWith('🟢')?'🟢':'🧭','권고 '+next.length+'건',next.join('<br><br>'))}
+    </div>`;
+}
+
+// ==================== 🤝 꽌시(关系) 형성 우선순위 (KOL 탭) ====================
+// 목적 (2026-07-06 사용자 정의): 효과적인 인플루언서와의 꽌시 형성 — 재협업·효율·爆文 기반 관계 투자 대상 자동 선별
+function renderGuanxi(b){
+  const el=document.getElementById('guanxiPanel'); if(!el) return;
+  const rows=_kolView(b).filter(r=>r.데이터상태!=='이전작업');
+  if(!rows.length){el.innerHTML='<div style="padding:12px;color:var(--ink-soft);font-size:12.5px">데이터 없음 — 기간 확대 또는 시트 동기화 후 확인</div>';return;}
+  // 인플루언서별 집계
+  const map={};
+  rows.forEach(r=>{
+    const name=r.인플루언서_한글||r.인플루언서; if(!name)return;
+    if(!map[name])map[name]={name,cn:r.인플루언서,n:0,cost:0,uv:0,hot:0,last:'',tier:r.팔로워구간||'-',angles:{}};
+    const m=map[name]; m.n++; m.cost+=(+r.총비용||0); m.uv+=(+r.외부행동UV||0);
+    if(r.인기콘텐츠)m.hot++;
+    const d=String(r.게시일||'').slice(0,10); if(d>m.last)m.last=d;
+    const ang=r.콘텐츠앵글&&r.콘텐츠앵글!=='미입력'?r.콘텐츠앵글:null; if(ang)m.angles[ang]=(m.angles[ang]||0)+1;
+  });
+  const infs=Object.values(map).map(m=>({...m,cpuv:m.uv>0?m.cost/m.uv:Infinity,topAngle:Object.entries(m.angles).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-'}));
+  const cpuvs=infs.filter(i=>isFinite(i.cpuv)).map(i=>i.cpuv).sort((a,b)=>a-b);
+  const med=cpuvs.length?cpuvs[Math.floor(cpuvs.length/2)]:2.5;
+  // 3단 분류
+  const gold=infs.filter(i=>i.n>=2&&(i.cpuv<=med||i.hot>=2)).sort((a,b)=>a.cpuv-b.cpuv).slice(0,4);
+  const goldNames=new Set(gold.map(g=>g.name));
+  const seed=infs.filter(i=>!goldNames.has(i.name)&&i.n===1&&(i.hot>=1||i.cpuv<=med*0.8)).sort((a,b)=>a.cpuv-b.cpuv).slice(0,4);
+  const review=infs.filter(i=>i.n>=2&&i.hot===0&&isFinite(i.cpuv)&&i.cpuv>med*1.5).sort((a,b)=>b.cpuv-a.cpuv).slice(0,3);
+  const chip=i=>`<div style="padding:10px 12px;background:var(--rice-deep);border:1px solid var(--line);border-radius:8px;cursor:pointer" onclick="openInfluencerModal('${(i.name||'').replace(/'/g,"\\'")}')">
+    <b style="color:var(--gong-red-deep)">${i.name}</b> <span style="font-size:10.5px;color:var(--ink-soft)">${i.tier}</span><br>
+    <span style="font-size:11px;color:var(--ink-soft)">협업 ${i.n}회 · CPUV ¥${isFinite(i.cpuv)?i.cpuv.toFixed(2):'-'} · 爆文 ${i.hot} · 최근 ${i.last||'-'}</span><br>
+    <span style="font-size:10.5px;color:var(--ink-soft)">주력: ${i.topAngle}</span>
+  </div>`;
+  const section=(title,cn,desc,list,action)=>`
+    <div style="margin-bottom:14px">
+      <div style="font-weight:800;font-size:13px;color:var(--ink);margin-bottom:2px">${title} <span style="font-family:'Noto Serif SC',serif;font-size:11.5px;color:var(--ink-soft)">${cn}</span> <span style="font-size:11px;color:var(--ink-soft);font-weight:500">— ${desc}</span></div>
+      ${list.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:6px 0">${list.map(chip).join('')}</div>
+      <div style="font-size:11.5px;color:var(--green);font-weight:700">→ 액션: ${action}</div>`
+      :'<div style="font-size:11.5px;color:var(--ink-soft);padding:4px 0">해당 없음 — 데이터 누적 후 자동 표시</div>'}
+    </div>`;
+  el.innerHTML=
+    section('🥇 장기 파트너 후보','长期伙伴',`반복 협업 + 효율 우수 (CPUV 중앙값 ¥${med.toFixed(2)} 이하 또는 爆文 2+)`,gold,
+      '대행사 통해 연간/시즌 계약 제안 · 신제품 우선 시딩 · 단가 인상 전 선점')
+    +section('🌱 재협업(꽌시 시작) 후보','再合作',`1회 협업인데 爆文 또는 CPUV 상위 — 관계 굳히기 타이밍`,seed,
+      '2차 협업 즉시 제안 (성과 데이터 첨부) · 3회차부터 패키지 조건 협상')
+    +section('⏸ 재검토 대상','再评估',`반복 협업했지만 효율 하위 (CPUV 중앙값 1.5배 초과 · 爆文 0)`,review,
+      '조건 재협상(비용↓ 또는 앵글 변경) 1회 시도 → 개선 없으면 종료, 예산 🥇로 이전')
+    +`<div style="font-size:11px;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:8px">기준: 기간 필터 내 ${rows.length}건 · 인플루언서 ${infs.length}명 · CPUV 중앙값 ¥${med.toFixed(2)} · 카드 클릭 = 상세 이력</div>`;
 }
 
 // ==================== 인플루언서 deep-dive 모달 ====================
